@@ -1503,7 +1503,7 @@ const CARDS = [
   { id: "p1s-findings", name: "Phase 1S key findings", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
     draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-findings").draw(ctx, W, H, u, viewP1S(d)),
     caption: d => CARDS.find(c => c.id === "p1-findings").caption(viewP1S(d)) },
-  { id: "p1s-gemma-ub", name: "Gemma on SYCL: one more flag", safe: false, group: "p1s",
+  { id: "p1s-gemma-ub", name: "Gemma on SYCL: one more flag", safe: false, group: "gd",
     ready: d => !!(d.gd && d.gd.complete && ((d.gd.variants || {}).ckpt0_ub2048 || {}).status === "ok"),
     lockMsg: d => d.gd && d.gd.state === "running" ? "Unlocks when the Gemma diagnostic finishes" : "Gemma diagnostic not run yet",
     draw(ctx, W, H, u, d) {
@@ -1535,6 +1535,129 @@ const CARDS = [
     caption: d => { const g = d.models.find(m => m.name.startsWith("gemma")) || d.models[1], gd = d.gd, f = (k, n) => secs((((k === "vulkan" ? gd.vulkan : gd.variants[k].serve) || []).find(x => x.size === n) || {}).ttft);
       return [["Post", `${short(g)} 4 on a 32 GB Arc Pro B65, SYCL backend: first token on a 16K prompt took ${f("ckpt0", 16384)}. Vulkan: ${f("vulkan", 16384)}.\n\nOne more flag, -b 2048 -ub 2048:\n• 4K: ${f("ckpt0", 4096)} → ${f("ckpt0_ub2048", 4096)}\n• 16K: ${f("ckpt0", 16384)} → ${f("ckpt0_ub2048", 16384)}\n\nNow faster than Vulkan. Running Gemma on Intel?`],
         ["Short take", `Gemma 4 on Intel Arc with llama.cpp SYCL? Add -ub 2048. 16K-prompt first token: ${f("ckpt0", 16384)} → ${f("ckpt0_ub2048", 16384)}.`]]; } },
+  // ---------- Gemma SYCL diagnostic ----------
+  { id: "gd-preview", name: "Gemma diagnostic: the question", safe: true, group: "gd",
+    draw(ctx, W, H, u, d) {
+      const g = d.gd || {}, wide = W > H, done = !!g.complete;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · GEMMA ON SYCL", title: done ? "Gemma's slow start: solved" : "Why is Gemma slow to start on SYCL?",
+        sub: "SYCL made every model generate faster. But Gemma took longer to start answering than on Vulkan.", live: g.state === "running" && !g.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const tried = [["Context checkpoints", "on vs off: they cost ~100 s per prompt on Vulkan"], ["A bigger batch", "llama-server reads prompts 512 tokens at a time by default"],
+                     ["A smaller context", "17K instead of 32K: does the allocation slow it down?"], ["Flash attention off", "and a full-size sliding-window cache"]];
+      const colW = wide ? (b.w - 48 * u) / 2 : b.w, rh = Math.min(86 * u, (wide ? b.h : b.h / 2 - 20 * u) / 4.6);
+      ctx.fillStyle = C.series[0]; ctx.fillRect(b.x, b.y + 2 * u, 4 * u, 18 * u);
+      text(ctx, "SIX SERVER CONFIGS, THREE PROMPT SIZES EACH", b.x + 14 * u, b.y + 18 * u, 15 * u, { w: 750, color: C.ink2 });
+      tried.forEach(([k, v], i) => { const y = b.y + 40 * u + rh * i;
+        text(ctx, k, b.x, y + rh * 0.42, 21 * u, { w: 700, max: colW }); text(ctx, v, b.x, y + rh * 0.42 + 25 * u, 16 * u, { color: C.ink2, max: colW }); });
+      const bx = wide ? b.x + colW + 48 * u : b.x, by = wide ? b.y : b.y + 40 * u + rh * 4 + 30 * u, bh = wide ? b.h : Math.min(320 * u, b.y + b.h - by);
+      rr(ctx, bx, by, colW, bh, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+      text(ctx, "THE BAR TO CLEAR", bx + 24 * u, by + 40 * u, 15 * u, { w: 750, color: C.ink2 });
+      font(ctx, 72 * u, 800); ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.fillText("< 45 s", bx + 24 * u, by + 40 * u + 90 * u);
+      ctx.font = `750 ${22 * u}px ${FONT}`; wrap(ctx, "to the first word on a 16K-token prompt (about 30 pages)", colW - 48 * u).forEach((l, i) => text(ctx, l, bx + 24 * u, by + 170 * u + i * 30 * u, 22 * u, { w: 650 }));
+      text(ctx, done ? "Answer is in. One flag did it." : "Before: 58 s on SYCL, 49 s on Vulkan", bx + 24 * u, by + bh - 28 * u, 17 * u, { color: C.ink2, max: colW - 48 * u });
+    },
+    caption: d => (d.gd || {}).complete ? [
+      ["Post", `Gemma 4 was slower to start answering on Intel's SYCL backend than on Vulkan (58 s vs 49 s on a 16K prompt). Tested 6 llama-server configs to find out why.\n\nOne flag fixed it. Guess which?`]] : [
+      ["Post", `Gemma 4 on a 32 GB Arc Pro B65: SYCL generates faster than Vulkan, but takes longer to start answering a long prompt (58 s vs 49 s).\n\nTesting 6 llama-server configs to find out why. Which knob would you turn first?`]] },
+
+  { id: "gd-poll", name: "Gemma diagnostic poll: what fixed it?", safe: true, group: "gd",
+    draw(ctx, W, H, u, d) {
+      const wide = W > H, g = d.gd || {}, ans = g.complete && ((g.variants || {}).ckpt0_ub2048 || {}).status === "ok" ? "B" : null;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · GEMMA ON SYCL", title: "Place your bets",
+        sub: "Gemma 4 31B, llama.cpp SYCL backend, 16K-token prompt: 58 s to the first word.", results: !!g.complete, foot: p1foot(viewP1S(d)) });
+      ctx.font = `750 ${34 * u}px ${FONT}`;
+      const q = wrap(ctx, "Which llama-server setting cut it to under 45 seconds?", b.w * (wide ? 0.92 : 1));
+      q.forEach((l, i) => text(ctx, l, b.x, b.y + 36 * u + i * 44 * u, 34 * u, { w: 750 }));
+      const opts = [["A", "Context checkpoints off"], ["B", "A bigger batch size"], ["C", "A smaller context"], ["D", "Flash attention off"]];
+      const oy = b.y + 36 * u + q.length * 44 * u + 26 * u, gap = 16 * u, cols = wide ? 2 : 1, ow = (b.w - gap * (cols - 1)) / cols, oh = wide ? 86 * u : 92 * u;
+      opts.forEach(([k, v], i) => {
+        const x = b.x + (ow + gap) * (i % cols), y = oy + (oh + gap) * Math.floor(i / cols), col = C.series[i % 3];
+        ctx.save(); if (ans && ans !== k) ctx.globalAlpha = 0.35;
+        rr(ctx, x, y, ow, oh, 14 * u, C.surf, ans === k ? col : "rgba(255,255,255,0.10)", ans === k ? 3 * u : 1.5 * u);
+        ctx.beginPath(); ctx.arc(x + 40 * u, y + oh / 2, 20 * u, 0, 7); ctx.fillStyle = col; ctx.fill();
+        text(ctx, k, x + 40 * u, y + oh / 2 + 8 * u, 22 * u, { w: 800, color: C.page, align: "center" });
+        text(ctx, v, x + 76 * u, y + oh / 2 + 8 * u, 22 * u, { w: 650, max: ow - 92 * u });
+        if (ans === k) text(ctx, "ANSWER", x + ow - 18 * u, y + 24 * u, 13 * u, { w: 800, color: col, align: "right" });
+        ctx.restore();
+      });
+      const s16 = ((((g.variants || {}).ckpt0_ub2048 || {}).serve) || []).find(x => x.size === 16384);
+      text(ctx, ans && s16 ? `Answer: B. -b 2048 -ub 2048: ${secs(s16.ttft)} to the first word. Checkpoints made no difference on SYCL.` : "The answer drops with the results.",
+        b.x, b.y + b.h - 6 * u, wide ? 18 * u : 22 * u, { w: ans ? 700 : 400, color: ans ? C.ink : C.ink2, max: b.w });
+    },
+    caption: d => { const g = d.gd || {}, s16 = ((((g.variants || {}).ckpt0_ub2048 || {}).serve) || []).find(x => x.size === 16384); return [
+      ...(g.complete && s16 ? [["Answer reveal", `Answer: B, a bigger batch. llama-server's default micro-batch is 512 tokens; at -b 2048 -ub 2048 Gemma 4 on SYCL answers a 16K prompt in ${secs(s16.ttft)}, down from 58 s. Checkpoints off did nothing on SYCL.\n\nWho called it?`]] : []),
+      ["Post (attach as a poll)", `Gemma 4 31B, llama.cpp SYCL on an Intel Arc Pro B65: 58 s to start answering a 16K-token prompt.\n\nWhich llama-server setting got it under 45 s?\n\nA) Context checkpoints off\nB) Bigger batch size\nC) Smaller context\nD) Flash attention off`]]; } },
+
+  { id: "gd-variants", name: "Every config tested", safe: false, group: "gd", ready: d => !!(d.gd && d.gd.complete), lockMsg: () => "Unlocks when the Gemma diagnostic finishes",
+    draw(ctx, W, H, u, d) {
+      const g = d.gd, wide = W > H, gm = d.models.find(m => m.name.startsWith("gemma")) || d.models[1];
+      const t16 = rows => ((rows || []).find(x => x.size === 16384) || {}).ttft;
+      const list = [["Vulkan, checkpoints off (reference)", t16(g.vulkan), "ref"], ["SYCL, checkpoints off (Phase 1S)", t16((g.variants.ckpt0 || {}).serve)],
+        ["SYCL, default checkpoints", t16((g.variants.default || {}).serve)], ["SYCL, context 17K instead of 32K", t16((g.variants.ckpt0_ctx16k || {}).serve)],
+        ["SYCL, flash attention off", t16((g.variants.ckpt0_fa0 || {}).serve)], ["SYCL, full sliding-window cache", (g.variants.ckpt0_swafull_16k || {}).status === "oom" ? "oom" : null],
+        ["SYCL, -b 2048 -ub 2048", t16((g.variants.ckpt0_ub2048 || {}).serve), "win"]];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · GEMMA ON SYCL", title: "Six configs, one winner",
+        sub: `${short(gm)} 4 31B · time to first token on a 16K-token prompt · llama-server, median of 3 · lower is better`, results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(wide ? 330 * u : 300 * u, b.w * 0.42), maxW = b.w - labW - 110 * u, vmax = Math.max(...list.map(x => typeof x[1] === "number" ? x[1] : 0), 45);
+      const rh = Math.min(wide ? 64 * u : 130 * u, (b.h - 24 * u) / list.length), barH = Math.min(wide ? 30 * u : 40 * u, rh * 0.6), X = v => b.x + labW + maxW * v / vmax;
+      list.forEach(([lab, v, kind], i) => {
+        const y = b.y + rh * i + (rh - barH) / 2;
+        text(ctx, lab, b.x, y + barH * 0.72, 17 * u, { w: kind === "win" ? 750 : 600, color: kind === "ref" ? C.ink2 : C.ink, max: labW - 14 * u });
+        if (v === "oom") { text(ctx, "didn't fit in VRAM", b.x + labW, y + barH * 0.72, 16 * u, { color: C.muted }); return; }
+        if (v == null) { text(ctx, "n/a", b.x + labW, y + barH * 0.72, 16 * u, { color: C.muted }); return; }
+        ctx.beginPath(); ctx.roundRect(b.x + labW, y, Math.max(6 * u, X(v) - b.x - labW), barH, [0, 4 * u, 4 * u, 0]);
+        ctx.fillStyle = kind === "win" ? mcolor(d.models.indexOf(gm)) : kind === "ref" ? C.axis : "#5a5a56"; ctx.fill();
+        text(ctx, secs(v), X(v) + 10 * u, y + barH * 0.74, 18 * u, { w: 750 });
+      });
+      const tx = X(45); ctx.setLineDash([6 * u, 6 * u]); ctx.strokeStyle = C.good; ctx.lineWidth = 1.5 * u; ctx.beginPath(); ctx.moveTo(tx, b.y); ctx.lineTo(tx, b.y + rh * list.length); ctx.stroke(); ctx.setLineDash([]);
+      text(ctx, "45 s target", tx + 6 * u, b.y + rh * list.length + 16 * u, 13 * u, { color: C.good });
+    },
+    caption: d => { const g = d.gd, t = k => secs((((g.variants[k] || {}).serve) || []).find(x => x.size === 16384)?.ttft); return [
+      ["Post", `Gemma 4 on Intel Arc, SYCL, time to first token on a 16K prompt:\n\n• Checkpoints off: ${t("ckpt0")}\n• Default checkpoints: ${t("default")}\n• 17K context: ${t("ckpt0_ctx16k")}\n• Flash attention off: ${t("ckpt0_fa0")}\n• -ub 2048: ${t("ckpt0_ub2048")}\n\nVulkan: ${secs((g.vulkan.find(x => x.size === 16384) || {}).ttft)}. Which surprised you?`]]; } },
+
+  { id: "gd-batch", name: "The batch size, by the numbers", safe: false, group: "gd", ready: d => !!(d.gd && d.gd.complete), lockMsg: () => "Unlocks when the Gemma diagnostic finishes",
+    draw(ctx, W, H, u, d) {
+      const g = d.gd, wide = W > H, gm = d.models.find(m => m.name.startsWith("gemma")) || d.models[1], col = mcolor(d.models.indexOf(gm));
+      const sv = (k, n) => ((((g.variants[k] || {}).serve) || []).find(x => x.size === n) || {}).prompt_tok_s;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · GEMMA ON SYCL", title: "512 tokens at a time was the bottleneck",
+        sub: `${short(gm)} 4 31B prefill (reading the prompt), tokens per second · micro-batch 512 vs 2048 · higher is better`, results: true, foot: p1foot(viewP1S(d)) });
+      const groups = [["llama-bench, 16K prompt", g.bench[512], g.bench[2048]], ["llama-server, 4K prompt", sv("ckpt0", 4096), sv("ckpt0_ub2048", 4096)], ["llama-server, 16K prompt", sv("ckpt0", 16384), sv("ckpt0_ub2048", 16384)]];
+      const vmax = Math.max(...groups.flatMap(x => [x[1] || 0, x[2] || 0]), 1), labW = Math.min(250 * u, b.w * 0.28), maxW = b.w - labW - 220 * u;
+      let lx = b.x; [["micro-batch 512 (default)", "#5a5a56"], ["micro-batch 2048", col]].forEach(([l, c]) => { rr(ctx, lx, b.y, 14 * u, 14 * u, 3 * u, c); lx += 22 * u + text(ctx, l, lx + 22 * u, b.y + 12 * u, 15 * u, { color: C.ink2 }) + 26 * u; });
+      const area = { y: b.y + 40 * u, h: b.h - 40 * u }, gh = area.h / groups.length, barH = Math.min(40 * u, (gh - 24 * u) / 2 - 3 * u);
+      groups.forEach(([lab, a, z], i) => {
+        const top = area.y + gh * i + (gh - 2 * (barH + 4 * u)) / 2;
+        text(ctx, lab, b.x, top + barH + 6 * u, 18 * u, { w: 650, max: labW - 12 * u });
+        [[a, "#5a5a56"], [z, col]].forEach(([v, c], k) => { if (v == null) return; const y = top + k * (barH + 4 * u), w = Math.max(6 * u, maxW * v / vmax);
+          ctx.beginPath(); ctx.roundRect(b.x + labW, y, w, barH, [0, 4 * u, 4 * u, 0]); ctx.fillStyle = c; ctx.fill();
+          const tw = text(ctx, `${v.toFixed(0)} tok/s`, b.x + labW + w + 10 * u, y + barH * 0.74, Math.min(19 * u, barH * 0.8), { w: 750 });
+          if (k && a) text(ctx, `+${(100 * (z / a - 1)).toFixed(0)}%`, b.x + labW + w + 22 * u + tw, y + barH * 0.74, Math.min(18 * u, barH * 0.75), { w: 750, color: C.good }); });
+      });
+      text(ctx, "Cost: generation is 5–6% slower at long context with the bigger batch. Short prompts (one batch either way) don't change.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const g = d.gd, sv = (k, n) => Math.round(((((g.variants[k] || {}).serve) || []).find(x => x.size === n) || {}).prompt_tok_s || 0); return [
+      ["Post", `Gemma 4 on Intel Arc (llama.cpp SYCL) was reading prompts 512 tokens at a time. -b 2048 -ub 2048:\n\n• llama-bench prefill: ${Math.round(g.bench[512])} → ${Math.round(g.bench[2048])} tok/s\n• llama-server, 16K prompt: ${sv("ckpt0", 16384)} → ${sv("ckpt0_ub2048", 16384)} tok/s\n\nCost: ~5% slower generation at long context. Worth it?`]]; } },
+
+  { id: "gd-findings", name: "Gemma diagnostic key findings", safe: false, group: "gd", ready: d => !!(d.gd && d.gd.complete), lockMsg: () => "Unlocks when the Gemma diagnostic finishes",
+    draw(ctx, W, H, u, d) {
+      const g = d.gd, wide = W > H, gm = d.models.find(m => m.name.startsWith("gemma")) || d.models[1];
+      const s = (k, n) => (((g.variants[k] || {}).serve) || []).find(x => x.size === n) || {}, v16 = (g.vulkan.find(x => x.size === 16384) || {}).ttft;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · GEMMA ON SYCL", title: "What we found",
+        sub: `${short(gm)} 4 31B · llama.cpp b${d.rig.llama_build} SYCL, flash attention on · llama-server at 32K context`, results: true, foot: p1foot(viewP1S(d)) });
+      const items = [
+        [`The fix: -b 2048 -ub 2048`, `16K-prompt first word: ${secs(s("ckpt0", 16384).ttft)} → ${secs(s("ckpt0_ub2048", 16384).ttft)} · Vulkan: ${secs(v16)}`],
+        [`Faster than Vulkan at 4K and 16K`, `4K: ${secs(s("ckpt0_ub2048", 4096).ttft)} vs ${secs((g.vulkan.find(x => x.size === 4096) || {}).ttft)} · Vulkan still wins at 512 tokens`],
+        ["Checkpoints don't matter on SYCL", `default vs off: ${secs(s("default", 16384).ttft)} vs ${secs(s("ckpt0", 16384).ttft)} at 16K (on Vulkan they cost ~100 s)`],
+        ["Flash attention must stay on", `off: ${secs(s("ckpt0_fa0", 16384).ttft)} at 16K, generation ${(s("ckpt0_fa0", 16384).gen_tok_s || 0).toFixed(1)} tok/s`],
+        ["The cost: ~5% slower generation", `at 4K and 16K context; short prompts unchanged · full SWA cache doesn't fit`]];
+      const rh = b.h / items.length;
+      items.forEach(([k, v], i) => { const y = b.y + rh * i, cy = y + rh / 2;
+        ctx.beginPath(); ctx.arc(b.x + 14 * u, cy - 8 * u, 14 * u, 0, 7); ctx.fillStyle = C.surf; ctx.fill();
+        text(ctx, String(i + 1), b.x + 14 * u, cy - 2 * u, 15 * u, { w: 750, color: C.series[0], align: "center" });
+        text(ctx, k, b.x + 42 * u, cy - 4 * u, 22 * u, { w: 700, max: b.w - 50 * u });
+        text(ctx, v, b.x + 42 * u, cy + 21 * u, 16 * u, { color: C.ink2, max: b.w - 50 * u }); });
+    },
+    caption: d => { const g = d.gd, s = (k, n) => secs(((((g.variants[k] || {}).serve) || []).find(x => x.size === n) || {}).ttft); return [
+      ["Post", `Gemma 4 on Intel Arc, llama.cpp SYCL, 6 server configs tested:\n\n• Fix: -b 2048 -ub 2048 (16K prompt ${s("ckpt0", 16384)} → ${s("ckpt0_ub2048", 16384)})\n• Now faster than Vulkan at 4K and 16K\n• Checkpoints: no effect on SYCL\n• Flash attention off: ${s("ckpt0_fa0", 16384)}\n• Cost: ~5% slower generation\n\nWhat should we test next?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -1707,6 +1830,7 @@ const SHARE_PHASES = [
   { key: "p1", label: "Phase 1", name: "Context & serving", href: "p1", st: d => d.p1 || {} },
   { key: "p2", label: "Phase 2", name: "Vulkan vs SYCL", href: "p2", st: d => d.p2 || {} },
   { key: "p1s", label: "Phase 1S", name: "Phase 1 on SYCL", href: "p1s", st: d => d.p1s || {} },
+  { key: "gd", label: "Gemma diag", name: "SYCL prefill fix", href: "gd", st: d => d.gd || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;

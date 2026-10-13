@@ -698,8 +698,10 @@ def gd_share():
     """Gemma SYCL diagnostic for share cards: medians only once the full (non-dry) run has finished."""
     g = gd_full(); done = g["state"] == "finished" and not g["dry"]
     pick = lambda rows: [{k: x[k] for k in ("size", "ttft", "prompt_tok_s", "gen_tok_s")} for x in rows]
-    return dict(run_id=g["run_id"], state=g["state"], complete=done,
-                variants={v["name"]: dict(status=v["status"], serve=pick(v["serve"]) if done else []) for v in g["variants"]},
+    return dict(run_id=g["run_id"], state=g["state"], complete=done, dry=g["dry"], done=g.get("done", 0), total=g.get("total", 0),
+                variants={v["name"]: dict(status=v["status"] if done or v["status"] in ("pending", "running") else "done", flags=v["flags"],
+                                          serve=pick(v["serve"]) if done else []) for v in g["variants"]},
+                sycl_p1s=pick(g["refs"].get("sycl_p1s", [])) if done else [],
                 bench={b["ub"]: b["tok_s"] for b in g["bench"]} if done else {},
                 vulkan=pick(g["refs"].get("vulkan_ckpt0", [])) if done else [])
 

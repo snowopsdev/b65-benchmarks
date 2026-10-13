@@ -19,7 +19,7 @@
   const here = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, "") || "";
   const isHere = href => { const h = href.split("#")[0].replace(/^\.\/?/, "").replace(/\/$/, ""); return h === here || (h === "" && (here === "" || here === "index")); };
   // on a phase page, "Share cards" opens that phase's tab (the Gemma rerun's cards live under Phase 1)
-  const curPhase = PHASES.find(p => isHere(p.href)), shareTab = curPhase && { p1g: "p1", p1s: "p1s", gd: "p1s" }[curPhase.key] || (curPhase && curPhase.key);
+  const curPhase = PHASES.find(p => isHere(p.href)), shareTab = curPhase && { p1g: "p1", p1s: "p1s", gd: "gd" }[curPhase.key] || (curPhase && curPhase.key);
   if (shareTab) LINKS.find(l => l.href === "share").href = "share#" + shareTab;
 
   const css = `
