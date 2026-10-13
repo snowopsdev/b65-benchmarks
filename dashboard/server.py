@@ -641,7 +641,8 @@ def nav_status():
                 p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2,
                 p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")),
                 gd=state(latest(os.path.join(ROOT, "b65-gemmadiag", "raw"), r"^gd-\d{8}-\d{6}$")),
-                p3=state(latest(os.path.join(ROOT, "b65-phase3", "raw"), r"^p3-\d{8}-\d{6}$")))
+                p3=state(latest(os.path.join(ROOT, "b65-phase3", "raw"), r"^p3-\d{8}-\d{6}$")),
+                p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")))
 
 def p1s_full():
     return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
@@ -778,6 +779,58 @@ def p3_share():
     return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], models=models, sections=f["sections"],
                 ids={k: len(v) for k, v in f["ids"].items()}, writing=writing)
 
+def p4_plan(models, ubcheck, vk):
+    plan = []
+    for m in models:
+        plan += [("sycl", m, t, "512") for t in ("pp512", "pp16384", "tg128", "tg128@d16384")]
+        if ubcheck:
+            plan += [("sycl", m, "pp4096", "512"), ("sycl", m, "pp4096", "2048"), ("sycl", m, "pp16384", "2048"), ("sycl", m, "tg128@d16384", "2048")]
+            if vk: plan += [("vulkan", m, "pp16384", "512"), ("vulkan", m, "pp16384", "2048")]
+    return plan
+
+def p4_full():
+    """Phase 4 canary (b65-phase4/raw/p4-*): SYCL fa1 ub512 drift vs baseline.json, plus the optional micro-batch check."""
+    kit = os.path.join(ROOT, "b65-phase4"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^p4-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    try: baseline = json.load(open(os.path.join(kit, "baseline.json")))
+    except (OSError, ValueError): baseline = {}
+    res = dict(state="not started", run_id=None, env={}, rows=[], current=None, done=0, total=0, dry=False, baseline_src=baseline.get("_source"), flags=0,
+               runs=sorted((r for r in runs if not r.startswith("p4-dry-")), reverse=True))
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "canary" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    models = env.get("models", "").split(); ub = env.get("ubcheck") == "1"
+    vk = ub and env.get("vk_index", "1") != ""   # runs before vk_index was recorded had it set
+    got = {(r["backend"], r["model"], r["test"], r["ub"]): r for r in csv.DictReader(open(f"{out}/canary.csv"))} if os.path.exists(f"{out}/canary.csv") else {}
+    log = read_lines(os.path.join(kit, "p4-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    cur = tuple(last[-1][:3]) + (last[-1][3][2:],) if res["state"] == "running" and last else None
+    plan = p4_plan(models, ub, vk)
+    for k in plan:
+        r = got.get(k); b = baseline.get(k[1], {}).get(k[2]) if k[0] == "sycl" and k[3] == "512" else None
+        row = dict(backend=k[0], model=k[1], test=k[2], ub=k[3], baseline=b, status="pending")
+        if r:
+            if r["tok_s"] in ("FAIL", ""): row["status"] = "fail"
+            else:
+                v = float(r["tok_s"]); row.update(status="ok", tok_s=v, watts=float(r["board_w"]) if r.get("board_w") else None)
+                if b: row["drift"] = round((v - b) / b * 100, 2); row["flag"] = abs(row["drift"]) > 5
+        elif cur and (cur[0], cur[1], cur[2], cur[3]) == k: row["status"] = "running"
+        res["rows"].append(row)
+    res["total"] = len(plan); res["done"] = sum(1 for r in res["rows"] if r["status"] in ("ok", "fail"))
+    res["flags"] = sum(1 for r in res["rows"] if r.get("flag") or r["status"] == "fail" and r["baseline"])
+    if cur: res["current"] = dict(backend=cur[0], model=cur[1], test=cur[2], ub=cur[3])
+    return res
+
+def p4_share():
+    f = p4_full(); complete = f["state"] == "finished" and not f["dry"]
+    rows = [{k: r.get(k) for k in (("backend", "model", "test", "ub", "status", "baseline", "tok_s", "watts", "drift", "flag") if complete else ("backend", "model", "test", "ub", "status"))} for r in f["rows"]]
+    if not complete: rows = [dict(r, status=r["status"] if r["status"] in ("pending", "running") else "done") for r in rows]
+    return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], rows=rows,
+                flags=f["flags"] if complete else None, env={k: f["env"].get(k) for k in ("kernel", "mesa", "level_zero", "llama_sycl", "oneapi")} if complete else {})
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -810,7 +863,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -822,7 +875,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -903,6 +956,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p4", "/p4.html"):
+            return self.send(200, open(os.path.join(HERE, "p4.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p4":
+            return self.send(200, json.dumps(dict(p4=p4_full(), now=time.time())).encode(), "application/json")
         if path in ("/p3", "/p3.html"):
             return self.send(200, open(os.path.join(HERE, "p3.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p3":

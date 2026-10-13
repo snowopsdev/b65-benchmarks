@@ -1812,6 +1812,73 @@ const CARDS = [
     },
     caption: d => { const w = d.p3.writing, ms = d.models.filter(m => w.totals[m.name]).sort((a, c) => w.totals[a.name].mean_rank - w.totals[c.name].mean_rank);
       return [["Post", `Writing, ranked blind: 5 prompts, 3 unlabelled answers each, three local models on a 32 GB Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: mean rank ${w.totals[m.name].mean_rank.toFixed(1)}, ${w.totals[m.name].firsts} first place${w.totals[m.name].firsts === 1 ? "" : "s"}`).join("\n")}\n\nOne rater, small sample. Which writes best for you?`]]; } },
+  // ---------- Phase 4: canary ----------
+  { id: "p4-preview", name: "Phase 4: the canary", safe: true, group: "p4",
+    draw(ctx, W, H, u, d) {
+      const p = d.p4 || {}, wide = W > H, done = !!p.complete;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 4", title: "Did an update just slow my GPU?",
+        sub: "Drivers, oneAPI and llama.cpp update constantly. A 10-minute canary catches it when one quietly costs you speed.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const steps = [["1", "Pin a baseline", "SYCL, flash attention on: prefill and decode, three models, 5 runs each"], ["2", "Update anything", "Mesa, kernel, oneAPI, Level Zero, llama.cpp, LM Studio"],
+                     ["3", "Rerun the canary", "~10 minutes: 4 tests per model, GPU board power on each"], ["4", "Flag more than 5%", "rerun once; if it repeats, diff the versions and report it"]];
+      const rh = (b.h - 20 * u) / steps.length, colW = wide ? b.w * 0.62 : b.w;
+      steps.forEach(([n, k, v], i) => { const y = b.y + rh * i, cy = y + rh / 2;
+        ctx.beginPath(); ctx.arc(b.x + 22 * u, cy - 6 * u, 22 * u, 0, 7); ctx.fillStyle = C.surf; ctx.fill(); ctx.strokeStyle = C.series[0]; ctx.lineWidth = 2 * u; ctx.stroke();
+        text(ctx, n, b.x + 22 * u, cy + 2 * u, 20 * u, { w: 800, color: C.series[0], align: "center" });
+        text(ctx, k, b.x + 62 * u, cy - 6 * u, 23 * u, { w: 700, max: colW - 70 * u }); text(ctx, v, b.x + 62 * u, cy + 20 * u, 16 * u, { color: C.ink2, max: colW - 70 * u }); });
+      if (wide) { const bx = b.x + colW + 30 * u, bw = b.w - colW - 30 * u;
+        rr(ctx, bx, b.y, bw, b.h - 20 * u, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+        text(ctx, "THE BAR", bx + 22 * u, b.y + 36 * u, 15 * u, { w: 750, color: C.ink2 });
+        font(ctx, 76 * u, 800); ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.fillText("±5%", bx + 22 * u, b.y + 124 * u);
+        ctx.font = `650 ${19 * u}px ${FONT}`; wrap(ctx, "Anything that moves more than this gets flagged and rechecked.", bw - 44 * u).forEach((l, i) => text(ctx, l, bx + 22 * u, b.y + 166 * u + i * 26 * u, 19 * u, { w: 650 }));
+        text(ctx, done ? "First canary is in." : p.state === "running" ? "First canary running now." : "First canary coming up.", bx + 22 * u, b.y + b.h - 48 * u, 16 * u, { color: C.ink2, max: bw - 44 * u }); }
+    },
+    caption: d => [["Post", `Drivers and runtimes update constantly, and some updates quietly cost you speed.\n\nPhase 4 on the Arc Pro B65: a 10-minute canary against a pinned baseline. Anything that moves more than 5% gets flagged.\n\nHave you ever lost speed to an update?`],
+      ["Short take", `New on the Arc Pro B65 bench: a 10-minute canary that flags any update that moves speed more than 5%.`]] },
+
+  { id: "p4-drift", name: "Canary: drift vs baseline", safe: false, group: "p4", ready: d => !!(d.p4 && d.p4.complete), lockMsg: d => `Unlocks when the canary finishes (${(d.p4 || {}).done || 0} of ${(d.p4 || {}).total || 0} tests)`,
+    draw(ctx, W, H, u, d) {
+      const p = d.p4, wide = W > H, rows = p.rows.filter(r => r.backend === "sycl" && r.ub === "512" && r.baseline != null);
+      const ms = d.models.filter(m => rows.some(r => r.model === m.name)), tests = ["pp512", "pp16384", "tg128", "tg128@d16384"], tl = { pp512: "Prefill 512", pp16384: "Prefill 16K", tg128: "Decode @ 0", "tg128@d16384": "Decode @ 16K" };
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 4", title: p.flags ? `${p.flags} test${p.flags > 1 ? "s" : ""} moved more than 5%` : "Nothing moved",
+        sub: "canary vs the Phase 2 baseline · SYCL, flash attention on · same versions · 5 runs each · flag at ±5%", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(230 * u, b.w * 0.26), cw = (b.w - labW) / tests.length, headH = 50 * u, rh = Math.min(wide ? 150 * u : 260 * u, (b.h - headH) / ms.length);
+      tests.forEach((t, j) => text(ctx, tl[t], b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
+      ms.forEach((m, i) => { const y = b.y + headH + rh * i, cy = y + rh / 2;
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, cy - 16 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m))); text(ctx, m.display, b.x + 20 * u, cy - 4 * u, 20 * u, { w: 700, max: labW - 28 * u });
+        tests.forEach((t, j) => { const r = rows.find(x => x.model === m.name && x.test === t), x = b.x + labW + cw * j + cw / 2; if (!r) return;
+          if (r.status !== "ok") { text(ctx, "failed", x, cy, 18 * u, { w: 700, color: C.critical, align: "center" }); return; }
+          const dd = r.drift, col = r.flag ? C.critical : C.good;
+          text(ctx, `${dd >= 0 ? "+" : "−"}${Math.abs(dd).toFixed(1)}%`, x, cy - 2 * u, 30 * u, { w: 800, color: col, align: "center" });
+          text(ctx, `${r.baseline.toFixed(r.baseline > 100 ? 0 : 2)} → ${r.tok_s.toFixed(r.tok_s > 100 ? 0 : 2)} tok/s`, x, cy + 22 * u, 14 * u, { color: C.ink2, align: "center", max: cw - 10 * u }); });
+      });
+    },
+    caption: d => { const p = d.p4, rows = p.rows.filter(r => r.backend === "sycl" && r.ub === "512" && r.baseline != null && r.status === "ok"), mx = Math.max(...rows.map(r => Math.abs(r.drift)));
+      return [["Post", `Phase 4 canary on the Arc Pro B65: ${rows.length} tests rerun against the pinned baseline (SYCL, llama.cpp b11574).\n\n${p.flags ? `${p.flags} moved more than 5%.` : `Nothing moved more than 5%. Largest drift: ${mx.toFixed(1)}%.`}\n\nThat's the bar every future driver or llama.cpp update has to clear. What should it catch first?`]]; } },
+
+  { id: "p4-ub", name: "Canary: the micro-batch check", safe: false, group: "p4",
+    ready: d => !!(d.p4 && d.p4.complete && d.p4.rows.some(r => r.ub === "2048")), lockMsg: d => d.p4 && d.p4.complete ? "This canary ran without the micro-batch check" : `Unlocks when the canary finishes (${(d.p4 || {}).done || 0} of ${(d.p4 || {}).total || 0} tests)`,
+    draw(ctx, W, H, u, d) {
+      const p = d.p4, wide = W > H, get = (b, m, t, ub) => p.rows.find(r => r.backend === b && r.model === m && r.test === t && r.ub === ub && r.status === "ok");
+      const ms = d.models.filter(m => p.rows.some(r => r.model === m.name && r.ub === "2048")), g = d.models.find(m => m.name.startsWith("gemma"));
+      const groups = []; ms.forEach(m => { const a = get("sycl", m.name, "pp16384", "512"), z = get("sycl", m.name, "pp16384", "2048"); if (a && z) groups.push([`${short(m)}, SYCL`, a.tok_s, z.tok_s, mcolor(d.models.indexOf(m))]);
+        const va = get("vulkan", m.name, "pp16384", "512"), vz = get("vulkan", m.name, "pp16384", "2048"); if (va && vz) groups.push([`${short(m)}, Vulkan`, va.tok_s, vz.tok_s, C.axis]); });
+      if (g && d.gd && d.gd.bench && d.gd.bench[512] && d.gd.bench[2048]) groups.push([`${short(g)}, SYCL (Gemma diag)`, d.gd.bench[512], d.gd.bench[2048], mcolor(d.models.indexOf(g))]);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 4", title: "Does a bigger batch help everyone?",
+        sub: "prefill of a 16K-token prompt, tok/s · llama-bench micro-batch 512 (default) vs 2048 · higher is better", results: true, foot: p1foot(viewP1S(d)) });
+      const vmax = Math.max(...groups.flatMap(x => [x[1], x[2]]), 1), labW = Math.min(260 * u, b.w * 0.28), maxW = b.w - labW - 200 * u;
+      const gh = b.h / groups.length, barH = Math.min(26 * u, (gh - 12 * u) / 2 - 2 * u);
+      groups.forEach(([lab, a, z, col], i) => { const top = b.y + gh * i + (gh - 2 * (barH + 3 * u)) / 2;
+        text(ctx, lab, b.x, top + barH + 6 * u, 17 * u, { w: 650, max: labW - 12 * u });
+        [[a, "#5a5a56"], [z, col]].forEach(([v, c], k) => { const y = top + k * (barH + 3 * u), w = Math.max(6 * u, maxW * v / vmax);
+          ctx.beginPath(); ctx.roundRect(b.x + labW, y, w, barH, [0, 4 * u, 4 * u, 0]); ctx.fillStyle = c; ctx.fill();
+          const tw = text(ctx, `${v.toFixed(0)}`, b.x + labW + w + 8 * u, y + barH * 0.78, Math.min(17 * u, barH * 0.85), { w: 750 });
+          if (k) { const ch = 100 * (z / a - 1); text(ctx, `${ch >= 0 ? "+" : "−"}${Math.abs(ch).toFixed(0)}%`, b.x + labW + w + 18 * u + tw, y + barH * 0.78, Math.min(16 * u, barH * 0.8), { w: 750, color: ch >= 10 ? C.good : ch <= -5 ? C.critical : C.muted }); } }); });
+      text(ctx, "Grey = micro-batch 512 · colour = 2048. Rule: +10% on 16K prefill without costing more than 5% decode makes it the default.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.p4, ch = (b, m) => { const a = p.rows.find(r => r.backend === b && r.model === m && r.test === "pp16384" && r.ub === "512"), z = p.rows.find(r => r.backend === b && r.model === m && r.test === "pp16384" && r.ub === "2048"); return a && z && a.tok_s && z.tok_s ? 100 * (z.tok_s / a.tok_s - 1) : null; };
+      const ms = d.models.filter(m => p.rows.some(r => r.model === m.name && r.ub === "2048")), f = v => v == null ? "n/a" : `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(0)}%`;
+      return [["Post", `Gemma 4 got +55% prefill on Intel Arc from one llama.cpp flag (-ub 2048). Does it work for the others?\n\n${ms.map(m => `• ${short(m)}: SYCL ${f(ch("sycl", m.name))}, Vulkan ${f(ch("vulkan", m.name))}`).join("\n")}\n\n(16K-prompt prefill, ub 512 → 2048.) Have you tuned -ub?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -1986,6 +2053,7 @@ const SHARE_PHASES = [
   { key: "p1s", label: "Phase 1S", name: "Phase 1 on SYCL", href: "p1s", st: d => d.p1s || {} },
   { key: "gd", label: "Gemma diag", name: "SYCL prefill fix", href: "gd", st: d => d.gd || {} },
   { key: "p3", label: "Phase 3", name: "Quality checks", href: "p3", st: d => d.p3 || {} },
+  { key: "p4", label: "Phase 4", name: "Canary", href: "p4", st: d => d.p4 || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;

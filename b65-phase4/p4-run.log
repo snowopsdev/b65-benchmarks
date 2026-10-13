@@ -1,0 +1,18 @@
+run_id=p4-20261013-150339
+date=2026-10-13T15:03:39-04:00
+kernel=7.2.5-3-omarchy
+mesa=mesa 1:26.2.2-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+omarchy=4.0.4-1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+reps=5
+models=qwen3.8-27b muse-glimmer
+ubcheck=1
+dry=0
+energy_file=/sys/class/hwmon/hwmon6/energy1_input
+== qwen3.8-27b
+>> sycl qwen3.8-27b pp512 ub512
+  sycl qwen3.8-27b pp512 ub512: 639.86 tok/s 184.2W
+>> sycl qwen3.8-27b pp16384 ub512

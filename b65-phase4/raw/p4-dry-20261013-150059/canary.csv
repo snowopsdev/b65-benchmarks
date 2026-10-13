@@ -1,0 +1,5 @@
+backend,model,test,ub,tok_s,board_w,invocation_w
+sycl,qwen3.8-27b,pp512,512,639.22,176.8,73.7
+sycl,qwen3.8-27b,pp16384,512,605.99,182.5,166.8
+sycl,qwen3.8-27b,tg128,512,23.7,192.5,119.5
+sycl,qwen3.8-27b,tg128@d16384,512,18.64,175.4,156.5
