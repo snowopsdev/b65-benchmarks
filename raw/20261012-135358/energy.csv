@@ -1,0 +1,3 @@
+test,model,quant,file,status,exit_code,energy_j,seconds,t_end
+pp512,qwen3.8-27b,Q4_K_M,Qwen3.8-27B-Q4_K_M.gguf,ok,0,1491.417053,13.500556,1791827691.150177
+pp4096,qwen3.8-27b,Q4_K_M,Qwen3.8-27B-Q4_K_M.gguf,ok,0,10544.610718,75.072045,1791827766.233531

@@ -1,0 +1,4 @@
+Explain in three sentences why GPU memory bandwidth matters for LLM token generation.
+
+GPU memory bandwidth is the primary bottleneck for LLM inference because generating each token requires repeatedly reading the model's massive weight matrices from high-bandwidth memory (HBM) into the compute units. Since the arithmetic intensity of the decoding phase is low—meaning the GPU performs relatively few floating-point operations per byte of data moved—the speed at which data can be transferred dictates the overall throughput. Consequently, even with high computational power, a GPU with insufficient memory bandwidth will struggle to sustain high
+

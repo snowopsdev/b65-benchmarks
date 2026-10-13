@@ -1,0 +1,5 @@
+Explain in three sentences why GPU memory bandwidth matters for LLM token generation.
+
+GPU memory bandwidth determines how quickly the model's weights can be transferred from VRAM to the GPU cores for each single token generated. Since LLMs are memory-bound during the inference phase, the speed of token generation is limited by this data transfer rate rather than the raw computing power of the GPU. Consequently, higher memory bandwidth allows the model to process weights faster, directly increasing the number of tokens generated per second. [end of text]
+
+
