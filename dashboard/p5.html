@@ -84,6 +84,11 @@ th.num { text-align: right; }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
 .ok-text { color: var(--good-text); font-weight: 600; } .bad-text { color: var(--critical); font-weight: 600; }
 code { font: 12px ui-monospace, monospace; }
+.ptile { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.ptile.running { border-color: var(--series-1); }
+.ptile .pname { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+.ptile .pcount { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.ptile .bar, #live .bar { margin-top: 6px; }
 </style>
 <script src="nav.js"></script>
 </head>
@@ -94,7 +99,10 @@ code { font: 12px ui-monospace, monospace; }
     <span id="badge" class="badge"><span class="dot"></span><span id="state">connecting…</span></span>
     <span class="sub" id="runinfo"></span>
   </header>
-  <div class="card" id="now-card"><h2>Now running</h2><div class="what" id="now-what">–</div><div class="sub" id="now-phase" style="font-family:ui-monospace,monospace;font-size:12px"></div></div>
+  <div class="card" id="now-card"><h2>Progress</h2>
+    <div class="tiles" id="ptiles" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))"></div>
+    <div id="live" style="margin-top:14px"></div>
+    <details style="margin-top:10px"><summary>Recent log</summary><pre id="recent"></pre></details></div>
   <div class="card"><h2>A · New canary baseline (SYCL, FA on, -b 2048 -ub 2048, 5 reps, board W over the timed reps)</h2><div style="overflow-x:auto"><table id="A"></table></div>
     <p class="sub" style="margin:8px 0 0;font-size:12px">Should match Phase 4's ub 2048 numbers within 3%.</p></div>
   <div class="card"><h2>B · Gemma short-prompt time to first token (median; cold = cache off, warm = identical prompt reused)</h2><div style="overflow-x:auto"><table id="B"></table></div>
@@ -120,8 +128,24 @@ function render(j) {
   $("state").textContent = ({ running: "Running", finished: "Finished", stopped: "Stopped (incomplete)", "not started": "Not started" }[st] || st) + (d.dry ? " · dry run" : "");
   const start = d.env.date ? new Date(d.env.date) : null;
   $("runinfo").textContent = (d.run_id ? `run ${d.run_id}` : "") + (start ? ` · started ${start.toLocaleTimeString()}` : "");
-  $("now-card").style.display = st === "running" ? "" : "none"; pollMs = st === "running" ? 5000 : 30000;
-  if (d.current) { $("now-what").textContent = `Part ${d.current.part || "?"} · ${d.current.step}`; $("now-phase").textContent = d.current.last; }
+  $("now-card").style.display = d.progress.length ? "" : "none"; pollMs = st === "running" ? 5000 : 30000;
+  const PN = { A: "A · baseline", B: "B · Gemma short TTFT", C: "C · multi-turn cache", D: "D · Qwen thinking" }, UNIT = { A: "tests", B: "requests", C: "turns", D: "tries" };
+  $("ptiles").innerHTML = d.progress.map(p => `<div class="ptile ${p.status}"><div class="pname">${PN[p.part] || p.part}</div>
+    <div class="pcount">${p.done}<span class="sub" style="font-size:13px;font-weight:500"> / ${p.total} ${UNIT[p.part] || ""}</span></div>
+    <div class="sub" style="font-size:12px">${p.status === "done" ? "✓ done" : p.status === "running" ? "running" : p.status}</div>
+    <div class="bar"><div style="width:${Math.min(100, 100 * p.done / p.total)}%;${p.status === "done" ? "background:var(--good)" : ""}"></div></div></div>`).join("");
+  const hm = s => s == null ? "–" : `${Math.floor(s / 3600)} h ${String(Math.floor(s % 3600 / 60)).padStart(2, "0")} min`;
+  const L = d.live; let lv = "";
+  if (st === "running" && d.current) {
+    lv = `<div class="now"><div class="what">Part ${esc(d.current.part)} · ${esc(d.current.step)}</div><div class="sub">elapsed ${hm(d.elapsed_s)}</div>`;
+    if (L && L.variant) lv += `<div class="sub" style="grid-column:1/-1"><code>${esc(L.variant)}</code> · try ${L.try_} of ${L.tries} · ${L.n_gen == null ? "prompt / waiting" : `${L.n_gen.toLocaleString()} of ${L.cap.toLocaleString()} tokens at ${fmt(L.tg, 1)} tok/s`}
+        · at most ${hm(L.worst_left_s)} left (if every remaining try hits its cap)</div>${L.n_gen != null ? `<div class="bar"><div style="width:${Math.min(100, 100 * L.n_gen / L.cap)}%"></div></div>` : ""}`;
+    else if (L && L.turn) lv += `<div class="sub" style="grid-column:1/-1">server <code>${esc(L.server)}</code> · turn ${L.turn} of 8${L.n_gen != null ? ` · generating (${L.n_gen} tokens)` : ""}</div>`;
+    else if (L && L.per_cfg) lv += `<div class="sub" style="grid-column:1/-1">server <code>${esc(L.server)}</code> · ${L.in_cfg} of ${L.per_cfg} requests for this config</div>`;
+    else lv += `<div class="sub" style="grid-column:1/-1;font-family:ui-monospace,monospace;font-size:12px">${esc(d.current.last)}</div>`;
+    lv += "</div>";
+  } else if (st === "finished") lv = `<div class="sub">Finished · total ${hm(d.elapsed_s)}</div>`;
+  $("live").innerHTML = lv; $("recent").textContent = (d.recent || []).join("\n");
   // A
   if (d.A.length) { const r4 = d.ref.p4_ub2048 || {};
     $("A").innerHTML = `<thead><tr><th>Model</th><th>Test</th><th class="num">tok/s</th><th class="num">Board W</th><th class="num">vs Phase 4 ub 2048</th></tr></thead><tbody>` + d.A.map(r => {

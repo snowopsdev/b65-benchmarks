@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Live B65 Bench dashboard: reads raw/<latest run>/ plus the xe hwmon sensors. Read-only; never touches the GPU.
 Usage: python dashboard/server.py [--port 8765]   (binds 127.0.0.1; expose with `tailscale serve`)"""
-import csv, json, os, re, sys, threading, time, collections, argparse, statistics
+import csv, glob, json, os, re, sys, threading, time, collections, argparse, statistics
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -875,7 +875,7 @@ def p5_full():
     """Phase 5 (b65-phase5/raw/p5-*): A new ub2048 baseline, B Gemma short-prompt TTFT, C multi-turn cache, D Qwen thinking on c08."""
     kit = os.path.join(ROOT, "b65-phase5"); base = os.path.join(kit, "raw")
     runs = [d for d in os.listdir(base) if re.match(r"^p5-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
-    res = dict(state="not started", run_id=None, env={}, dry=False, A=[], B=[], C=[], D=[], current=None, parts=[], ref={})
+    res = dict(state="not started", run_id=None, env={}, dry=False, A=[], B=[], C=[], D=[], current=None, parts=[], ref={}, progress=[], live=None, recent=[], elapsed_s=None)
     try:
         b512 = json.load(open(os.path.join(ROOT, "b65-phase4", "baseline.json"))); res["ref"]["baseline_ub512"] = {k: v for k, v in b512.items() if not k.startswith("_")}
     except (OSError, ValueError): pass
@@ -899,6 +899,46 @@ def p5_full():
         part = next((m.split()[1] for m in reversed(marks) if m.startswith("part ")), None)
         tail = [l for l in log if l.strip()][-1].strip()
         res["current"] = dict(part=part, step=marks[-1], last=tail[:160])
+    res["recent"] = [l.rstrip()[:200] for l in log if l.strip()][-10:] if res["state"] == "running" else []
+    # expected row counts per part (mirrors phase5.sh / p5tools.py loops)
+    dry = res["dry"]; reps = 1 if dry else 5; nsz = 5
+    D_CAPS = [("think-4k", 4096), ("think-8k", 8192), ("think-16k", 16384), ("think-8k-pp1.5", 8192), ("think-8k-qwen-sampler", 8192), ("nothink", 2048)]
+    tries = 1 if dry else 5
+    totals = dict(A=12, B=4 * nsz * reps * 2, C=3 * 4 * (2 if dry else 8), D=len(D_CAPS) * tries)
+    seen = [m.split()[1] for m in marks if m.startswith("part ")]
+    cur = res["current"]["part"] if res["current"] else None
+    res["progress"] = [dict(part=p, done=len(res[p]), total=totals[p],
+                            status="done" if res["state"] == "finished" or (p in seen and p != cur) else "running" if p == cur else "pending" if res["state"] == "running" else "skipped")
+                       for p in res["parts"] if p in totals]
+    # live view of the in-flight request: newest server log, last generation tick after the last finished request
+    live = None
+    if res["state"] == "running" and cur in ("B", "C", "D"):
+        logs = glob.glob(os.path.join(out, "*.server.log"))
+        if logs:
+            sl = max(logs, key=os.path.getmtime); age = time.time() - os.path.getmtime(sl)
+            ln = read_lines(sl); i = max((k for k, l in enumerate(ln) if "stop processing" in l), default=-1)
+            ticks = [re.search(r"n_gen =\s*(\d+), tg =\s*([\d.]+)", l) for l in ln[i + 1:]]
+            ticks = [t for t in ticks if t]
+            live = dict(server=os.path.basename(sl).replace(".server.log", ""), log_age_s=round(age),
+                        n_gen=int(ticks[-1].group(1)) if ticks and age < 30 else None, tg=float(ticks[-1].group(2)) if ticks and age < 30 else None)
+            if cur == "D":
+                k = len(res["D"]); tok_s = live["tg"] or 21.9
+                if k < len(D_CAPS) * tries:
+                    live.update(variant=D_CAPS[k // tries][0], try_=k % tries + 1, tries=tries, cap=D_CAPS[k // tries][1])
+                    left = sum(D_CAPS[j // tries][1] for j in range(k, len(D_CAPS) * tries)) - (live["n_gen"] or 0)
+                    live["worst_left_s"] = round(left / tok_s)
+            elif cur == "C":
+                live["turn"] = (len(res["C"]) % (2 if dry else 8)) + 1
+            elif cur == "B":
+                live["in_cfg"] = len(res["B"]) % (nsz * reps * 2); live["per_cfg"] = nsz * reps * 2
+        res["live"] = live
+    res["elapsed_s"] = None
+    try:
+        from datetime import datetime
+        t0 = datetime.fromisoformat(env["date"]).timestamp()
+        t1 = os.path.getmtime(f"{out}/done") if os.path.exists(f"{out}/done") else time.time()
+        res["elapsed_s"] = round(t1 - t0)
+    except (KeyError, ValueError, OSError): pass
     return res
 
 def p5_share():
