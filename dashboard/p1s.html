@@ -110,7 +110,7 @@ code { font: 12px ui-monospace, monospace; }
     <h2>Decode tok/s by context depth (SYCL, flash attention on · mean ± sd of 5 reps · board W during timed reps)</h2>
     <div style="overflow-x:auto"><table id="dec"></table></div>
     <p class="sub" style="margin:10px 0 0;font-size:12px">"OOM" means the context didn't fit in VRAM, which is a result, not a failure.
-      "Vulkan P1" is the same test in Phase 1 on Vulkan (flash attention off), with the SYCL change. "P2 SYCL" is the same test from Phase 2 (SYCL, flash attention on) as a drift check.</p>
+      "Vulkan P1" is the same test in Phase 1 on Vulkan (flash attention off), with the SYCL change. For Gemma's server rows, "Vulkan P1" is the Phase 1 rerun with --ctx-checkpoints 0, the same flag used here. "P2 SYCL" is the same test from Phase 2 (SYCL, flash attention on) as a drift check.</p>
   </div>
 
   <div class="card">

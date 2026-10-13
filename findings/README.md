@@ -10,8 +10,9 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 | 1 | Decode by context depth (to 32K), llama-server TTFT, loaded idle | `b65-phase1/raw/p1-20261012-180308` | [phase1.md](phase1.md) |
 | 1 follow-up | Gemma llama-server: `--ctx-checkpoints 0` / `--swa-full` / defaults | `b65-phase1/raw/p1-swa-20261013-081841` | [phase1.md](phase1.md#gemma-llama-server-rerun-p1-swa-20261013-081841) |
 | 2 | Vulkan (FA off) vs SYCL (FA off/on), same commit, 7 tests × 3 models | `b65-phase2/raw/p2-20261013-091509` | [phase2.md](phase2.md) |
+| 1S | Phase 1 rerun on SYCL, flash attention on | `b65-phase1s/raw/p1s-20261013-111949` | [phase1s.md](phase1s.md) |
 
-Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`) are kept for the record and aren't used in any findings.
+Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`) are kept for the record and aren't used in any findings.
 
 ## Headlines so far
 
@@ -25,3 +26,4 @@ Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p
 ## Packages
 
 Release tarballs for each run (raw data, scripts as run, summaries, SHA256SUMS) are built into `dist/`, which isn't committed because everything in it is regenerated from what's here. The dashboard serves them at `/files/dist/`.
+7. **On SYCL, Qwen and Muse answer 1.4–2.0× sooner, all models fit 32K in 1.5–3.3 GiB less VRAM, and server generation matches llama-bench** (Phase 1S). Gemma's first token is slower than on Vulkan with the same checkpoint fix (2.8 s vs 1.4 s on a 512-token prompt), which is still open.

@@ -374,6 +374,13 @@ def p1_full(kit_name="b65-phase1", run_re=r"^p1-\d{8}-\d{6}$", log_name="p1-run.
                 vk[(m, t)] = jsonl_ts(f"{P1_VK_RUN}/{m}.{t}.jsonl")
         vrows = list(csv.DictReader(open(f"{P1_VK_RUN}/serve.csv"))) if os.path.exists(f"{P1_VK_RUN}/serve.csv") else []
         res["vk_serve"] = {m: serve_medians(vrows, m) for m in models}
+        # Gemma: compare like with like. Phase 1S runs it with --ctx-checkpoints 0, so its Vulkan baseline is the
+        # Phase 1 rerun with the same flag (p1-swa ckpt-off), not Phase 1's default-checkpoint run.
+        gk = os.path.join(ROOT, "b65-phase1", "raw", "p1-swa-20261013-081841", "ckpt-off", "serve.csv")
+        if res["env"].get("gemma_ckpt", "0") == "0" and os.path.exists(gk):
+            for m in models:
+                if m.startswith("gemma"): res["vk_serve"][m] = serve_medians(list(csv.DictReader(open(gk))), m)
+        res["vk_serve_note"] = "Gemma's Vulkan server baseline is the --ctx-checkpoints 0 rerun (p1-swa-20261013-081841)"
     else:   # Phase 0.5 fa=0 references (tg128 / tg128@d4096 from the follow-up, tg128@d16384 from the main sweep)
         for prefix, key in (("p05b", "fa0.tg128"), ("p05b", "fa0.tg128@d4096"), ("p05", "fa0.tg128@d16384")):
             d = sweep_dir(prefix)
@@ -520,7 +527,8 @@ def p1_share(f=None):
                 bench_tests=f["bench_tests"], sizes=f["sizes"], bench=bench, serve=serve, idle=idle, shape=f.get("shape") or [],
                 server_failed=f.get("server_failed", []) if complete else [], idle_unloaded_w=f.get("idle_unloaded_w") if complete else None,
                 rerun=None if sycl else p1g_share(), sycl=sycl, dry=f.get("dry", False), env=dict(gemma_ckpt=f["env"].get("gemma_ckpt"), compute_runtime=f["env"].get("compute_runtime"), oneapi=f["env"].get("oneapi")),
-                vk_serve={m: [{k: x[k] for k in ("size", "ttft", "gen_tok_s")} for x in v] for m, v in f.get("vk_serve", {}).items()} if complete else {})
+                vk_serve={m: [{k: x[k] for k in ("size", "ttft", "gen_tok_s")} for x in v] for m, v in f.get("vk_serve", {}).items()} if complete else {},
+                vk_serve_note=f.get("vk_serve_note"))
 
 P2_TESTS = ["pp512", "pp4096", "pp16384", "tg128", "tg128@d4096", "tg128@d16384", "tg128@d32768"]
 P2_RUNS = [("vulkan", "0"), ("sycl", "0"), ("sycl", "1")]

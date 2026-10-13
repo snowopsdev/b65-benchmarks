@@ -1,0 +1,4 @@
+model,loaded_idle_w,vram_used_mib
+qwen3.8-27b,44.853812,17582
+gemma-4-31b-qat,44.903940,20916
+muse-glimmer,44.902240,16080

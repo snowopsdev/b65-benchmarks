@@ -974,7 +974,7 @@ const CARDS = [
         sub: `${f.ms.length} models · context, serving and idle · llama.cpp b${d.rig.llama_build} ${p1eng(d)}`, results: true, foot: p1foot(d) });
       const items = [
         [`32K context: ${f.fit32.length} of ${f.ms.length} fit`, f.fit32.length ? `decode at 32K: ${f.fit32.map(m => `${short(m)} ${p1b(d, m, "tg128@d32768").tok_s.toFixed(1)}`).join(" · ")}` : "none ran at 32K"],
-        [f.fast.length ? `${f.fast.map(short).join(" & ")}: first word in ${secRange(f.f512lo, f.f512hi)}` : "Time to first word",
+        [f.fast.length ? `${f.fast.length === f.ms.length && f.ms.length > 2 ? "All three" : f.fast.map(short).join(" & ")}: first word in ${secRange(f.f512lo, f.f512hi)}` : "Time to first word",
          f.fast.length ? `on a short prompt · ${secRange(f.f16lo, f.f16hi)} on a 16K-token prompt (about 30 pages)` : "see the TTFT card"],
         ...(f.slow.length ? [[`${f.slow.map(short).join(" & ")}: a llama-server penalty`,
           p1gReady(d) ? `${secs((p1s(d, f.slow[0], 512) || {}).ttft)} → ${secs(p1gs(d, "ckpt-off", 512).ttft)} first token with --ctx-checkpoints 0`
@@ -1482,16 +1482,17 @@ const CARDS = [
           if (z === "oom") { text(ctx, "didn't fit", x, y + rh / 2 + 8 * u, 20 * u, { w: 700, color: C.muted }); return; }
           if (a == null || z == null) { text(ctx, "n/a", x, y + rh / 2 + 8 * u, 18 * u, { color: C.muted }); return; }
           const fa = v => higher ? v.toFixed(1) : secs(v), better = higher ? z > a : z < a, same = Math.abs(z / a - 1) < 0.01;
-          const ch = same ? "same" : higher ? `${z >= a ? "+" : "−"}${Math.abs(100 * (z / a - 1)).toFixed(0)}%` : `${(a / z).toFixed(1)}× ${z <= a ? "faster" : "slower"}`;
+          const ch = same ? "same" : higher ? `${z >= a ? "+" : "−"}${Math.abs(100 * (z / a - 1)).toFixed(0)}%` : z <= a ? `${(a / z).toFixed(1)}× faster` : `${(z / a).toFixed(1)}× slower`;
           const w1 = text(ctx, fa(a), x, y + rh / 2 - 2 * u, 18 * u, { color: C.muted });
           const w2 = text(ctx, " → ", x + w1, y + rh / 2 - 2 * u, 18 * u, { color: C.muted });
           text(ctx, fa(z), x + w1 + w2, y + rh / 2 - 2 * u, 26 * u, { w: 750 });
           text(ctx, ch, x, y + rh / 2 + 24 * u, 16 * u, { w: 700, color: same ? C.muted : better ? C.good : C.critical });
         });
       });
+      if (ms.some(m => m.name.startsWith("gemma"))) text(ctx, "Gemma, first token: both engines with --ctx-checkpoints 0 (Vulkan from the Phase 1 rerun).", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const dv = viewP1S(d), ms = p1ms(dv), g = (m, t) => p1b(dv, m, t) || {}, s16 = m => (p1s(dv, m, 16384) || {}).ttft, v16 = m => ((((dv.p1.vk_serve || {})[m.name]) || []).find(x => x.size === 16384) || {}).ttft;
-      return [["Post", `Same 32 GB Arc Pro B65, Vulkan → SYCL (llama.cpp, same models):\n\n${ms.map(m => `• ${short(m)}: ${(g(m, "tg128").vk || 0).toFixed(1)} → ${(g(m, "tg128").tok_s || 0).toFixed(1)} tok/s, 32K ${g(m, "tg128@d32768").tok_s ? `${g(m, "tg128@d32768").vk.toFixed(1)} → ${g(m, "tg128@d32768").tok_s.toFixed(1)}` : "n/a"}`).join("\n")}\n\nFirst token at 16K: ${ms.map(m => `${short(m)} ${secs(v16(m))} → ${secs(s16(m))}`).join(", ")}\n\nSwitching?`]]; } },
+      return [["Post", `32 GB Arc Pro B65, Vulkan → SYCL, decode tok/s (empty / 32K context):\n\n${ms.map(m => `• ${short(m)}: ${(g(m, "tg128").vk || 0).toFixed(1)} → ${(g(m, "tg128").tok_s || 0).toFixed(1)} / ${g(m, "tg128@d32768").tok_s ? `${g(m, "tg128@d32768").vk.toFixed(1)} → ${g(m, "tg128@d32768").tok_s.toFixed(1)}` : "n/a"}`).join("\n")}\n\nFirst token, 16K prompt: ${ms.map(m => `${short(m)} ${secs(v16(m))} → ${secs(s16(m))}`).join(", ")}\n\nSwitching?`]]; } },
 
   { id: "p1s-context", name: "How much context fits (SYCL)", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
     draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-context").draw(ctx, W, H, u, viewP1S(d)),
