@@ -1,0 +1,18 @@
+{"tools":[
+ {"type":"function","function":{"name":"get_weather","description":"Current weather for a city","parameters":{"type":"object","properties":{"city":{"type":"string"},"unit":{"type":"string","enum":["c","f"]}},"required":["city"]}}},
+ {"type":"function","function":{"name":"search_web","description":"Search the web","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}}},
+ {"type":"function","function":{"name":"create_event","description":"Create a calendar event","parameters":{"type":"object","properties":{"title":{"type":"string"},"date":{"type":"string","description":"YYYY-MM-DD"},"time":{"type":"string","description":"HH:MM 24h"}},"required":["title","date"]}}},
+ {"type":"function","function":{"name":"convert_currency","description":"Convert money","parameters":{"type":"object","properties":{"amount":{"type":"number"},"from":{"type":"string"},"to":{"type":"string"}},"required":["amount","from","to"]}}}
+],
+"cases":[
+ {"id":"t01","prompt":"What's the weather in Boston in fahrenheit?","expect":{"name":"get_weather","args":{"city":"boston","unit":"f"}}},
+ {"id":"t02","prompt":"Convert 250 US dollars to euros.","expect":{"name":"convert_currency","args":{"amount":250,"from":"usd","to":"eur"}}},
+ {"id":"t03","prompt":"Put 'Dentist' on my calendar for 2026-11-04 at 14:30.","expect":{"name":"create_event","args":{"title":"dentist","date":"2026-11-04","time":"14:30"}}},
+ {"id":"t04","prompt":"Look up the latest llama.cpp SYCL release notes.","expect":{"name":"search_web","args_contains":{"query":"sycl"}}},
+ {"id":"t05","prompt":"What is 2 + 2? Answer directly.","expect":{"name":null}},
+ {"id":"t06","prompt":"Is it raining in Tokyo right now?","expect":{"name":"get_weather","args":{"city":"tokyo"}}},
+ {"id":"t07","prompt":"Schedule 'Phase 3 review' on 2026-10-20.","expect":{"name":"create_event","args":{"title":"phase 3 review","date":"2026-10-20"}}},
+ {"id":"t08","prompt":"How many yen is 99.5 GBP?","expect":{"name":"convert_currency","args":{"amount":99.5,"from":"gbp","to":"jpy"}}},
+ {"id":"t09","prompt":"Write me a haiku about GPUs.","expect":{"name":null}},
+ {"id":"t10","prompt":"Find articles about answer engine optimization.","expect":{"name":"search_web","args_contains":{"query":"answer engine"}}}
+]}

@@ -1,0 +1,7 @@
+[
+ {"id":"w01","prompt":"Write a 120-word LinkedIn post announcing a local-AI benchmarking project on an Intel Arc Pro B65."},
+ {"id":"w02","prompt":"Explain to a marketer, in under 150 words, the difference between SEO and AEO."},
+ {"id":"w03","prompt":"Summarize in 3 bullet points why someone would run AI models on their own GPU."},
+ {"id":"w04","prompt":"Write a polite 80-word email declining a meeting and proposing next Tuesday instead."},
+ {"id":"w05","prompt":"Rewrite this to be clearer: 'The thing with flash attention is that it depends on the backend which is why on one it was bad and on other one good.'"}
+]

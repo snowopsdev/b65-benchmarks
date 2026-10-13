@@ -1,0 +1,7 @@
+[
+ {"id":"n01","q":"In Phase 0.5, what was Gemma's pp16384 prefill speed with flash attention off, in tok/s?","expect_any":["335"]},
+ {"id":"n02","q":"What server flag fixed Gemma's slow time-to-first-token under llama-server?","expect_any":["ctx-checkpoints"]},
+ {"id":"n03","q":"Which backend won Phase 2, Vulkan or SYCL?","expect_any":["sycl"]},
+ {"id":"n04","q":"What was the idle GPU board power with nothing loaded in Phase 0, in watts?","expect_any":["43"]},
+ {"id":"n05","q":"Which model regressed on SYCL decode at 32k context?","expect_any":["qwen"]}
+]
