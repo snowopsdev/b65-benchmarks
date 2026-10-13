@@ -93,6 +93,8 @@ Instagram/Threads) with Download / Copy image / Share and a suggested caption fo
   Card price is typed in by hand on the page and only appears once set.
 
 ### Phase dashboards
+Every page has a left sidebar (`dashboard/nav.js`, statuses from `/api/nav`) linking all phases, share cards, findings and files, with a live status dot per phase. To add a phase, add it to the `PHASES` list in `nav.js` and to `nav_status()` in `server.py`.
+
 - `/p05`: Phase 0.5 flash-attention sweep (off vs on, with Phase 0 reference and provenance).
 - `/p1`: Phase 1 (decode by context depth with OOMs, llama-server TTFT, loaded idle power + VRAM, drift check vs Phase 0.5).
 - `/p2`: Phase 2, Vulkan (FA off) vs SYCL (FA off/on) per model and test, SYCL build state, decode verdict so far.

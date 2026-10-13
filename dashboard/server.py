@@ -588,6 +588,30 @@ def p2_share():
                 sycl=dict(compute_runtime=f["env"].get("compute_runtime"), oneapi=f["env"].get("oneapi")),
                 shape=power_shape(out) if out and os.path.isdir(out) and f["state"] == "running" else [])
 
+def nav_status():
+    """Cheap per-phase state for the sidebar: latest run folder's done/pid markers only."""
+    def latest(base, pat):
+        runs = sorted(d for d in os.listdir(base) if re.match(pat, d)) if os.path.isdir(base) else []
+        return os.path.join(base, runs[-1]) if runs else None
+    def state(out):
+        if not out: return dict(state="not started")
+        pid = (read_lines(f"{out}/pid") or [""])[0].strip()
+        try: alive = bool(pid) and ".sh" in open(f"/proc/{pid}/cmdline").read()   # any phase's runner script
+        except OSError: alive = False
+        st = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+        return dict(state=st, run_id=os.path.basename(out))
+    p05, p05b = (latest(os.path.join(ROOT, "b65-phase05", "raw"), rf"^{k}-\d{{8}}-\d{{6}}$") for k in ("p05", "p05b"))
+    s05 = state(p05); b = state(p05b) if p05b else None
+    if b and b["state"] == "running": s05 = b
+    p2base = os.path.join(ROOT, "b65-phase2", "raw")
+    s2 = state(latest(p2base, r"^p2-\d{8}-\d{6}$"))
+    if s2["state"] == "not started":
+        dry = latest(p2base, r"^p2-dry-\d{8}-\d{6}$")
+        if dry: s2 = state(dry); s2["state"] = "running" if s2["state"] == "running" else "dry"
+    return dict(p0=state(latest(RAW, r"^\d{8}-\d{6}$")), p05=s05,
+                p1=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-\d{8}-\d{6}$")),
+                p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2)
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -700,6 +724,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "p05.html"), "rb").read(), "text/html; charset=utf-8")
         if path in ("/p1", "/p1.html"):
             return self.send(200, open(os.path.join(HERE, "p1.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/nav.js":
+            return self.send(200, open(os.path.join(HERE, "nav.js"), "rb").read(), "text/javascript; charset=utf-8")
+        if path == "/api/nav":
+            return self.send(200, json.dumps(nav_status()).encode(), "application/json")
         if path in ("/p2", "/p2.html"):
             return self.send(200, open(os.path.join(HERE, "p2.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p2":
