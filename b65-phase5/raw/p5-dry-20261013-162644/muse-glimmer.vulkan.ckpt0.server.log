@@ -1,0 +1,32 @@
+0.00.111.917 I srv  llama_server: initializing ...
+0.00.111.927 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.111.997 I srv  init_listene: The UI is disabled
+0.00.111.998 I srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+0.00.112.052 W srv  llama_server: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+0.00.113.664 I srv    load_model: loading model '/home/snowdesk/.lmstudio/models/lmstudio-community/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf'
+0.00.725.270 W load: setting token '<|message|>' (200023) attribute to USER_DEFINED (16), old attributes: 8
+0.00.725.273 W load: setting token '<|start|>' (200022) attribute to USER_DEFINED (16), old attributes: 8
+0.00.728.976 W load: special_eot_id is not in special_eog_ids - the tokenizer config may be incorrect
+0.05.997.593 I cmn          init: llama threadpool init, n_threads = 8
+0.06.139.241 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 32768, kv_unified = 'false'
+0.06.142.176 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.06.142.203 I srv  llama_server: model loaded
+0.06.142.206 I srv  llama_server: listening on http://127.0.0.1:8099
+0.06.548.446 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.06.548.585 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.15.512.146 I slot print_timing: id  0 | task 0 | prompt eval time =    4025.92 ms /  1557 tokens (    2.59 ms per token,   386.74 tokens per second)
+0.15.512.149 I slot print_timing: id  0 | task 0 |        eval time =    4937.62 ms /    96 tokens (   51.97 ms per token,    19.24 tokens per second)
+0.15.512.149 I slot print_timing: id  0 | task 0 |       total time =    8963.54 ms /  1653 tokens
+0.15.512.152 I slot print_timing: id  0 | task 0 |    graphs reused =         95
+0.15.512.153 I slot print_timing: id  0 | task 0 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.15.512.189 I slot      release: id  0 | task 0 | stop processing: n_tokens = 1652, truncated = 0
+0.15.523.020 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.490 (> 0.100 thold), f_keep = 0.943
+0.15.523.157 I slot launch_slot_: id  0 | task 97 | processing task, is_child = 0
+0.18.537.433 I slot print_timing: id  0 | task 97 | prompt processing, n_tokens =   2048, progress = 0.64, t =   3.01 s / 679.44 tokens per second
+0.27.427.740 I slot print_timing: id  0 | task 97 | prompt eval time =    6842.99 ms /  3178 tokens (    2.15 ms per token,   464.42 tokens per second)
+0.27.427.743 I slot print_timing: id  0 | task 97 |        eval time =    5061.58 ms /    96 tokens (   53.28 ms per token,    18.77 tokens per second)
+0.27.427.743 I slot print_timing: id  0 | task 97 |       total time =   11904.57 ms /  3274 tokens
+0.27.427.745 I slot print_timing: id  0 | task 97 |    graphs reused =        189
+0.27.427.745 I slot print_timing: id  0 | task 97 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.27.427.798 I slot      release: id  0 | task 97 | stop processing: n_tokens = 3273, truncated = 0
+0.27.436.823 I srv    operator(): operator(): cleaning up before exit...

@@ -1,0 +1,31 @@
+variant,try,pass,finish_reason,completion_tokens,reasoning_chars,seconds,err
+think-4k,0,0,length,4096,16868,180.9,"Traceback (most recent call last):   File ""/tmp/tmpcr6dqw_g.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-4k,1,0,length,4096,16537,179.8,"Traceback (most recent call last):   File ""/tmp/tmpb4u4r5cx.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-4k,2,1,stop,2188,8207,95.0,
+think-4k,3,1,stop,3379,12834,148.0,
+think-4k,4,0,length,4096,17087,180.0,"Traceback (most recent call last):   File ""/tmp/tmpflwn89cj.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k,0,0,length,8192,32825,371.4,"Traceback (most recent call last):   File ""/tmp/tmpst1us4hb.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k,1,0,length,8192,32770,371.6,"Traceback (most recent call last):   File ""/tmp/tmpyjae4de5.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k,2,1,stop,2188,8207,95.2,
+think-8k,3,1,stop,3379,12834,147.5,
+think-8k,4,1,stop,6036,23835,269.1,
+think-16k,0,1,stop,9402,36220,430.7,
+think-16k,1,1,stop,9650,37300,442.6,
+think-16k,2,1,stop,2188,8207,95.2,
+think-16k,3,1,stop,3379,12834,147.5,
+think-16k,4,1,stop,6036,23835,269.0,
+think-8k-pp1.5,0,1,stop,7443,30247,339.2,
+think-8k-pp1.5,1,1,stop,4564,18046,203.8,
+think-8k-pp1.5,2,0,length,8192,33876,375.6,"Traceback (most recent call last):   File ""/tmp/tmpwjosxuim.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k-pp1.5,3,0,length,8192,34365,375.8,"Traceback (most recent call last):   File ""/tmp/tmpc2jeb63j.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k-pp1.5,4,1,stop,5323,21193,239.0,
+think-8k-qwen-sampler,0,0,length,8192,32217,371.8,"Traceback (most recent call last):   File ""/tmp/tmpjzwjqs_u.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k-qwen-sampler,1,1,stop,4799,18790,212.0,
+think-8k-qwen-sampler,2,1,stop,3148,11811,137.3,
+think-8k-qwen-sampler,3,0,length,8192,34031,371.3,"Traceback (most recent call last):   File ""/tmp/tmp7s5ooc6s.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k-qwen-sampler,4,1,stop,6328,25089,283.0,
+nothink,0,1,stop,615,0,27.6,
+nothink,1,1,stop,322,0,13.9,
+nothink,2,1,stop,253,0,10.9,
+nothink,3,1,stop,295,0,12.7,
+nothink,4,1,stop,283,0,12.2,

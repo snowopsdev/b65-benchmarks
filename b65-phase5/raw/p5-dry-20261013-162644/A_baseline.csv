@@ -1,0 +1,7 @@
+model,test,tok_s,board_w
+qwen3.8-27b,pp512,639.03,178.0
+qwen3.8-27b,tg128,23.7,191.4
+gemma-4-31b-qat,pp512,410.74,164.2
+gemma-4-31b-qat,tg128,22.51,173.3
+muse-glimmer,pp512,677.65,177.8
+muse-glimmer,tg128,25.63,195.3

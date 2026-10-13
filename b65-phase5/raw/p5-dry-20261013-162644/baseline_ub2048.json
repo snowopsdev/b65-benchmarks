@@ -1,0 +1,17 @@
+{
+  "note": "Phase 5 baseline: SYCL fa1, -b 2048 -ub 2048",
+  "results": {
+    "qwen3.8-27b": {
+      "pp512": 639.03,
+      "tg128": 23.7
+    },
+    "gemma-4-31b-qat": {
+      "pp512": 410.74,
+      "tg128": 22.51
+    },
+    "muse-glimmer": {
+      "pp512": 677.65,
+      "tg128": 25.63
+    }
+  }
+}

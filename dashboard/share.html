@@ -1924,6 +1924,7 @@ const CARDS = [
         sub: "Earlier phases left questions. Phase 5 runs one test for each.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
       const qs = [["A", "A new baseline", "lock in -ub 2048 as the canary's reference for all three models"], ["B", "Gemma's slow short prompts", "fixed cost per request, batch size, or warm-up? Prompts of 16 to 4,096 tokens"],
                   ["C", "Does chat reuse its cache?", "8-turn chats growing to ~12K tokens, context checkpoints on vs off"], ["D", "Can Qwen stop overthinking?", "thinking budgets, a repetition penalty, Qwen's own sampler, or thinking off"]];
+      if (done) { const a = p5answers(d); qs.forEach((q, i) => q[2] = a[i]); }
       const cols = wide ? 2 : 1, cw = (b.w - 30 * u * (cols - 1)) / cols, rows = Math.ceil(qs.length / cols), rh = (b.h - 16 * u * (rows - 1)) / rows;
       qs.forEach(([k, t, v], i) => { const x = b.x + (cw + 30 * u) * (i % cols), y = b.y + (rh + 16 * u) * Math.floor(i / cols);
         rr(ctx, x, y, cw, rh, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
@@ -1932,7 +1933,7 @@ const CARDS = [
         text(ctx, t, x + 66 * u, y + 47 * u, 22 * u, { w: 750, max: cw - 80 * u });
         ctx.font = `400 ${16 * u}px ${FONT}`; wrap(ctx, v, cw - 44 * u).slice(0, 3).forEach((l, j) => text(ctx, l, x + 22 * u, y + 92 * u + j * 22 * u, 16 * u, { color: C.ink2 })); });
     },
-    caption: d => [["Post", `Phase 5 on the Arc Pro B65 closes four loose ends:\n\nA) a new -ub 2048 baseline\nB) why Gemma is slow on tiny prompts\nC) does a multi-turn chat reuse its cache?\nD) can Qwen stop overthinking a coding task?\n\nWhich answer do you want first?`]] },
+    caption: d => (d.p5 || {}).complete ? [["Post", `Phase 5 on the Arc Pro B65, four answers:\n\n${p5answers(d).map((a, i) => `${"ABCD"[i]}) ${a.split(". ")[0]}.`).join("\n")}\n\nWhich one surprised you?`]] : [["Post", `Phase 5 on the Arc Pro B65 closes four loose ends:\n\nA) a new -ub 2048 baseline\nB) why Gemma is slow on tiny prompts\nC) does a multi-turn chat reuse its cache?\nD) can Qwen stop overthinking a coding task?\n\nWhich answer do you want first?`]] },
 
   { id: "p5-baseline", name: "A: new baseline at ub 2048", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.A || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
     draw(ctx, W, H, u, d) {
@@ -1960,7 +1961,7 @@ const CARDS = [
       const lab = c => { const [be, cfg] = c.split("|"); return `${be === "sycl" ? "SYCL" : "Vulkan"} ${cfg.replace("ub", "ub ").replace("-nowarm", ", no warm-up")}`; };
       const cols = [C.series[0], C.series[1], C.series[2], C.axis];
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · B", title: "Gemma's first word on tiny prompts",
-        sub: "Gemma 4 31B · llama-server time to first token, cold (no cache) · median of 5 · lower is better", results: true, foot: p1foot(viewP1S(d)) });
+        sub: "Gemma 4 31B · llama-server time to first token, cold (no cache) · median of 5 · lower is better", results: true, foot: (p1foot(viewP1S(d)) || "") + ` · Vulkan: Mesa ${d.stack.mesa}` });
       let lx = b.x; cfgs.forEach((c, i) => { rr(ctx, lx, b.y, 14 * u, 14 * u, 3 * u, cols[i % 4]); lx += 22 * u + text(ctx, lab(c), lx + 22 * u, b.y + 12 * u, 14 * u, { color: C.ink2 }) + 20 * u; });
       const area = { x: b.x, y: b.y + 40 * u, w: b.w, h: b.h - 96 * u }, gw = area.w / sizes.length, vmax = Math.max(...cfgs.flatMap(c => sizes.map(n => val(c, n) || 0)), 0.1);
       const bw = Math.min(30 * u, (gw - 20 * u) / cfgs.length);
@@ -1975,23 +1976,30 @@ const CARDS = [
     caption: d => { const p = d.p5, med = a => { a = a.sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; }, v = (be, cfg, n) => med(p.B.filter(r => r.backend === be && r.cfg === cfg && +r.prompt_tokens === n && r.cached === "0").map(r => +r.ttft_s));
       return [["Post", `Gemma 4 on Intel Arc, time to first word on a 16-token prompt:\n\n• SYCL: ${(v("sycl", "ub2048", 16) || 0).toFixed(2)} s\n• Vulkan: ${(v("vulkan", "ub512", 16) || 0).toFixed(2)} s\n\nWith 4,096 tokens: SYCL ${(v("sycl", "ub2048", 4096) || 0).toFixed(1)} s, Vulkan ${(v("vulkan", "ub512", 4096) || 0).toFixed(1)} s. Do you notice a one-second start?`]]; } },
 
-  { id: "p5-cache", name: "C: does chat reuse its cache?", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.C || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
+  { id: "p5-cache", name: "C: chat cache and checkpoints", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.C || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
     draw(ctx, W, H, u, d) {
-      const p = d.p5, wide = W > H, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))];
-      const ms = d.models.filter(m => keys.some(k => k.startsWith(m.name + "|")));
-      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · C", title: "Does a growing chat reuse its cache?",
-        sub: "8-turn chat, ~1.5K tokens added per turn · tokens the server had to re-read on the last turn vs the whole conversation", results: true, foot: p1foot(viewP1S(d)) });
-      const rows = keys.map(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), last = rs[rs.length - 1]; const [m, be, cfg] = k.split("|"); return { m, be, cfg, re: +last.prompt_n_processed, ctx: +last.ctx_tokens, ttft: +last.ttft_s }; });
-      const labW = Math.min(330 * u, b.w * 0.36), maxW = b.w - labW - 170 * u, vmax = Math.max(...rows.map(r => r.ctx), 1), rh = Math.min(56 * u, (b.h - 22 * u) / rows.length), barH = Math.min(26 * u, rh * 0.6);
-      rows.forEach((r, i) => { const y = b.y + rh * i + (rh - barH) / 2, m = d.models.find(x => x.name === r.m);
-        text(ctx, `${short(m)} · ${r.be === "sycl" ? "SYCL" : "Vulkan"} · ${r.cfg === "ckpt0" ? "checkpoints off" : "checkpoints on"}`, b.x, y + barH * 0.75, 16 * u, { w: 650, max: labW - 12 * u });
-        rr(ctx, b.x + labW, y, maxW * r.ctx / vmax, barH, 4 * u, "rgba(255,255,255,0.06)");
-        ctx.beginPath(); ctx.roundRect(b.x + labW, y, Math.max(4 * u, maxW * r.re / vmax), barH, 4 * u); ctx.fillStyle = r.re >= r.ctx * 0.8 ? C.critical : mcolor(d.models.indexOf(m)); ctx.fill();
-        text(ctx, `${r.re.toLocaleString()} of ${r.ctx.toLocaleString()}`, b.x + labW + maxW * r.ctx / vmax + 10 * u, y + barH * 0.75, 15 * u, { w: 700 }); });
-      text(ctx, "Coloured = tokens re-read on the last turn · faint = the whole conversation · red = 80%+ re-read (cache thrown away).", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+      const p = d.p5, wide = W > H, rows = p5cache(p), ms = d.models.filter(m => rows.some(r => r.m === m.name)), cap = 12;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · C", title: "Context checkpoints: on or off?",
+        sub: "8-turn chat growing to ~12.5K tokens · median seconds to first token, turns 2–8 · every setup reused its cache · lower is better", results: true, foot: (p1foot(viewP1S(d)) || "") + ` · Vulkan: Mesa ${d.stack.mesa}` });
+      text(ctx, "checkpoints on", b.x + 34 * u, b.y + 12 * u, 14 * u, { color: C.ink2 }); rr(ctx, b.x, b.y, 26 * u, 14 * u, 3 * u, C.axis);
+      text(ctx, "checkpoints off", b.x + 190 * u, b.y + 12 * u, 14 * u, { color: C.ink2 }); rr(ctx, b.x + 156 * u, b.y, 26 * u, 14 * u, 3 * u, C.series[0]);
+      const groups = []; ms.forEach(m => ["sycl", "vulkan"].forEach(be => { const on = rows.find(r => r.m === m.name && r.be === be && r.cfg === "ckpt-default"), off = rows.find(r => r.m === m.name && r.be === be && r.cfg === "ckpt0"); if (on || off) groups.push({ m, be, on, off }); }));
+      const top = b.y + 36 * u, labW = Math.min(300 * u, b.w * 0.32), maxW = b.w - labW - 110 * u, gh = (b.h - 60 * u) / groups.length, barH = Math.min(22 * u, gh * 0.36);
+      groups.forEach((g, i) => { const y = top + gh * i; ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        text(ctx, short(g.m), b.x, y + gh / 2 - 2 * u, 18 * u, { w: 700, max: labW - 12 * u }); text(ctx, g.be === "sycl" ? "SYCL" : "Vulkan", b.x, y + gh / 2 + 18 * u, 14 * u, { color: C.ink2 });
+        [[g.on, C.axis], [g.off, C.series[0]]].forEach(([r, col], k) => { if (!r) return; const by = y + gh / 2 - barH - 2 * u + k * (barH + 4 * u), w = maxW * Math.min(r.ttft, cap) / cap;
+          rr(ctx, b.x + labW, by, Math.max(4 * u, w), barH, 4 * u, col);
+          if (r.ttft > cap) { ctx.fillStyle = C.surf; for (let z = 0; z < 2; z++) ctx.fillRect(b.x + labW + w - 30 * u + z * 8 * u, by - 1 * u, 3 * u, barH + 2 * u); }
+          text(ctx, `${r.ttft.toFixed(r.ttft >= 100 ? 0 : 1)} s`, b.x + labW + w + 8 * u, by + barH * 0.78, 15 * u, { w: 700, color: r.ttft > cap ? C.critical : C.ink }); }); });
+      text(ctx, `Bars past ${cap} s are cut. Turn 2 is left out because Muse re-reads the whole chat once there with checkpoints off.`, b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
-    caption: d => { const p = d.p5, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = keys.filter(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), l = rs[rs.length - 1]; return +l.prompt_n_processed >= +l.ctx_tokens * 0.8; });
-      return [["Post", `Does llama-server reuse a growing chat on Intel Arc, or re-read the whole thing every turn? 8-turn chats up to ~12K tokens, context checkpoints on vs off.\n\n${bad.length ? `${bad.length} of ${keys.length} setups re-read most of the conversation each turn.` : `All ${keys.length} setups reuse the cache: only the new turn is processed.`}\n\nDo you run with checkpoints off?`]]; } },
+    caption: d => { const rows = p5cache(d.p5), on = rows.filter(r => r.cfg === "ckpt-default"), faster = on.filter(r => { const o = rows.find(x => x.m === r.m && x.be === r.be && x.cfg === "ckpt0"); return o && o.ttft < r.ttft; }).length,
+        gv = rows.find(r => r.m.startsWith("gemma") && r.be === "vulkan" && r.cfg === "ckpt-default"), go = rows.find(r => r.m.startsWith("gemma") && r.be === "vulkan" && r.cfg === "ckpt0");
+      return [["Post", `llama-server context checkpoints on Intel Arc, in an 8-turn chat: every setup reused its cache, but turning checkpoints off was faster in ${faster} of ${on.length}.
+
+${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn on, ${go.ttft.toFixed(1)} s off.
+
+` : ""}Do you run with checkpoints off?`]]; } },
 
   { id: "p5-qwen", name: "D: taming Qwen's thinking", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.D || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
     draw(ctx, W, H, u, d) {
@@ -1999,8 +2007,8 @@ const CARDS = [
       const med = a => { a = a.filter(x => !isNaN(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
       const lab = { "think-4k": "Thinking, 4K-token cap", "think-8k": "Thinking, 8K cap", "think-16k": "Thinking, 16K cap", "think-8k-pp1.5": "8K cap + presence penalty 1.5", "think-8k-qwen-sampler": "8K cap + Qwen's sampler", nothink: "Thinking off" };
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · D", title: `Can ${short(q)} stop overthinking?`,
-        sub: "the coding task Qwen looped on in Phase 3 · 5 tries per setting · passes, and how often it ran out of room", results: true, foot: p1foot(viewP1S(d)) });
-      const labW = Math.min(330 * u, b.w * 0.36), cw = (b.w - labW) / 3, headH = 44 * u, rh = Math.min(70 * u, (b.h - headH) / vs.length);
+        sub: "the coding task Qwen ran out of tokens on in Phase 3 · 5 tries per setting · passes, and how often it ran out of room", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(330 * u, b.w * 0.36), cw = (b.w - labW) / 3, headH = 44 * u, rh = Math.min(70 * u, (b.h - headH - 26 * u) / vs.length);
       ["Passed", "Hit the cap", "Median tokens"].forEach((h, j) => text(ctx, h, b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
       vs.forEach((v, i) => { const rs = p.D.filter(r => r.variant === v), y = b.y + headH + rh * i, cy = y + rh / 2, pass = rs.filter(r => r.pass === "1").length, cap = rs.filter(r => r.finish_reason === "length").length;
         ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
@@ -2008,12 +2016,31 @@ const CARDS = [
         text(ctx, `${pass}/${rs.length}`, b.x + labW + cw / 2, cy + 8 * u, 26 * u, { w: 800, align: "center", color: pass === rs.length ? C.good : pass ? C.ink : C.critical });
         text(ctx, `${cap}/${rs.length}`, b.x + labW + cw * 1.5, cy + 8 * u, 22 * u, { w: 700, align: "center", color: cap ? C.critical : C.ink2 });
         const t = med(rs.map(r => +r.completion_tokens)); text(ctx, t == null ? "–" : Math.round(t).toLocaleString(), b.x + labW + cw * 2.5, cy + 8 * u, 22 * u, { w: 700, align: "center" }); });
+      const full = p.D.filter(r => r.variant === "think-16k" && r.finish_reason === "stop").map(r => +r.completion_tokens);
+      if (full.length) text(ctx, `The 4K, 8K and 16K rows use the same 5 seeds, so they're the same 5 answers cut off at different caps. Uncut, they took ${Math.min(...full).toLocaleString()}–${Math.max(...full).toLocaleString()} tokens.`, b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const p = d.p5, vs = [...new Set(p.D.map(r => r.variant))], pr = v => { const rs = p.D.filter(r => r.variant === v); return `${rs.filter(r => r.pass === "1").length}/${rs.length}`; };
-      return [["Post", `Qwen3.8 27B overthought a simple Python task until it ran out of tokens. 5 tries per fix, passes:\n\n${vs.map(v => `• ${v}: ${pr(v)}`).join("\n")}\n\nHow do you stop reasoning models from looping?`]]; } },
+      const lab = { "think-4k": "4K cap", "think-8k": "8K cap", "think-16k": "16K cap", "think-8k-pp1.5": "8K + presence penalty", "think-8k-qwen-sampler": "8K + Qwen's sampler", nothink: "thinking off" };
+      return [["Post", `Qwen3.8 27B ran out of tokens thinking about a simple Python task. 5 tries per fix, passes:\n\n${vs.map(v => `• ${lab[v] || v}: ${pr(v)}`).join("\n")}\n\nDo you leave thinking on for coding?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
+function p5answers(d) {  // one-line results for the preview card, computed from the data
+  const p = d.p5, ref = p.ref.p4_ub2048 || {}, med = a => { a = a.sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
+  const drift = Math.max(...p.A.filter(r => ref[`${r.model}|${r.test}`] && r.tok_s !== "FAIL").map(r => Math.abs(100 * (r.tok_s / ref[`${r.model}|${r.test}`] - 1))));
+  const b = (be, cfg, n) => med(p.B.filter(r => r.backend === be && r.cfg === cfg && +r.prompt_tokens === n && r.cached === "0").map(r => +r.ttft_s));
+  const rows = p5cache(p), on = rows.filter(r => r.cfg === "ckpt-default"), faster = on.filter(r => { const o = rows.find(x => x.m === r.m && x.be === r.be && x.cfg === "ckpt0"); return o && o.ttft < r.ttft; }).length;
+  const nt = p.D.filter(r => r.variant === "nothink"), full = p.D.filter(r => r.variant === "think-16k").map(r => +r.completion_tokens);
+  return [`Matches Phase 4 within ${Math.max(0.1, Math.ceil(drift * 10) / 10).toFixed(1)}%. It's the canary's new reference.`,
+    `SYCL takes ${b("sycl", "ub2048", 16).toFixed(1)} s even for 16 tokens (Vulkan ${b("vulkan", "ub512", 16).toFixed(1)} s). Not batch size or warm-up. From 1K tokens up, SYCL is faster.`,
+    `Every setup reused its cache. Checkpoints off was faster in ${faster} of ${on.length}.`,
+    `Thinking off: ${nt.filter(r => r.pass === "1").length}/${nt.length}, median ${med(nt.map(r => +r.completion_tokens))} tokens. With thinking on, it needed up to ${Math.max(...full).toLocaleString()} tokens.`];
+}
+function p5cache(p) {  // median TTFT over turns 2-8 per model/backend/cfg
+  const keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))];
+  return keys.map(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k && +r.turn >= 2).map(r => +r.ttft_s).sort((a, c) => a - c), [m, be, cfg] = k.split("|");
+    return { m, be, cfg, ttft: rs[Math.floor(rs.length / 2)] }; });
+}
 const P05_TESTS = ["pp512", "pp4096", "pp16384", "tg128@d16384"];
 const p5 = (d, m, t, fa) => (d.p05.cells || []).find(c => c.model === m.name && c.test === t && c.fa === fa);
 // off-vs-on comparison for one test; falls back to the Phase 0 value when this sweep skipped the fa-on run

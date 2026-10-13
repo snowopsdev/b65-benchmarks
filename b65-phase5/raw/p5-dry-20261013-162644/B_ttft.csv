@@ -1,0 +1,17 @@
+model,backend,cfg,prompt_tokens,rep,cached,ttft_s,server_prompt_ms,prompt_n
+gemma-4-31b-qat,sycl,ub512,16,0,0,1.523,1522.2,17
+gemma-4-31b-qat,sycl,ub512,16,0,1,0.113,112.0,5
+gemma-4-31b-qat,sycl,ub512,64,0,0,1.138,1137.1,65
+gemma-4-31b-qat,sycl,ub512,64,0,1,0.157,156.5,5
+gemma-4-31b-qat,sycl,ub2048,16,0,0,1.522,1521.2,17
+gemma-4-31b-qat,sycl,ub2048,16,0,1,0.113,111.8,5
+gemma-4-31b-qat,sycl,ub2048,64,0,0,1.139,1138.0,65
+gemma-4-31b-qat,sycl,ub2048,64,0,1,0.14,139.1,5
+gemma-4-31b-qat,sycl,ub2048-nowarm,16,0,0,1.52,1519.7,17
+gemma-4-31b-qat,sycl,ub2048-nowarm,16,0,1,0.112,111.5,5
+gemma-4-31b-qat,sycl,ub2048-nowarm,64,0,0,1.138,1137.4,65
+gemma-4-31b-qat,sycl,ub2048-nowarm,64,0,1,0.139,137.8,5
+gemma-4-31b-qat,vulkan,ub512,16,0,0,0.748,747.0,17
+gemma-4-31b-qat,vulkan,ub512,16,0,1,0.722,721.6,17
+gemma-4-31b-qat,vulkan,ub512,64,0,0,0.559,558.4,65
+gemma-4-31b-qat,vulkan,ub512,64,0,1,0.537,536.4,65

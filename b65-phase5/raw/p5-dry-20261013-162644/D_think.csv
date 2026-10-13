@@ -1,0 +1,7 @@
+variant,try,pass,finish_reason,completion_tokens,reasoning_chars,seconds,err
+think-4k,0,0,length,4096,16868,180.8,"Traceback (most recent call last):   File ""/tmp/tmp7q5tadp4.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-8k,0,0,length,8192,32825,371.7,"Traceback (most recent call last):   File ""/tmp/tmpq15e2c1_.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+think-16k,0,1,stop,9402,36220,430.5,
+think-8k-pp1.5,0,1,stop,7443,30247,339.6,
+think-8k-qwen-sampler,0,0,length,8192,32217,371.8,"Traceback (most recent call last):   File ""/tmp/tmpr3r38a5c.py"", line 3, in <module>     assert extract_canonical('<head><link rel=""canonical"" href=""https://x.com/a""></head>')=='https://x.com/a'      "
+nothink,0,1,stop,615,0,27.6,

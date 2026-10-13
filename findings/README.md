@@ -14,9 +14,10 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 | 3 | Quality: coding, tool calling, notes recall, blind writing (SYCL, FA on) | `b65-phase3/raw/p3-20261013-135609` | [phase3.md](phase3.md) |
 | 4 | Canary vs Phase 2 baseline, plus the micro-batch check (SYCL and Vulkan) | `b65-phase4/raw/p4-20261013-150339` | [phase4.md](phase4.md) |
 | 4+ | llama-server at the new SYCL default -ub 2048 (Qwen, Muse) | `b65-ubserve/raw/us-20261013-161926` | [ubserve.md](ubserve.md) |
+| 5 | Open questions: ub 2048 canary baseline, Gemma short prompts, chat cache/checkpoints, Qwen thinking | `b65-phase5/raw/p5-20261013-171039` | [phase5.md](phase5.md) |
 | 1S diag | Gemma SYCL server prefill: micro-batch, checkpoints, ctx, swa-full, FA | `b65-gemmadiag/raw/gd-20261013-123933` | [gemma-sycl-diag.md](gemma-sycl-diag.md) |
 
-Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`) are kept for the record and aren't used in any findings.
+Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`) are kept for the record and aren't used in any findings.
 
 ## Headlines so far
 
@@ -32,9 +33,14 @@ Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p
 Release tarballs for each run (raw data, scripts as run, summaries, SHA256SUMS) are built into `dist/`, which isn't committed because everything in it is regenerated from what's here. The dashboard serves them at `/files/dist/`.
 7. **On SYCL, Qwen and Muse answer 1.4–2.0× sooner, all models fit 32K in 1.5–3.3 GiB less VRAM, and server generation matches llama-bench** (Phase 1S). Gemma's first token is slower than on Vulkan with the same checkpoint fix (2.8 s vs 1.4 s on a 512-token prompt), which is still open.
 8. **Gemma on SYCL needs `-b 2048 -ub 2048`:** its 16K first token drops from 58 s to 31 s, 1.6× faster than Vulkan. Checkpoints cost nothing on SYCL (Gemma diagnostic).
-9. **Quality (Phase 3): Muse scores 10/10 coding, 10/10 tools and 5/5 recall, and is quickest.** Qwen and Gemma each miss one coding task by running out of tokens while thinking. Gemma passes with more room; Qwen goes round in circles. In AJ's blind writing ranking, Gemma wins (mean rank 1.6 against 2.2 for both others).
+9. **Quality (Phase 3): Muse scores 10/10 coding, 10/10 tools and 5/5 recall, and is quickest.** Qwen and Gemma each miss one coding task by running out of tokens while thinking. Gemma passes with more room; Qwen goes round in circles (Phase 5: it does finish on its own, at 9,402 tokens). In AJ's blind writing ranking, Gemma wins (mean rank 1.6 against 2.2 for both others).
 10. **The canary is clean** (all within 0.1%), and **`-ub 2048` lifts SYCL prefill for all three models** (+35–55% at 16K, decode unchanged). On Vulkan it helps Qwen (+10%) but costs Muse 36% (Phase 4).
 11. **At the new default, Qwen and Muse answer a 16K prompt in about 20.5 s,** 1.4× sooner than at ub 512 and about 2× sooner than on Vulkan. Generation is unchanged and VRAM is 0.5–0.7 GB higher (server rerun after Phase 4).
+12. **Phase 5:**
+    - The ub 2048 baseline reproduces Phase 4 within 0.03%.
+    - Gemma on SYCL has a fixed ~1.1 s floor per request, so Vulkan answers tiny prompts 0.3–0.6 s sooner; SYCL is faster from 1K tokens up.
+    - Every chat setup reuses its cache, and `--ctx-checkpoints 0` was faster in all 6 model and engine pairs (Gemma on Vulkan: 124 s per turn with checkpoints on vs 5.5 s off).
+    - Qwen passes c08 5/5 with thinking off, in about 300 tokens and 13 s. With thinking on it needs up to 9,650 tokens; caps only cut it short, and the samplers don't help.
 
 ## Current defaults (Forge, 2026-10-13)
 - **Engine:** llama.cpp `8bb3cf0d2` SYCL, flash attention on, `-b 2048 -ub 2048`, for all three models.
