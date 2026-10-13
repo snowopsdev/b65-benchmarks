@@ -80,3 +80,14 @@ The values match Phase 2's SYCL flash-attention-on results within 0.2% on all 12
 ## Posting status
 - **Cleared:** everything.
 - **When posting Gemma's time to first token:** compare it with the Vulkan checkpoints-off numbers, not Phase 1's default-checkpoint numbers. The share cards already do this.
+
+## Review of Forge's Phase 1S findings (2026-10-13)
+These are checked against the run data. The tables, the time-to-first-token and decode numbers, and Gemma's server decode gap closing (17.83 vs 18.28 tok/s at 16K, against 13.6 vs 16.0 on Vulkan) are all correct. Corrections:
+- **"Qwen and Muse are faster on every number that users notice."** Qwen's decode at 32K is 5% slower (15.27 vs 16.14), which the next line of Forge's own headline says.
+- **"Vulkan's roughly 142–182 W" for decode.** Vulkan decode in Phase 1 drew 166–182 W. 142 W was a Phase 0 prefill number. SYCL decode draws 165–198 W.
+- **"Gemma's VRAM fell to about 20.9 GB, from 24.2 GB."** Those are MiB figures read as GB. The values are 20,916 MiB (20.4 GiB), down from 24,244 MiB (23.7 GiB).
+- **"Specific to Gemma in the server (sliding-window attention or checkpoint handling), not the backend."** The gap needs all three: Gemma, llama-server and SYCL. On Vulkan with the same flag, Gemma's server prefill matched llama-bench (370 vs 379 tok/s at 4K). Checkpoint handling is unlikely, since checkpoints were off (`--ctx-checkpoints 0`); the log shows steady prompt processing.
+
+Additions:
+- **Gemma, SYCL vs Vulkan (both with `--ctx-checkpoints 0`):** SYCL starts later but generates faster (21.6 / 19.9 / 17.8 tok/s against 17.6 / 16.5 / 13.6). It finishes a whole response sooner once the answer is longer than about 140 tokens on a 512-token prompt, about 300 tokens at 4K, and about 510 tokens at 16K. That's the measured version of Forge's "long output vs long prompt" recommendation.
+- **Next diagnostic:** Forge's plan is to run Gemma's SYCL server at 16K three ways: checkpoints 0, default checkpoints, and `-ub 2048`. A fourth variant, the server with flash attention off for Gemma only, would show whether the SYCL flash-attention path causes the gap.
