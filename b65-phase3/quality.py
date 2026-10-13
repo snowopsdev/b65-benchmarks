@@ -11,7 +11,15 @@ def chat(port, messages, tools=None, max_tokens=1024):
         data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     t = time.time()
     with urllib.request.urlopen(req, timeout=900) as r: d = json.load(r)
-    return d["choices"][0]["message"], time.time() - t
+    m = d["choices"][0]["message"]   # local: keep finish_reason (length = hit max_tokens) and the reasoning length
+    m["_finish"] = d["choices"][0].get("finish_reason"); m["_reasoning_chars"] = len(m.get("reasoning_content") or "")
+    m["_ctoks"] = (d.get("usage") or {}).get("completion_tokens")
+    return m, time.time() - t
+
+def safe_chat(*a, **k):   # local: one failed request must not lose the model's whole run
+    try: return chat(*a, **k)
+    except Exception as e: return {"content": "", "_finish": f"error {e}"}, 0.0
+def meta(m): return {"finish": m.get("_finish"), "reasoning_chars": m.get("_reasoning_chars", 0), "tokens": m.get("_ctoks")}
 
 def strip_think(s):
     return re.sub(r"<think>.*?</think>", "", s or "", flags=re.S).strip()
@@ -55,24 +63,24 @@ def main():
     coding = json.load(open(f"{T}/coding.json"))
     if os.path.exists(f"{T}/coding_repo.json"): coding += json.load(open(f"{T}/coding_repo.json"))
     for c in lim(coding):
-        m, dt = chat(o.port, [sysmsg, {"role": "user", "content": c["prompt"]}], max_tokens=2048)
+        m, dt = safe_chat(o.port, [sysmsg, {"role": "user", "content": c["prompt"]}], max_tokens=2048)
         ok, err = run_test(code_from(m.get("content")), c["test"])
-        res["coding"].append({"id": c["id"], "pass": ok, "err": err, "s": round(dt, 2)}); print(o.model, c["id"], "PASS" if ok else "FAIL", flush=True)
+        res["coding"].append({"id": c["id"], "pass": ok, "err": err, "s": round(dt, 2), **meta(m)}); print(o.model, c["id"], "PASS" if ok else "FAIL", m.get("_finish"), flush=True)
     tj = json.load(open(f"{T}/tools.json"))
     for c in lim(tj["cases"]):
         try:
             m, dt = chat(o.port, [{"role": "user", "content": c["prompt"]}], tools=tj["tools"], max_tokens=1024); ok, why = grade_tool(m, c["expect"])
-        except Exception as e: ok, why, dt = False, f"error {e}", 0
-        res["tools"].append({"id": c["id"], "pass": ok, "why": why, "s": round(dt, 2)}); print(o.model, c["id"], "PASS" if ok else f"FAIL {why}", flush=True)
+        except Exception as e: m, ok, why, dt = {"_finish": "error"}, False, f"error {e}", 0
+        res["tools"].append({"id": c["id"], "pass": ok, "why": why, "s": round(dt, 2), **meta(m)}); print(o.model, c["id"], "PASS" if ok else f"FAIL {why}", m.get("_finish"), flush=True)
     corpus = "\n\n".join(open(p).read() for p in sorted(glob.glob(f"{T}/notes/*.md")))
     for c in lim(json.load(open(f"{T}/notes.json"))):
-        m, dt = chat(o.port, [{"role": "system", "content": "Answer from these notes only, in one short sentence.\n\n" + corpus},
+        m, dt = safe_chat(o.port, [{"role": "system", "content": "Answer from these notes only, in one short sentence.\n\n" + corpus},
                               {"role": "user", "content": c["q"]}], max_tokens=1024)
         a = strip_think(m.get("content")).lower(); ok = any(x.lower() in a for x in c["expect_any"])
-        res["notes"].append({"id": c["id"], "pass": ok, "answer": a[:300], "s": round(dt, 2)}); print(o.model, c["id"], "PASS" if ok else "FAIL", flush=True)
+        res["notes"].append({"id": c["id"], "pass": ok, "answer": a[:300], "s": round(dt, 2), **meta(m)}); print(o.model, c["id"], "PASS" if ok else "FAIL", m.get("_finish"), flush=True)
     for c in lim(json.load(open(f"{T}/writing.json"))):
-        m, dt = chat(o.port, [{"role": "user", "content": c["prompt"]}], max_tokens=2048)
-        res["writing"].append({"id": c["id"], "text": strip_think(m.get("content")), "s": round(dt, 2)})
+        m, dt = safe_chat(o.port, [{"role": "user", "content": c["prompt"]}], max_tokens=2048)
+        res["writing"].append({"id": c["id"], "text": strip_think(m.get("content")), "s": round(dt, 2), **meta(m)}); print(o.model, c["id"], "done", m.get("_finish"), flush=True)
     json.dump(res, open(f"{o.out}/{o.model}.quality.json", "w"), indent=1)
 
 if __name__ == "__main__": main()

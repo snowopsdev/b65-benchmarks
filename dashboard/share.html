@@ -465,6 +465,12 @@ function drawP2Delta(ctx, b, u, d, ms, tests = d.p2.tests) {
   text(ctx, "SYCL faster →", X(lim), b.y - 8 * u, 12 * u, { color: C.muted, align: "right" });
 }
 
+function p3answer(d) {   // poll: most coding tests passed (needs the complete run)
+  const p = d.p3; if (!p || !p.complete) return null;
+  const order = [["A", "qwen"], ["B", "gemma"], ["C", "muse"]], v = order.map(([k, pre]) => { const m = d.models.find(x => x.name.startsWith(pre)); return [k, m, m && p.models[m.name] ? p.models[m.name].sections.coding.passed : -1]; });
+  const mx = Math.max(...v.map(x => x[2])), top = v.filter(x => x[2] === mx), n = p.ids.coding;
+  return top.length > 1 ? { key: "D", text: `A tie: ${top.map(x => short(x[1])).join(" and ")} passed ${mx} of ${n}.` } : { key: top[0][0], text: `${top[0][1].display} passed ${mx} of ${n} coding tests.` };
+}
 // ---------- results components (only ever called with complete data) ----------
 function drawHBars(ctx, b, u, d, tests, key, unit, digits) {
   const n = d.models.length, groupH = b.h / tests.length, barH = Math.min(40 * u, (groupH - 34 * u) / n - 2 * u);
@@ -1658,6 +1664,125 @@ const CARDS = [
     },
     caption: d => { const g = d.gd, s = (k, n) => secs(((((g.variants[k] || {}).serve) || []).find(x => x.size === n) || {}).ttft); return [
       ["Post", `Gemma 4 on Intel Arc, llama.cpp SYCL, 6 server configs tested:\n\n• Fix: -b 2048 -ub 2048 (16K prompt ${s("ckpt0", 16384)} → ${s("ckpt0_ub2048", 16384)})\n• Now faster than Vulkan at 4K and 16K\n• Checkpoints: no effect on SYCL\n• Flash attention off: ${s("ckpt0_fa0", 16384)}\n• Cost: ~5% slower generation\n\nWhat should we test next?`]]; } },
+  // ---------- Phase 3: quality checks ----------
+  { id: "p3-preview", name: "Phase 3 preview", safe: true, group: "p3",
+    draw(ctx, W, H, u, d) {
+      const p = d.p3 || {}, wide = W > H, done = !!p.complete, full = p.total && !p.dry;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: done ? "Phase 3: done" : "Fast is nice. Is it any good?",
+        sub: done ? "Speed was Phases 0–2. Phase 3 checked whether the answers hold up." : "Same three models, same card, now graded on what they actually answer.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const covers = [["Coding", "10 Python tasks, run against real tests"], ["Tool calling", "10 prompts, 4 tools: right tool, right arguments, and 2 that need none"],
+                      ["Notes recall", "5 questions answered from our own benchmark write-ups"], ["Writing", "5 prompts, ranked blind by a human"]];
+      const rules = ["Temperature 0: same answer every time", "One try per task, no retries", "llama.cpp SYCL, flash attention on", "Small, self-made: a sanity check, not a leaderboard"];
+      const barH = 70 * u, bodyH = b.h - barH - 20 * u, colW = wide ? (b.w - 48 * u) / 2 : b.w, secH = wide ? bodyH : (bodyH - 24 * u) / 2;
+      const section = (x, y, w, h, head, rows, render) => {
+        ctx.fillStyle = C.series[0]; ctx.fillRect(x, y + 2 * u, 4 * u, 18 * u);
+        text(ctx, head, x + 14 * u, y + 18 * u, 15 * u, { w: 750, color: C.ink2 });
+        const rh = Math.min((h - 36 * u) / rows.length, 86 * u); rows.forEach((r, i) => render(r, i, x, y + 36 * u + rh * i, w, rh));
+      };
+      section(b.x, b.y, colW, secH, "WHAT IT TESTS", covers, ([k, v], i, x, y, w, rh) => {
+        text(ctx, k, x, y + rh * 0.42, 21 * u, { w: 700, max: w }); text(ctx, v, x, y + rh * 0.42 + 25 * u, 16 * u, { color: C.ink2, max: w }); });
+      section(wide ? b.x + colW + 48 * u : b.x, wide ? b.y : b.y + secH + 24 * u, colW, secH, "THE RULES", rules, (t, i, x, y, w, rh) => {
+        const cy = y + rh * 0.42 - 6 * u; rr(ctx, x, cy - 11 * u, 22 * u, 22 * u, 6 * u, null, C.series[0], 2 * u);
+        text(ctx, t, x + 36 * u, cy + 7 * u, 19 * u, { w: 600, max: w - 36 * u }); });
+      const py = b.y + b.h - barH + 10 * u;
+      rr(ctx, b.x, py, b.w, barH - 10 * u, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+      text(ctx, done ? "Run complete" : full && p.state === "running" ? "Running now" : "Starting soon", b.x + 20 * u, py + 26 * u, 18 * u, { w: 700 });
+      text(ctx, "Scores drop when all three models are done", b.x + 20 * u, py + 48 * u, 15 * u, { color: C.ink2, max: b.w * 0.6 });
+      if (full) { const tx = b.x + b.w - 20 * u, bw2 = Math.min(260 * u, b.w * 0.3);
+        text(ctx, `${p.done} / ${p.total} answers`, tx, py + 26 * u, 17 * u, { w: 700, align: "right" });
+        rr(ctx, tx - bw2, py + 38 * u, bw2, 10 * u, 5 * u, C.page); if (p.done) rr(ctx, tx - bw2, py + 38 * u, Math.max(10 * u, bw2 * p.done / p.total), 10 * u, 5 * u, C.series[0]); }
+    },
+    caption: d => (d.p3 || {}).complete ? [["Post", `Phase 3 on the Arc Pro B65 is done: coding, tool calling, recall and writing, graded for three ~30B models running locally.\n\nScores next. Which one do you think writes the best code?`]] : [
+      ["Post", `Speed was Phases 0–2. Phase 3: are the answers any good?\n\n3 local ~30B models on one Intel Arc Pro B65: 10 coding tasks run against tests, 10 tool calls, recall from our own notes, blind-ranked writing.\n\nWhich model would you bet on?`],
+      ["Short take", `Phase 3 running: quality checks for three local ~30B models on Intel Arc.`]] },
+
+  { id: "p3-live", name: "Phase 3 progress (live)", safe: true, group: "p3", ready: d => !!(d.p3 && d.p3.run_id && !d.p3.dry), lockMsg: () => "Waiting for the full run to start",
+    draw(ctx, W, H, u, d) {
+      const p = d.p3, wide = W > H, ms = d.models.filter(m => (p.models || {})[m.name]);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: "Grading the answers",
+        sub: p.complete ? `${ms.length} models · all ${p.total} answers in` : `${ms.length} models · 30 tasks each · scores when it's done`, live: p.state === "running", results: p.complete, foot: p1foot(viewP1S(d)) });
+      const lw = wide ? b.w * 0.26 : b.w, yb = drawProgress(ctx, { x: b.x, y: b.y, w: lw, h: 160 * u }, u, { ...p, unit: "answers in" });
+      const g = wide ? { x: b.x + lw + 40 * u, y: b.y, w: b.w - lw - 40 * u, h: b.h } : { x: b.x, y: yb + 50 * u, w: b.w, h: b.y + b.h - yb - 50 * u };
+      const secs4 = ["coding", "tools", "notes", "writing"], lab = { coding: "Coding", tools: "Tools", notes: "Recall", writing: "Writing" };
+      const labW = Math.min(210 * u, g.w * 0.3), cw = (g.w - labW) / 4, rh = Math.min(110 * u, (g.h - 40 * u) / ms.length);
+      secs4.forEach((s, j) => text(ctx, lab[s], g.x + labW + cw * j, g.y + 18 * u, 15 * u, { w: 650, color: C.ink2 }));
+      ms.forEach((m, i) => {
+        const y = g.y + 40 * u + rh * i, mi = d.models.indexOf(m), x0 = p.models[m.name];
+        text(ctx, m.display, g.x, y + 26 * u, 18 * u, { w: 650, max: labW - 12 * u });
+        secs4.forEach((s, j) => { const sx = x0.sections[s] || { done: 0, n: 0 }, n = sx.n || 1, cell = Math.min(14 * u, (cw - 20 * u) / 5 - 3 * u);
+          for (let k = 0; k < n; k++) { const cx = g.x + labW + cw * j + (k % 5) * (cell + 3 * u), cy = y + 14 * u + Math.floor(k / 5) * (cell + 3 * u);
+            rr(ctx, cx, cy, cell, cell, 3 * u, k < sx.done ? mcolor(mi) : null, k < sx.done ? null : C.axis, 1.2 * u); } });
+      });
+    },
+    caption: d => [["Post", `${d.p3.done}/${d.p3.total} answers in. Phase 3 on the Arc Pro B65: three local ~30B models graded on coding, tool calls, recall and writing.\n\nGuess: which one passes the most coding tests?`],
+      ["Short take", `Phase 3 on Intel Arc: ${d.p3.done}/${d.p3.total} answers graded.`]] },
+
+  { id: "p3-poll", name: "Phase 3 poll: best coder", safe: true, group: "p3",
+    draw(ctx, W, H, u, d) {
+      const wide = W > H, p = d.p3 || {}, ans = p3answer(d);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: "Place your bets",
+        sub: "10 Python tasks, run against real tests. Temperature 0, one try each.", live: p.state === "running" && !p.dry, results: !!p.complete, foot: p1foot(viewP1S(d)) });
+      ctx.font = `750 ${34 * u}px ${FONT}`;
+      const q = wrap(ctx, "Which local model passes the most coding tests?", b.w * (wide ? 0.92 : 1));
+      q.forEach((l, i) => text(ctx, l, b.x, b.y + 36 * u + i * 44 * u, 34 * u, { w: 750 }));
+      const opts = [["A", "Qwen3.8 27B"], ["B", "Gemma 4 31B QAT"], ["C", "Muse Glimmer 28B"], ["D", "A tie"]];
+      const oy = b.y + 36 * u + q.length * 44 * u + 26 * u, gap = 16 * u, cols = wide ? 2 : 1, ow = (b.w - gap * (cols - 1)) / cols, oh = wide ? 86 * u : 92 * u;
+      opts.forEach(([k, v], i) => {
+        const x = b.x + (ow + gap) * (i % cols), y = oy + (oh + gap) * Math.floor(i / cols), col = i < 3 ? C.series[i] : C.muted;
+        ctx.save(); if (ans && ans.key !== k) ctx.globalAlpha = 0.35;
+        rr(ctx, x, y, ow, oh, 14 * u, C.surf, ans && ans.key === k ? col : "rgba(255,255,255,0.10)", ans && ans.key === k ? 3 * u : 1.5 * u);
+        ctx.beginPath(); ctx.arc(x + 40 * u, y + oh / 2, 20 * u, 0, 7); ctx.fillStyle = col; ctx.fill();
+        text(ctx, k, x + 40 * u, y + oh / 2 + 8 * u, 22 * u, { w: 800, color: C.page, align: "center" });
+        text(ctx, v, x + 76 * u, y + oh / 2 + 8 * u, 22 * u, { w: 650, max: ow - 92 * u });
+        if (ans && ans.key === k) text(ctx, "ANSWER", x + ow - 18 * u, y + 24 * u, 13 * u, { w: 800, color: col, align: "right" });
+        ctx.restore();
+      });
+      text(ctx, ans ? `Answer: ${ans.key}. ${ans.text}` : p.complete ? "The run is done. Answer coming up." : p.total && !p.dry ? `The answer drops when Phase 3 finishes · ${p.done} of ${p.total} answers in` : "The answer drops when Phase 3 finishes",
+        b.x, b.y + b.h - 6 * u, wide ? 18 * u : 22 * u, { w: ans ? 700 : 400, color: ans ? C.ink : C.ink2, max: b.w });
+    },
+    caption: d => { const a = p3answer(d); return [...(a ? [["Answer reveal", `Answer: ${a.key}. ${a.text}\n\n10 Python tasks, temperature 0, one try, local on a 32 GB Intel Arc Pro B65. Who called it?`]] : []),
+      ["Post (attach as a poll)", `Three local ~30B models on one Intel Arc Pro B65. 10 Python tasks, run against real tests, one try each.\n\nWhich passes the most?\n\nA) Qwen3.8 27B\nB) Gemma 4 31B QAT\nC) Muse Glimmer 28B\nD) A tie`]]; } },
+
+  { id: "p3-scores", name: "Phase 3 scoreboard", safe: false, group: "p3", ready: d => !!(d.p3 && d.p3.complete), lockMsg: d => `Unlocks when Phase 3 finishes (${(d.p3 || {}).done || 0} of ${(d.p3 || {}).total || 90} answers so far)`,
+    draw(ctx, W, H, u, d) {
+      const p = d.p3, wide = W > H, ms = d.models.filter(m => p.models[m.name]), secs3 = [["coding", "Coding", "tests passed"], ["tools", "Tool calling", "correct calls"], ["notes", "Notes recall", "answers found"]];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: "The scoreboard",
+        sub: "temperature 0 · one try per task · llama.cpp SYCL, flash attention on · writing is ranked blind separately", results: true, foot: p1foot(viewP1S(d)) });
+      legend(ctx, b.x, b.y + 6 * u, u, ms, b.w);
+      const area = { y: b.y + 34 * u, h: b.h - 34 * u }, gh = area.h / secs3.length, labW = Math.min(200 * u, b.w * 0.22), maxW = b.w - labW - 120 * u;
+      const barH = Math.min(30 * u, (gh - 22 * u) / ms.length - 3 * u);
+      secs3.forEach(([k, lab, unit], gi) => {
+        const inner = ms.length * (barH + 3 * u), top = area.y + gh * gi + (gh - inner) / 2, n = (p.ids || {})[k] || 1;
+        text(ctx, lab, b.x, top + inner / 2 - 2 * u, 20 * u, { w: 650 }); text(ctx, unit, b.x, top + inner / 2 + 18 * u, 14 * u, { color: C.muted });
+        rr(ctx, b.x + labW, top - 2 * u, maxW, inner, 4 * u, "rgba(255,255,255,0.03)");
+        ms.forEach((m, i) => { const v = p.models[m.name].sections[k].passed || 0, y = top + i * (barH + 3 * u);
+          if (v) { ctx.beginPath(); ctx.roundRect(b.x + labW, y, maxW * v / n, barH, [0, 4 * u, 4 * u, 0]); ctx.fillStyle = mcolor(d.models.indexOf(m)); ctx.fill(); }
+          text(ctx, `${v}/${n}`, b.x + labW + maxW * v / n + 10 * u, y + barH * 0.76, Math.min(19 * u, barH * 0.85), { w: 750 }); });
+      });
+    },
+    caption: d => { const p = d.p3, ms = d.models.filter(m => p.models[m.name]), sc = (m, k) => `${p.models[m.name].sections[k].passed}/${p.ids[k]}`;
+      return [["Post", `Phase 3 on a 32 GB Intel Arc Pro B65, temperature 0, one try:\n\n${ms.map(m => `• ${short(m)}: code ${sc(m, "coding")}, tools ${sc(m, "tools")}, recall ${sc(m, "notes")}`).join("\n")}\n\nSmall self-made test, not a leaderboard. Which would you trust with your code?`]]; } },
+
+  { id: "p3-findings", name: "Phase 3 key findings", safe: false, group: "p3", ready: d => !!(d.p3 && d.p3.complete), lockMsg: d => `Unlocks when Phase 3 finishes (${(d.p3 || {}).done || 0} of ${(d.p3 || {}).total || 90} answers so far)`,
+    draw(ctx, W, H, u, d) {
+      const p = d.p3, ms = d.models.filter(m => p.models[m.name]), wide = W > H;
+      const best = k => { const v = ms.map(m => [m, p.models[m.name].sections[k].passed || 0]); const mx = Math.max(...v.map(x => x[1])); return [v.filter(x => x[1] === mx).map(x => short(x[0])), mx]; };
+      const fast = ms.map(m => [m, p.models[m.name].seconds]).sort((a, c) => a[1] - c[1]);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: "What we found",
+        sub: `${ms.length} local models · 30 tasks each · temperature 0, one try · llama.cpp SYCL`, results: true, foot: p1foot(viewP1S(d)) });
+      const items = [["coding", "Coding", "tests passed out of " + p.ids.coding], ["tools", "Tool calling", "correct calls out of " + p.ids.tools], ["notes", "Notes recall", "answers found out of " + p.ids.notes]].map(([k, lab, unit]) => {
+        const [who, mx] = best(k); return [`${lab}: ${who.length === ms.length && ms.length > 2 ? "all three tie" : who.join(" & ") + (who.length > 1 ? " tie" : " leads")} (${mx})`, `${ms.map(m => `${short(m)} ${p.models[m.name].sections[k].passed}`).join(" · ")} ${unit}`]; });
+      items.push([`Quickest through all 30: ${short(fast[0][0])}`, fast.map(([m, s]) => `${short(m)} ${Math.round(s / 60)} min`).join(" · ") + " · thinking models spend more tokens"]);
+      items.push(["Writing: ranked blind next", "5 prompts, answers shuffled and unlabelled"]);
+      const rh = b.h / items.length;
+      items.forEach(([k, v], i) => { const cy = b.y + rh * i + rh / 2;
+        ctx.beginPath(); ctx.arc(b.x + 14 * u, cy - 8 * u, 14 * u, 0, 7); ctx.fillStyle = C.surf; ctx.fill();
+        text(ctx, String(i + 1), b.x + 14 * u, cy - 2 * u, 15 * u, { w: 750, color: C.series[0], align: "center" });
+        text(ctx, k, b.x + 42 * u, cy - 4 * u, 22 * u, { w: 700, max: b.w - 50 * u });
+        text(ctx, v, b.x + 42 * u, cy + 21 * u, 16 * u, { color: C.ink2, max: b.w - 50 * u }); });
+    },
+    caption: d => { const p = d.p3, ms = d.models.filter(m => p.models[m.name]), sc = (m, k) => p.models[m.name].sections[k].passed;
+      return [["Post", `Are local ~30B models any good? Phase 3 on an Intel Arc Pro B65:\n\n${ms.map(m => `• ${short(m)}: ${sc(m, "coding")}/${p.ids.coding} code, ${sc(m, "tools")}/${p.ids.tools} tools, ${sc(m, "notes")}/${p.ids.notes} recall`).join("\n")}\n\nWriting gets ranked blind next. What should we test next?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -1831,6 +1956,7 @@ const SHARE_PHASES = [
   { key: "p2", label: "Phase 2", name: "Vulkan vs SYCL", href: "p2", st: d => d.p2 || {} },
   { key: "p1s", label: "Phase 1S", name: "Phase 1 on SYCL", href: "p1s", st: d => d.p1s || {} },
   { key: "gd", label: "Gemma diag", name: "SYCL prefill fix", href: "gd", st: d => d.gd || {} },
+  { key: "p3", label: "Phase 3", name: "Quality checks", href: "p3", st: d => d.p3 || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;
@@ -1900,7 +2026,7 @@ function selectTab(k, keepHash) {
   if (D) refresh(true);
 }
 function phaseStatus(p) {
-  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" || p.key === "p1s" ? "steps" : "tests"}` : "";
+  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" || p.key === "p1s" ? "steps" : p.key === "p3" ? "answers" : "tests"}` : "";
   if (!x.run_id) return ["not started", "No run yet. Teasers work now; results unlock when the run finishes."];
   if (x.dry) return [`dry run ${x.run_id}`, "Only a dry run so far. Results stay locked until the full run finishes."];
   return x.complete ? [`run ${x.run_id} · complete`, "Run complete: results cards are unlocked. Teaser cards stay number-free."]

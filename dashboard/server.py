@@ -640,7 +640,8 @@ def nav_status():
                 p1=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-\d{8}-\d{6}$")),
                 p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2,
                 p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")),
-                gd=state(latest(os.path.join(ROOT, "b65-gemmadiag", "raw"), r"^gd-\d{8}-\d{6}$")))
+                gd=state(latest(os.path.join(ROOT, "b65-gemmadiag", "raw"), r"^gd-\d{8}-\d{6}$")),
+                p3=state(latest(os.path.join(ROOT, "b65-phase3", "raw"), r"^p3-\d{8}-\d{6}$")))
 
 def p1s_full():
     return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
@@ -705,6 +706,71 @@ def gd_share():
                 bench={b["ub"]: b["tok_s"] for b in g["bench"]} if done else {},
                 vulkan=pick(g["refs"].get("vulkan_ckpt0", [])) if done else [])
 
+P3_SECTIONS = [("coding", "c"), ("tools", "t"), ("notes", "n"), ("writing", "w")]
+
+def p3_full():
+    """Phase 3 quality checks (b65-phase3/raw/p3-*): per model, per section, per item; live from <model>.quality.log."""
+    kit = os.path.join(ROOT, "b65-phase3"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^p3-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    models = [l.split("|")[0] for l in read_lines(os.path.join(kit, "models.conf")) if l.strip() and not l.startswith("#")]
+    T = os.path.join(kit, "tasks"); ids = {}
+    for sec, f in (("coding", "coding.json"), ("tools", "tools.json"), ("notes", "notes.json"), ("writing", "writing.json")):
+        try:
+            j = json.load(open(os.path.join(T, f))); j = j["cases"] if sec == "tools" else j
+            if sec == "coding" and os.path.exists(os.path.join(T, "coding_repo.json")): j += json.load(open(os.path.join(T, "coding_repo.json")))
+            ids[sec] = [x["id"] for x in j]
+        except (OSError, ValueError, KeyError): ids[sec] = []
+    res = dict(state="not started", run_id=None, env={}, models=models, sections=[s_ for s_, _ in P3_SECTIONS], ids=ids, results={}, current=None, done=0, total=0, dry=False)
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
+    if res["dry"]: models = res["models"] = models[:1]; res["ids"] = ids = {k: v[:2] for k, v in ids.items()}
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "phase3" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    log = read_lines(os.path.join(kit, "p3-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    cur_m = last[-1][1] if res["state"] == "running" and last else None
+    for m in models:
+        qj = os.path.join(out, f"{m}.quality.json"); r = {}
+        if os.path.exists(qj):
+            try:
+                q = json.load(open(qj))
+                for sec in res["sections"]:
+                    r[sec] = [dict(id=x["id"], status="done" if sec == "writing" else "pass" if x.get("pass") else "fail", s=x.get("s"), finish=x.get("finish"),
+                                   tokens=x.get("tokens"), why=(x.get("why") or (x.get("err") or "")[-160:] or x.get("answer", "")[:160]) if not x.get("pass") and sec != "writing" else "",
+                                   answer=x.get("answer", "")[:200] if sec == "notes" else "") for x in q.get(sec, [])]
+            except (OSError, ValueError): pass
+        else:   # live: "<model> <id> PASS|FAIL ..." / "<model> <id> done ..." lines
+            seen = {}
+            for l in read_lines(os.path.join(out, f"{m}.quality.log")):
+                p_ = l.split()
+                if len(p_) >= 3 and p_[0] == m: seen[p_[1]] = "pass" if p_[2] == "PASS" else "fail" if p_[2] == "FAIL" else "done"
+            for sec in res["sections"]: r[sec] = [dict(id=i, status=seen[i]) for i in ids[sec] if i in seen]
+        status = "done" if os.path.exists(qj) else "running" if m == cur_m else "pending"
+        res["results"][m] = dict(status=status, sections=r)
+        if status == "running":
+            n = sum(len(v) for v in r.values()); tot = sum(len(v) for v in ids.values())
+            nxt = next((i for sec in res["sections"] for i in ids[sec] if i not in {x["id"] for x in r.get(sec, [])}), None)
+            res["current"] = dict(model=m, item=nxt, n=n, of=tot, phase="loading model" if not os.path.exists(os.path.join(out, f"{m}.quality.log")) else f"item {n + 1} of {tot}")
+    per = sum(len(v) for v in ids.values()); res["total"] = per * len(models)
+    res["done"] = sum(sum(len(v) for v in x["sections"].values()) for x in res["results"].values())
+    for f in ("phase3_summary.md", "blind_packet.md"): res[f.split(".")[0]] = os.path.exists(os.path.join(out, f))
+    return res
+
+def p3_share():
+    """Phase 3 for share cards: progress counts only until the full (non-dry) run finishes; then pass counts and times.
+    Writing outputs never leave the server (they're for AJ's blind ranking)."""
+    f = p3_full(); complete = f["state"] == "finished" and not f["dry"]
+    models = {}
+    for m, x in f["results"].items():
+        secs_ = {}
+        for sec, items in x["sections"].items():
+            secs_[sec] = dict(done=len(items), n=len(f["ids"].get(sec, [])), **({} if not complete or sec == "writing" else dict(passed=sum(1 for i in items if i["status"] == "pass"))))
+        models[m] = dict(status=x["status"], sections=secs_, **({} if not complete else dict(seconds=round(sum((i.get("s") or 0) for v in x["sections"].values() for i in v)))))
+    return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], models=models, sections=f["sections"],
+                ids={k: len(v) for k, v in f["ids"].items()})
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -737,7 +803,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -749,7 +815,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -758,6 +824,7 @@ def safe_path(rel):
     rel = unquote(rel).strip("/")
     if not rel: return ""
     if rel.split("/")[0] not in FILE_ROOTS: return None
+    if any(part.startswith(".") for part in rel.split("/")): return None   # dot-files (e.g. Phase 3's .blind_key.json) are never served
     full = os.path.realpath(os.path.join(ROOT, rel))
     top = os.path.realpath(os.path.join(ROOT, rel.split("/")[0]))
     return full if (full == top or full.startswith(top + os.sep)) and os.path.exists(full) else None
@@ -769,6 +836,7 @@ def listing(rel, full):
     rows = []
     if rel: rows.append(f'<tr><td><a href="/files/{quote(os.path.dirname(rel.strip("/")))}">../</a></td><td></td><td></td></tr>')
     for n in names:
+        if n.startswith("."): continue   # hidden: .blind_key.json and friends
         r = f"{rel.strip('/')}/{n}".strip("/"); f = os.path.join(ROOT, r)
         if not os.path.exists(f): continue
         isdir = os.path.isdir(f); st = os.stat(f)
@@ -828,6 +896,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p3", "/p3.html"):
+            return self.send(200, open(os.path.join(HERE, "p3.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p3":
+            return self.send(200, json.dumps(dict(p3=p3_full(), now=time.time())).encode(), "application/json")
         if path in ("/p1s", "/p1s.html"):
             return self.send(200, open(os.path.join(HERE, "p1s.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p1s":
