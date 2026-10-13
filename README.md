@@ -74,6 +74,8 @@ Start long runs as a user service so they survive the terminal/agent session tha
     systemctl --user stop b65-bench-run    # abort
 
 ### Share cards
+`/share` has one tab per phase (`/share#p0`, `#p05`, `#p1`, `#p2`; the sidebar's Share cards link opens the current phase's tab). Each tab shows that phase's run status, then **Post now** (no measured numbers) and **Results** (unlock when that phase's run finishes). Only the open tab is drawn. A new card joins a tab through its `group`; a new phase needs an entry in `SHARE_PHASES` in `share.html`.
+
 https://desktop-omarchy.tail172f2e.ts.net:8445/share : social-size PNG cards (16:9 for X/LinkedIn, 4:5 for
 Instagram/Threads) with Download / Copy image / Share and a suggested caption for each.
 - **Teasers** (live progress, proof: the model's own spot-check output, redacted results, lineup, methodology, test rig) never contain measured values. While a run is

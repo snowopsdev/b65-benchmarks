@@ -58,6 +58,20 @@ textarea { width: 100%; font: 13px/1.4 inherit; font-family: inherit; padding: 8
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1a1a19; color: #f0efec;
   padding: 8px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
 .note { color: var(--muted); font-size: 12px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.tabs button { font: inherit; text-align: left; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-1);
+  color: var(--text-primary); cursor: pointer; display: grid; gap: 2px; min-width: 150px; }
+.tabs button[aria-selected="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.tabs .tn { font-weight: 650; display: flex; align-items: center; gap: 6px; }
+.tabs .tc { font-size: 12px; color: var(--text-secondary); }
+.tabs .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good-text); display: none; }
+.tabs .dot.on { display: inline-block; animation: tpulse 1.6s infinite; }
+@keyframes tpulse { 50% { opacity: .3; } }
+.phead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.phead h2 { margin: 0; font-size: 16px; text-transform: none; letter-spacing: 0; color: var(--text-primary); }
+.phase { display: grid; gap: 14px; }
+.phase[hidden] { display: none; }
+.phase h3 { font-size: 12px; font-weight: 650; color: var(--text-secondary); margin: 6px 0 0; text-transform: uppercase; letter-spacing: .05em; }
 @media (max-width: 640px) { .viz-root { padding: 12px; } .grid { grid-template-columns: 1fr; } }
 </style>
 <script src="nav.js"></script>
@@ -78,24 +92,8 @@ textarea { width: 100%; font: 13px/1.4 inherit; font-family: inherit; padding: 8
     <label>Card price <input type="text" id="price" placeholder="what you paid"></label>
     <span class="note">Teasers refresh every 10 s as tests finish.</span>
   </div>
-  <p class="note" id="policy"></p>
-
-  <h2>Teasers · no measured numbers, safe to post now</h2>
-  <div class="grid" id="teasers"></div>
-  <h2>Results · unlock when every test in the run has finished</h2>
-  <div class="grid" id="results"></div>
-  <h2>Phase 0.5 · teasers, safe to post now</h2>
-  <div class="grid" id="p05-teasers"></div>
-  <h2>Phase 0.5 · results, unlock when the sweep finishes</h2>
-  <div class="grid" id="p05-results"></div>
-  <h2>Phase 1 · teasers, safe to post now</h2>
-  <div class="grid" id="p1-teasers"></div>
-  <h2>Phase 1 · results, unlock when the run finishes</h2>
-  <div class="grid" id="p1-results"></div>
-  <h2>Phase 2 · teasers, safe to post now</h2>
-  <div class="grid" id="p2-teasers"></div>
-  <h2>Phase 2 · results, unlock when the full run finishes</h2>
-  <div class="grid" id="p2-results"></div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Phase"></div>
+  <div id="panels"></div>
 </div></div>
 <div class="toast" id="toast"></div>
 
@@ -958,7 +956,7 @@ const CARDS = [
         b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const ms = p1ms(d); return [
-      ["Post", `Time to first token on a 32 GB Arc Pro B65 (llama-server, streamed, median of 3), 512 / 4K / 16K-token prompts:\n\n${ms.map(m => (p1s(d, m, 512) || {}).status === "held" ? `• ${short(m)}: held, server retest pending` : `• ${short(m)}: ${d.p1.sizes.map(s => secs((p1s(d, m, s) || {}).ttft)).join(" / ")}${((p1s(d, m, 512) || {}).prompt_tok_s ?? 999) < 100 ? " *" : ""}`).join("\n")}\n\n${ms.some(m => ((p1s(d, m, 512) || {}).prompt_tok_s ?? 999) < 100) ? (p1gReady(d) ? `* llama-server's default context checkpoints. Gemma with --ctx-checkpoints 0: ${d.p1.sizes.map(n => secs(p1gs(d, "ckpt-off", n).ttft)).join(" / ")}. ` : "* server checkpoint penalty, retest pending. ") : ""}What's your wait-time limit?`]]; } },
+      ["Post", `Time to first token on a 32 GB Arc Pro B65 (llama-server), 512 / 4K / 16K prompts:\n\n${ms.map(m => (p1s(d, m, 512) || {}).status === "held" ? `• ${short(m)}: held, server retest pending` : `• ${short(m)}: ${d.p1.sizes.map(s => secs((p1s(d, m, s) || {}).ttft)).join(" / ")}${((p1s(d, m, 512) || {}).prompt_tok_s ?? 999) < 100 ? " *" : ""}`).join("\n")}\n\n${ms.some(m => ((p1s(d, m, 512) || {}).prompt_tok_s ?? 999) < 100) ? (p1gReady(d) ? `* default checkpoints; --ctx-checkpoints 0: ${d.p1.sizes.map(n => secs(p1gs(d, "ckpt-off", n).ttft)).join(" / ")}\n\n` : "* server checkpoint penalty, retest pending\n\n") : ""}What's your limit?`]]; } },
 
   { id: "p1-findings", name: "Phase 1 key findings", safe: false, group: "p1", ready: d => p1ready(d), lockMsg: d => p1lock(d),
     draw(ctx, W, H, u, d) {
@@ -989,7 +987,7 @@ const CARDS = [
       drawDepthSlope(ctx, cb, u, d, f.ms, "Decode tok/s as context grows");
     },
     caption: d => { const f = facts1(d); return [
-      ["Post", `Phase 1 on the Arc Pro B65 (llama.cpp Vulkan, flash attention off):\n\n• 32K context: ${f.fit32.length} of ${f.ms.length} models fit\n• First token (${f.fast.map(short).join(", ")}): ${secRange(f.f512lo, f.f512hi)} short, ${secRange(f.f16lo, f.f16hi)} at 16K${f.slow.length ? `\n• ${f.slow.map(short).join(", ")}: ${p1gReady(d) ? `llama-server's context checkpoints cost ${secs((p1s(d, f.slow[0], 512) || {}).ttft)} on a short prompt; --ctx-checkpoints 0 brings it to ${secs(p1gs(d, "ckpt-off", 512).ttft)}` : "llama-server checkpoint penalty, retest pending"}` : ""}${f.held.length ? `\n• ${f.held.map(short).join(", ")}: a llama-server default slows its prompts, retest pending` : ""}\n• Loaded idle: ${wRange(f.iwLo, f.iwHi)}\n\nNext up: Vulkan vs SYCL. Predictions?`]]; } },
+      ["Post", `Phase 1 on the Arc Pro B65 (llama.cpp Vulkan):\n\n• 32K context: ${f.fit32.length} of ${f.ms.length} models fit\n• First token (${f.fast.map(short).join(", ")}): ${secRange(f.f512lo, f.f512hi)} short, ${secRange(f.f16lo, f.f16hi)} at 16K${f.slow.length ? `\n• ${f.slow.map(short).join(", ")}: ${p1gReady(d) ? `${secs((p1s(d, f.slow[0], 512) || {}).ttft)} → ${secs(p1gs(d, "ckpt-off", 512).ttft)} first token with --ctx-checkpoints 0` : "llama-server checkpoint penalty, retest pending"}` : ""}${f.held.length ? `\n• ${f.held.map(short).join(", ")}: a llama-server default slows its prompts, retest pending` : ""}\n• Loaded idle: ${wRange(f.iwLo, f.iwHi)}\n\nNext up: Vulkan vs SYCL. Predictions?`]]; } },
 
   { id: "p1-gemma-fix", name: "Gemma: one server flag", safe: false, group: "p1", ready: d => p1gReady(d),
     lockMsg: d => !p1ready(d) ? p1lock(d) : d.p1.rerun ? `Unlocks when the Gemma server rerun finishes (${d.p1.rerun.done} of ${d.p1.rerun.total} steps)` : "Gemma server rerun not started",
@@ -1023,7 +1021,7 @@ const CARDS = [
         b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const g = d.models.find(m => m.name.startsWith("gemma")) || d.models[1], t = (v, n) => secs(p1gs(d, v, n).ttft); return [
-      ["Post", `${short(g)} on a 32 GB Intel Arc Pro B65 took ${t("default", 512)} to start answering a 512-token prompt in llama-server. The other two models took under 2 s.\n\nCulprit: llama-server's context checkpoints for sliding-window models.\n\nOne flag, --ctx-checkpoints 0:\n• 512 tokens: ${t("default", 512)} → ${t("ckpt-off", 512)}\n• 4K: ${t("default", 4096)} → ${t("ckpt-off", 4096)}\n• 16K: ${t("default", 16384)} → ${t("ckpt-off", 16384)}\n\nCatch: without checkpoints, llama-server may reprocess the whole chat on each new turn. (not measured yet). Anyone else hit this with Gemma?`],
+      ["Post", `${short(g)} 4 on a 32 GB Arc Pro B65: ${t("default", 512)} to first token on a 512-token prompt in llama-server.\n\nFix: --ctx-checkpoints 0\n• 512: ${t("default", 512)} → ${t("ckpt-off", 512)}\n• 4K: ${t("default", 4096)} → ${t("ckpt-off", 4096)}\n• 16K: ${t("default", 16384)} → ${t("ckpt-off", 16384)}\n\nCatch: less cache reuse between chat turns (not measured yet). Seen this?`],
       ["Short take", `Gemma 4 + llama-server slow to first token? Try --ctx-checkpoints 0. ${t("default", 512)} → ${t("ckpt-off", 512)} on a 512-token prompt (Arc Pro B65, Vulkan).`]]; } },
   { id: "redacted", name: "Redacted results", safe: true,
     draw(ctx, W, H, u, d) {
@@ -1301,7 +1299,7 @@ const CARDS = [
     },
     caption: d => d.p2.complete ? [
       ["Post", `Phase 2 on the Arc Pro B65 is done: Vulkan vs Intel's own SYCL backend, same llama.cpp commit, same three models.\n\n${facts2(d).verdict}. Numbers next. Which engine are you running on Intel?`]] : [
-      ["Post", `Phase 2 on the Arc Pro B65: the engine question.\n\nSame llama.cpp commit built two ways, Vulkan and Intel's SYCL (oneAPI). Same three ~30B models, prefill and decode up to 32K context, board power on every test.\n\nSYCL has to beat Vulkan by 10%+ on decode to become the default. Which way do you lean?`],
+      ["Post", `Phase 2 on the Arc Pro B65: the engine question.\n\nSame llama.cpp commit built two ways, Vulkan and Intel's SYCL (oneAPI). Same three ~30B models, prefill and decode up to 32K context.\n\nSYCL has to beat Vulkan by 10%+ on decode to become the default. Which way do you lean?`],
       ["Short take", `Vulkan vs SYCL on Intel Arc Pro B65, same commit, same models. Running now.`]] },
 
   { id: "p2-live", name: "Phase 2 progress (live)", safe: true, group: "p2",
@@ -1557,6 +1555,15 @@ function num(d, m, t, key, digits, unit = "") {
 }
 
 // ---------- page ----------
+// phases on the share page: card.group (none = Phase 0) -> tab + panel; st(D) gives that phase's run status
+const SHARE_PHASES = [
+  { key: "p0", label: "Phase 0", name: "Baseline", href: "./", st: d => d },
+  { key: "p05", label: "Phase 0.5", name: "Flash attention", href: "p05", st: d => d.p05 || {} },
+  { key: "p1", label: "Phase 1", name: "Context & serving", href: "p1", st: d => d.p1 || {} },
+  { key: "p2", label: "Phase 2", name: "Vulkan vs SYCL", href: "p2", st: d => d.p2 || {} },
+];
+const groupOf = card => card.group || "p0";
+let tab = null;
 const pick = {}, variantPick = {};
 function gate(card) { return card.ready ? card.ready(D) : (card.safe || D.complete); }
 function lockText(card) { return card.lockMsg ? card.lockMsg(D) : `Unlocks when all ${D.total} tests are done (${D.done} so far)`; }
@@ -1577,8 +1584,16 @@ function counter(el) {
 }
 
 function build() {
+  $("tabs").innerHTML = SHARE_PHASES.map(p => `<button role="tab" data-k="${p.key}" aria-selected="false">
+    <span class="tn"><span class="dot" id="tdot-${p.key}"></span>${p.label} · ${p.name}</span><span class="tc" id="tc-${p.key}"></span></button>`).join("");
+  $("panels").innerHTML = SHARE_PHASES.map(p => `<section class="phase" id="panel-${p.key}" role="tabpanel" hidden>
+    <div class="phead"><h2>${p.label} · ${p.name}</h2><span class="sub" id="pst-${p.key}"></span><a href="${p.href}">dashboard →</a></div>
+    <p class="note" id="ppol-${p.key}" style="margin:0"></p>
+    <h3>Post now · no measured numbers</h3><div class="grid" id="${p.key}-teasers"></div>
+    <h3>Results · unlock when the run finishes</h3><div class="grid" id="${p.key}-results"></div></section>`).join("");
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) selectTab(b.dataset.k); });
   for (const card of CARDS) {
-    const box = card.group ? $(`${card.group}-${card.safe ? "teasers" : "results"}`) : $(card.safe ? "teasers" : "results");
+    const box = $(`${groupOf(card)}-${card.safe ? "teasers" : "results"}`);
     const el = document.createElement("div"); el.className = "card"; el.id = "card-" + card.id;
     el.innerHTML = `<div class="prev"><canvas></canvas></div>
       <div class="row"><span class="name">${card.name}</span><span class="tag"></span></div>
@@ -1607,12 +1622,31 @@ function build() {
   }
 }
 
+function selectTab(k, keepHash) {
+  tab = k; localStorage.setItem("b65sharetab", k);
+  if (!keepHash) history.replaceState(null, "", "#" + k);
+  SHARE_PHASES.forEach(p => { $("panel-" + p.key).hidden = p.key !== k;
+    document.querySelector(`#tabs [data-k="${p.key}"]`).setAttribute("aria-selected", p.key === k); });
+  if (D) refresh(true);
+}
+function phaseStatus(p) {
+  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" ? "steps" : "tests"}` : "";
+  if (!x.run_id) return ["not started", "No run yet. Teasers work now; results unlock when the run finishes."];
+  if (x.dry) return [`dry run ${x.run_id}`, "Only a dry run so far. Results stay locked until the full run finishes."];
+  return x.complete ? [`run ${x.run_id} · complete`, "Run complete: results cards are unlocked. Teaser cards stay number-free."]
+    : [`run ${x.run_id} · ${x.state}${n ? " · " + n : ""}`, "Run in progress: the server withholds every measured value (tok/s, watts, tok/J) from this page until it finishes, so no card here can show one. Results unlock on their own."];
+}
 function refresh(forceCaption) {
-  $("runinfo").textContent = D ? `run ${D.run_id} · ${D.complete ? "complete" : `${D.done}/${D.total} tests done`}` : "no runs yet";
-  $("policy").textContent = D && D.complete
-    ? "This run finished every test, so results cards are unlocked. Teasers stay number-free."
-    : "While the run is going, the server leaves every measured value (tok/s, watts, tokens per joule, sensor readings) out of what it sends this page, so none of these cards can show one. Results cards unlock automatically when the last test finishes.";
+  $("runinfo").textContent = D ? "Pick a phase. Cards refresh every 10 s." : "no runs yet";
+  if (D) SHARE_PHASES.forEach(p => {
+    const cards = CARDS.filter(c => groupOf(c) === p.key), ready = cards.filter(c => { const ms = eligible(c); return gate(c) && !(ms && !ms.length); });
+    const x = p.st(D), [st, pol] = phaseStatus(p);
+    $("tc-" + p.key).textContent = `${ready.length} of ${cards.length} ready${x.state === "running" && !x.dry ? " · running" : ""}`;
+    $("tdot-" + p.key).className = "dot" + (x.state === "running" ? " on" : "");
+    $("pst-" + p.key).textContent = st; $("ppol-" + p.key).textContent = pol;
+  });
   for (const card of CARDS) {
+    if (groupOf(card) !== tab) continue;   // only the open phase is drawn
     const el = $("card-" + card.id), cv = el.querySelector("canvas"), ms = D ? eligible(card) : null;
     const runLocked = D && !gate(card), empty = ms && !ms.length, locked = !D || runLocked || empty;
     const tag = el.querySelector(".tag");
@@ -1680,7 +1714,14 @@ if (Q.get("solo")) {
     if (ms && !ms.length) { document.title = "error: no model ready for this card"; return; }
     render(card, cv, chosen(card)); document.title = "ready";
   });
-} else { build(); poll(); }
+} else {
+  build();
+  const fromHash = location.hash.slice(1), keys = SHARE_PHASES.map(p => p.key);
+  const saved = localStorage.getItem("b65sharetab");
+  selectTab(keys.includes(fromHash) ? fromHash : keys.includes(saved) ? saved : keys[keys.length - 1], keys.includes(fromHash));
+  window.addEventListener("hashchange", () => { const k = location.hash.slice(1); if (keys.includes(k) && k !== tab) selectTab(k, true); });
+  poll();
+}
 </script>
 </body>
 </html>

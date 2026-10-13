@@ -1,6 +1,7 @@
 // Shared left sidebar for every dashboard page: phase links, current page highlighted, a live status dot per phase.
 // Pages only need <script src="nav.js"></script>; phases are listed here once.
 (() => {
+  if (new URLSearchParams(location.search).get("solo")) return;   // share-card renders: the card only, no sidebar
   const PHASES = [
     { key: "p0", href: "./", num: "0", name: "Baseline", sub: "prefill + decode, FA on" },
     { key: "p05", href: "p05", num: "0.5", name: "Flash attention", sub: "off vs on" },
@@ -14,7 +15,10 @@
     { href: "files/", name: "Files" },
   ];
   const here = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, "") || "";
-  const isHere = href => { const h = href.replace(/^\.\/?/, "").replace(/\/$/, ""); return h === here || (h === "" && (here === "" || here === "index")); };
+  const isHere = href => { const h = href.split("#")[0].replace(/^\.\/?/, "").replace(/\/$/, ""); return h === here || (h === "" && (here === "" || here === "index")); };
+  // on a phase page, "Share cards" opens that phase's tab (the Gemma rerun's cards live under Phase 1)
+  const curPhase = PHASES.find(p => isHere(p.href)), shareTab = curPhase && { p1g: "p1" }[curPhase.key] || (curPhase && curPhase.key);
+  if (shareTab) LINKS.find(l => l.href === "share").href = "share#" + shareTab;
 
   const css = `
   .b65nav { --nav-w: 232px; --n-bg: #f3f3f0; --n-ink: #0b0b0b; --n-ink2: #52514e; --n-muted: #898781; --n-line: rgba(11,11,11,.10);
