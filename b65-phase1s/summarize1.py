@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 """Phase 1 summary: decode table, context-fit table, server TTFT table, loaded idle power. Writes phase1_summary.md."""
 import csv, json, os, sys, glob, statistics as st
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+try:
+    from powerwin import test_watts   # local: timed-rep board W, same method as Phase 0/0.5
+except ImportError:
+    test_watts = None
 out = sys.argv[1]; L = []
-status = {(r["model"], r["test"]): r["status"] for r in csv.DictReader(open(os.path.join(out, "energy.csv")))}
-bench = {}
+ENV = dict(l.strip().split("=", 1) for l in open(os.path.join(out, "env.txt")) if "=" in l)
+erows = {(r["model"], r["test"]): r for r in csv.DictReader(open(os.path.join(out, "energy.csv")))}
+status = {k: r["status"] for k, r in erows.items()}
+bench, bw = {}, {}
 for p in glob.glob(os.path.join(out, "*.jsonl")):
-    m, t = os.path.basename(p)[:-6].split(".", 1)
+    m, t = os.path.basename(p)[:-6].rsplit(".", 1)   # local: rsplit, model names contain dots (qwen3.8-27b)
     recs = [json.loads(l) for l in open(p) if l.strip().startswith("{")]
-    if recs: bench[(m, t)] = recs[-1]["avg_ts"]
+    if recs:
+        bench[(m, t)] = recs[-1]["avg_ts"]
+        e = erows.get((m, t), {})
+        if test_watts: bw[(m, t)] = test_watts(out, m, t, recs[-1], float(e["t_end"]) if e.get("t_end") else None)
 models = sorted({m for m, _ in status})
 tests = ["tg128", "tg128@d4096", "tg128@d8192", "tg128@d16384", "tg128@d32768"]
-L += ["# Phase 1 summary", "", "## Decode tok/s by context depth (fa=0; OOM = did not fit)", "",
+L += [f"# Phase 1 summary ({ENV.get('run_id', '')})", "", f"## Decode tok/s by context depth ({ENV.get('backend', 'vulkan')}, fa={ENV.get('fa', '0')}; OOM = did not fit)", "",
       "| Model | " + " | ".join(t.replace("tg128@d", "@").replace("tg128", "@0") for t in tests) + " |",
       "|---|" + "---|" * len(tests)]
 for m in models:
@@ -19,6 +29,10 @@ for m in models:
         s = status.get((m, t)); v = bench.get((m, t))
         cells.append(f"{v:.2f}" if v else ("OOM" if s == "oom" else (s or "-")))
     L.append(f"| {m} | " + " | ".join(cells) + " |")
+if bw:   # local: board W over the timed reps for the decode tests
+    L += ["", "## Decode board W (timed reps)", "", "| Model | " + " | ".join(t.replace("tg128@d", "@").replace("tg128", "@0") for t in tests) + " |",
+          "|---|" + "---|" * len(tests)]
+    for m in models: L.append(f"| {m} | " + " | ".join(f"{bw[(m, t)]:.1f}" if bw.get((m, t)) else "-" for t in tests) + " |")
 sp = os.path.join(out, "serve.csv")
 if os.path.exists(sp):
     rows = list(csv.DictReader(open(sp))); g = {}

@@ -1,0 +1,3 @@
+>> bench qwen3.8-27b tg128
+>> bench qwen3.8-27b tg128@d4096
+>> bench qwen3.8-27b tg128@d8192

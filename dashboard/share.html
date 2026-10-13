@@ -275,7 +275,16 @@ const p1s = (d, m, n) => (d.p1.serve || []).find(c => c.model === m.name && c.si
 const p1i = (d, m) => (d.p1.idle || []).find(c => c.model === m.name);
 const p1ms = d => d.models.filter(m => (d.p1.models || []).includes(m.name));
 const p1ready = d => !!(d.p1 && d.p1.complete);
-const p1lock = d => `Unlocks when Phase 1 finishes (${d.p1 ? d.p1.done : 0} of ${d.p1 ? d.p1.total : 45} steps so far)`;
+const p1lock = d => `Unlocks when Phase 1${d.p1 && d.p1.sycl ? "S" : ""} finishes (${d.p1 ? d.p1.done : 0} of ${d.p1 ? d.p1.total : 45} steps so far)`;
+const p1kick = d => d.p1 && d.p1.sycl ? "INTEL ARC PRO B65 · 32 GB · PHASE 1 ON SYCL" : "INTEL ARC PRO B65 · 32 GB · PHASE 1";
+const p1eng = d => d.p1 && d.p1.sycl ? "SYCL, flash attention on" : "Vulkan, flash attention off";
+function p1foot(d) {   // undefined = the default (Vulkan) footer
+  if (!d.p1 || !d.p1.sycl) return undefined;
+  const st = d.stack, e = d.p1.env || {}, v = (x, re) => ((x || "").match(re) || [])[1];
+  const cr = v(e.compute_runtime, /compute-runtime (\d+\.\d+)/), oa = v(e.oneapi, /dpcpp-cpp (\d{4}\.\d+)/);
+  return `Arc Pro B65 32 GB · llama.cpp b${st.llama_build} SYCL (oneAPI${oa ? " " + oa : ""}${cr ? ", compute-runtime " + cr : ""}) · Linux ${st.kernel.split("-")[0]}`;
+}
+const viewP1S = d => ({ ...d, p1: d.p1s || {} });
 // Gemma llama-server rerun (p1-swa-*): one config per variant
 const p1gv = (d, name) => ((d.p1 && d.p1.rerun && d.p1.rerun.variants) || []).find(v => v.name === name);
 const p1gReady = d => p1ready(d) && !!(d.p1.rerun && d.p1.rerun.complete) && (p1gv(d, "ckpt-off") || {}).status === "ok";
@@ -893,8 +902,8 @@ const CARDS = [
   { id: "p1-context", name: "How much context fits", safe: false, group: "p1", ready: d => p1ready(d), lockMsg: d => p1lock(d),
     draw(ctx, W, H, u, d) {
       const ms = p1ms(d), tests = d.p1.bench_tests, wide = W > H, f = facts1(d);
-      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1", title: "How much context fits",
-        sub: `decode tok/s with 0 to 32K tokens already in context · ${f.fit32.length} of ${ms.length} run at 32K · flash attention off`, results: true });
+      const b = frame(ctx, W, H, u, { kicker: p1kick(d), title: "How much context fits",
+        sub: `decode tok/s with 0 to 32K tokens already in context · ${f.fit32.length} of ${ms.length} run at 32K · ${p1eng(d)}`, results: true, foot: p1foot(d) });
       const vals = ms.flatMap(m => tests.map(t => (p1b(d, m, t) || {}).tok_s)).filter(v => v != null);
       const lo = Math.min(...vals), hi = Math.max(...vals);
       const ramp = v => { const k = hi > lo ? (v - lo) / (hi - lo) : 1, a = [24, 79, 149], z = [158, 197, 244];   // sequential blue, dark -> light
@@ -926,8 +935,8 @@ const CARDS = [
   { id: "p1-ttft", name: "Time to first token", safe: false, group: "p1", ready: d => p1ready(d), lockMsg: d => p1lock(d),
     draw(ctx, W, H, u, d) {
       const ms = p1ms(d), sizes = d.p1.sizes;
-      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1", title: "Time to first token",
-        sub: "llama-server, streamed · 32K context · prompt cache off · median of 3 · lower is better", results: true });
+      const b = frame(ctx, W, H, u, { kicker: p1kick(d), title: "Time to first token",
+        sub: `llama-server, streamed · 32K context · prompt cache off · median of 3 · lower is better${d.p1.sycl ? " · " + p1eng(d) : ""}`, results: true, foot: p1foot(d) });
       legend(ctx, b.x, b.y + 6 * u, u, ms, b.w);
       const area = { x: b.x, y: b.y + 34 * u, w: b.w, h: b.h - 34 * u }, n = ms.length, gh = area.h / sizes.length;
       const barH = Math.min(36 * u, (gh - 30 * u) / n - 2 * u), labW = Math.min(170 * u, b.w * 0.2), maxW = b.w - labW - 130 * u;
@@ -961,8 +970,8 @@ const CARDS = [
   { id: "p1-findings", name: "Phase 1 key findings", safe: false, group: "p1", ready: d => p1ready(d), lockMsg: d => p1lock(d),
     draw(ctx, W, H, u, d) {
       const f = facts1(d), wide = W > H;
-      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1", title: "What we found",
-        sub: `${f.ms.length} models · context, serving and idle · llama.cpp b${d.rig.llama_build} Vulkan, flash attention off`, results: true });
+      const b = frame(ctx, W, H, u, { kicker: p1kick(d), title: "What we found",
+        sub: `${f.ms.length} models · context, serving and idle · llama.cpp b${d.rig.llama_build} ${p1eng(d)}`, results: true, foot: p1foot(d) });
       const items = [
         [`32K context: ${f.fit32.length} of ${f.ms.length} fit`, f.fit32.length ? `decode at 32K: ${f.fit32.map(m => `${short(m)} ${p1b(d, m, "tg128@d32768").tok_s.toFixed(1)}`).join(" · ")}` : "none ran at 32K"],
         [f.fast.length ? `${f.fast.map(short).join(" & ")}: first word in ${secRange(f.f512lo, f.f512hi)}` : "Time to first word",
@@ -987,7 +996,7 @@ const CARDS = [
       drawDepthSlope(ctx, cb, u, d, f.ms, "Decode tok/s as context grows");
     },
     caption: d => { const f = facts1(d); return [
-      ["Post", `Phase 1 on the Arc Pro B65 (llama.cpp Vulkan):\n\n• 32K context: ${f.fit32.length} of ${f.ms.length} models fit\n• First token (${f.fast.map(short).join(", ")}): ${secRange(f.f512lo, f.f512hi)} short, ${secRange(f.f16lo, f.f16hi)} at 16K${f.slow.length ? `\n• ${f.slow.map(short).join(", ")}: ${p1gReady(d) ? `${secs((p1s(d, f.slow[0], 512) || {}).ttft)} → ${secs(p1gs(d, "ckpt-off", 512).ttft)} first token with --ctx-checkpoints 0` : "llama-server checkpoint penalty, retest pending"}` : ""}${f.held.length ? `\n• ${f.held.map(short).join(", ")}: a llama-server default slows its prompts, retest pending` : ""}\n• Loaded idle: ${wRange(f.iwLo, f.iwHi)}\n\nNext up: Vulkan vs SYCL. Predictions?`]]; } },
+      ["Post", `Phase 1${d.p1.sycl ? " on SYCL" : ""}, Arc Pro B65 (llama.cpp ${d.p1.sycl ? "SYCL, FA on" : "Vulkan"}):\n\n• 32K context: ${f.fit32.length} of ${f.ms.length} models fit\n• First token (${f.fast.map(short).join(", ")}): ${secRange(f.f512lo, f.f512hi)} short, ${secRange(f.f16lo, f.f16hi)} at 16K${f.slow.length ? `\n• ${f.slow.map(short).join(", ")}: ${p1gReady(d) ? `${secs((p1s(d, f.slow[0], 512) || {}).ttft)} → ${secs(p1gs(d, "ckpt-off", 512).ttft)} first token with --ctx-checkpoints 0` : "llama-server checkpoint penalty, retest pending"}` : ""}${f.held.length ? `\n• ${f.held.map(short).join(", ")}: a llama-server default slows its prompts, retest pending` : ""}\n• Loaded idle: ${wRange(f.iwLo, f.iwHi)}\n\n${d.p1.sycl ? "What should we test next?" : "Next up: Vulkan vs SYCL. Predictions?"}`]]; } },
 
   { id: "p1-gemma-fix", name: "Gemma: one server flag", safe: false, group: "p1", ready: d => p1gReady(d),
     lockMsg: d => !p1ready(d) ? p1lock(d) : d.p1.rerun ? `Unlocks when the Gemma server rerun finishes (${d.p1.rerun.done} of ${d.p1.rerun.total} steps)` : "Gemma server rerun not started",
@@ -1390,6 +1399,109 @@ const CARDS = [
     },
     caption: d => { const f = facts2(d); return [
       ["Post", `Vulkan vs Intel's SYCL on a 32 GB Arc Pro B65, same llama.cpp commit, three ~30B models:\n\n• Decode: ${pct2(f.decMean)} on SYCL (flash attention on)\n• Prefill: ${pct2(f.preMean)}\n• Flash attention on SYCL: ${pct2(f.faDec)} decode\n• Tokens per joule: ${f.jv} → ${f.js}\n\nSYCL is the new default. What should we try next?`]]; } },
+  // ---------- Phase 1S: Phase 1 rerun on SYCL (flash attention on) ----------
+  { id: "p1s-preview", name: "Phase 1S preview", safe: true, group: "p1s",
+    draw(ctx, W, H, u, d) {
+      const p = d.p1s || {}, wide = W > H, done = !!p.complete, full = p.total && !p.dry;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1 ON SYCL", title: done ? "Phase 1 on SYCL: done" : "Phase 1, again, on SYCL",
+        sub: done ? "Context, serving and idle power, re-measured on the faster engine." : "SYCL won Phase 2. Every real-world number gets re-measured on it.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const covers = [
+        ["Speed as the conversation grows", "decode with 0, 4K, 8K, 16K and 32K tokens of context"],
+        ["Time to first token", "llama-server, 512 / 4K / 16K-token prompts, Gemma with --ctx-checkpoints 0"],
+        ["Does 32K still fit?", "flash attention on changes how VRAM is used"],
+        ["Idle with a model loaded", "board power and VRAM while the server waits"]];
+      const expect = ["Vulkan vs SYCL on every Phase 1 number", "How long you wait for the first word now", "Which models still handle 32K context", "What the faster engine costs in watts"];
+      const barH = 70 * u, bodyH = b.h - barH - 20 * u, colW = wide ? (b.w - 48 * u) / 2 : b.w, secH = wide ? bodyH : (bodyH - 24 * u) / 2;
+      const section = (x, y, w, h, head, rows, render) => {
+        ctx.fillStyle = C.series[0]; ctx.fillRect(x, y + 2 * u, 4 * u, 18 * u);
+        text(ctx, head, x + 14 * u, y + 18 * u, 15 * u, { w: 750, color: C.ink2 });
+        const rh = Math.min((h - 36 * u) / rows.length, 86 * u); rows.forEach((r, i) => render(r, i, x, y + 36 * u + rh * i, w, rh));
+      };
+      section(b.x, b.y, colW, secH, "WHAT IT COVERS", covers, ([k, v], i, x, y, w, rh) => {
+        text(ctx, k, x, y + rh * 0.42, 21 * u, { w: 700, max: w }); text(ctx, v, x, y + rh * 0.42 + 25 * u, 16 * u, { color: C.ink2, max: w }); });
+      const ex = wide ? b.x + colW + 48 * u : b.x, ey = wide ? b.y : b.y + secH + 24 * u;
+      section(ex, ey, colW, secH, done ? "WHAT WE GOT" : "WHAT YOU'LL SEE WHEN IT'S DONE", expect, (t, i, x, y, w, rh) => {
+        const cy = y + rh * 0.42 - 6 * u;
+        rr(ctx, x, cy - 11 * u, 22 * u, 22 * u, 6 * u, done ? C.series[0] : null, C.series[0], 2 * u);
+        if (done) { ctx.strokeStyle = C.page; ctx.lineWidth = 2.5 * u; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(x + 6 * u, cy); ctx.lineTo(x + 10 * u, cy + 4 * u); ctx.lineTo(x + 16 * u, cy - 4 * u); ctx.stroke(); }
+        text(ctx, t, x + 36 * u, cy + 7 * u, 19 * u, { w: 600, max: w - 36 * u });
+      });
+      const py = b.y + b.h - barH + 10 * u;
+      rr(ctx, b.x, py, b.w, barH - 10 * u, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+      text(ctx, done ? "Run complete" : full && p.state === "running" ? "Running now" : full && p.state === "stopped" ? "Paused" : "Starting soon", b.x + 20 * u, py + 26 * u, 18 * u, { w: 700 });
+      text(ctx, "Same tests as Phase 1, same models, new engine", b.x + 20 * u, py + 48 * u, 15 * u, { color: C.ink2, max: b.w * 0.6 });
+      if (full) { const tx = b.x + b.w - 20 * u, bw2 = Math.min(260 * u, b.w * 0.3);
+        text(ctx, `${p.done} / ${p.total} steps`, tx, py + 26 * u, 17 * u, { w: 700, align: "right" });
+        rr(ctx, tx - bw2, py + 38 * u, bw2, 10 * u, 5 * u, C.page);
+        if (p.done) rr(ctx, tx - bw2, py + 38 * u, Math.max(10 * u, bw2 * p.done / p.total), 10 * u, 5 * u, C.series[0]); }
+    },
+    caption: d => (d.p1s || {}).complete ? [
+      ["Post", `Phase 1 on SYCL is done: context up to 32K, time to first token and loaded idle power, re-measured on the Arc Pro B65's faster engine.\n\nVulkan vs SYCL numbers next. Which one do you want first?`]] : [
+      ["Post", `SYCL beat Vulkan by ~22% on decode on the Arc Pro B65. So every real-world number gets re-measured on it: 32K context, time to first token, idle power.\n\nRunning now. Which number do you expect to move most?`],
+      ["Short take", `Phase 1 again, this time on SYCL. Running now on the Arc Pro B65.`]] },
+
+  { id: "p1s-live", name: "Phase 1S progress (live)", safe: true, group: "p1s",
+    ready: d => !!(d.p1s && d.p1s.run_id && !d.p1s.dry), lockMsg: d => d.p1s && d.p1s.dry ? "Dry run in progress; the full run starts after it checks out" : "Waiting for the full run to start",
+    draw(ctx, W, H, u, d) {
+      const dv = viewP1S(d), p = dv.p1, wide = W > H, ms = p1ms(dv);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1 ON SYCL", title: "Context, serving, idle: on SYCL",
+        sub: p.complete ? `${ms.length} models · all ${p.total} steps done` : `${ms.length} models · decode up to 32K · llama-server · results when it's done`, live: p.state === "running", results: p.complete, foot: p1foot(dv) });
+      if (wide) {
+        const lw = b.w * 0.24, yb = drawProgress(ctx, { x: b.x, y: b.y, w: lw, h: b.h }, u, { ...p, unit: "steps complete" });
+        drawWave(ctx, { x: b.x, y: yb + 34 * u, w: lw, h: b.y + b.h - yb - 34 * u }, u, p.shape || [], "GPU board power, live");
+        drawP1Grid(ctx, { x: b.x + lw + 40 * u, y: b.y, w: b.w - lw - 40 * u, h: b.h }, u, dv, ms);
+      } else {
+        const yb = drawProgress(ctx, { x: b.x, y: b.y, w: b.w, h: 160 * u }, u, { ...p, unit: "steps complete" }), gh = 100 * u + ms.length * 84 * u;
+        drawP1Grid(ctx, { x: b.x, y: yb + 44 * u, w: b.w, h: gh }, u, dv, ms);
+        drawWave(ctx, { x: b.x, y: yb + 74 * u + gh, w: b.w, h: b.y + b.h - (yb + 74 * u + gh) }, u, p.shape || [], "GPU board power, live");
+      }
+    },
+    caption: d => [
+      ["Post", `${d.p1s.done}/${d.p1s.total} steps in. Phase 1 again on the Arc Pro B65, this time on SYCL: decode up to 32K context, then llama-server timing the first token.\n\nGuess: does the 22% decode gain survive at 32K?`],
+      ["Short take", `Phase 1 on SYCL: ${d.p1s.done}/${d.p1s.total} steps done.`]] },
+
+  { id: "p1s-vs-vulkan", name: "Vulkan → SYCL, real-world numbers", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
+    draw(ctx, W, H, u, d) {
+      const dv = viewP1S(d), ms = p1ms(dv), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1 ON SYCL", title: "Same card, faster engine",
+        sub: "Phase 1 on Vulkan (flash attention off) → Phase 1 on SYCL (flash attention on)", results: true, foot: p1foot(dv) });
+      const cols = [["Decode, empty context", "tok/s", m => { const c = p1b(dv, m, "tg128") || {}; return [c.vk, c.tok_s, true]; }],
+                    ["Decode at 32K context", "tok/s", m => { const c = p1b(dv, m, "tg128@d32768") || {}; return [c.vk, c.status === "oom" ? "oom" : c.tok_s, true]; }],
+                    ["First token, 16K prompt", "seconds", m => { const s = p1s(dv, m, 16384) || {}, v = (((dv.p1.vk_serve || {})[m.name]) || []).find(x => x.size === 16384) || {}; return [v.ttft, s.ttft, false]; }]];
+      const labW = wide ? Math.min(230 * u, b.w * 0.22) : Math.min(200 * u, b.w * 0.3), cw = (b.w - labW) / cols.length, headH = 54 * u;
+      const rh = Math.min(wide ? 110 * u : 260 * u, (b.h - headH) / ms.length);
+      cols.forEach(([h, unit], j) => { const x = b.x + labW + cw * j;
+        text(ctx, h, x, b.y + 18 * u, 17 * u, { w: 700, color: C.ink2, max: cw - 16 * u }); text(ctx, unit, x, b.y + 38 * u, 13 * u, { color: C.muted }); });
+      ms.forEach((m, i) => {
+        const y = b.y + headH + rh * i; ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, y + rh / 2 - 16 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m)));
+        text(ctx, m.display, b.x + 20 * u, y + rh / 2 - 4 * u, 20 * u, { w: 700, max: labW - 28 * u });
+        text(ctx, m.quant, b.x + 20 * u, y + rh / 2 + 18 * u, 13 * u, { color: C.muted });
+        cols.forEach(([, , get], j) => {
+          const [a, z, higher] = get(m), x = b.x + labW + cw * j;
+          if (z === "oom") { text(ctx, "didn't fit", x, y + rh / 2 + 8 * u, 20 * u, { w: 700, color: C.muted }); return; }
+          if (a == null || z == null) { text(ctx, "n/a", x, y + rh / 2 + 8 * u, 18 * u, { color: C.muted }); return; }
+          const fa = v => higher ? v.toFixed(1) : secs(v), better = higher ? z > a : z < a, same = Math.abs(z / a - 1) < 0.01;
+          const ch = same ? "same" : higher ? `${z >= a ? "+" : "−"}${Math.abs(100 * (z / a - 1)).toFixed(0)}%` : `${(a / z).toFixed(1)}× ${z <= a ? "faster" : "slower"}`;
+          const w1 = text(ctx, fa(a), x, y + rh / 2 - 2 * u, 18 * u, { color: C.muted });
+          const w2 = text(ctx, " → ", x + w1, y + rh / 2 - 2 * u, 18 * u, { color: C.muted });
+          text(ctx, fa(z), x + w1 + w2, y + rh / 2 - 2 * u, 26 * u, { w: 750 });
+          text(ctx, ch, x, y + rh / 2 + 24 * u, 16 * u, { w: 700, color: same ? C.muted : better ? C.good : C.critical });
+        });
+      });
+    },
+    caption: d => { const dv = viewP1S(d), ms = p1ms(dv), g = (m, t) => p1b(dv, m, t) || {}, s16 = m => (p1s(dv, m, 16384) || {}).ttft, v16 = m => ((((dv.p1.vk_serve || {})[m.name]) || []).find(x => x.size === 16384) || {}).ttft;
+      return [["Post", `Same 32 GB Arc Pro B65, Vulkan → SYCL (llama.cpp, same models):\n\n${ms.map(m => `• ${short(m)}: ${(g(m, "tg128").vk || 0).toFixed(1)} → ${(g(m, "tg128").tok_s || 0).toFixed(1)} tok/s, 32K ${g(m, "tg128@d32768").tok_s ? `${g(m, "tg128@d32768").vk.toFixed(1)} → ${g(m, "tg128@d32768").tok_s.toFixed(1)}` : "n/a"}`).join("\n")}\n\nFirst token at 16K: ${ms.map(m => `${short(m)} ${secs(v16(m))} → ${secs(s16(m))}`).join(", ")}\n\nSwitching?`]]; } },
+
+  { id: "p1s-context", name: "How much context fits (SYCL)", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
+    draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-context").draw(ctx, W, H, u, viewP1S(d)),
+    caption: d => CARDS.find(c => c.id === "p1-context").caption(viewP1S(d)) },
+  { id: "p1s-ttft", name: "Time to first token (SYCL)", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
+    draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-ttft").draw(ctx, W, H, u, viewP1S(d)),
+    caption: d => CARDS.find(c => c.id === "p1-ttft").caption(viewP1S(d)) },
+  { id: "p1s-findings", name: "Phase 1S key findings", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
+    draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-findings").draw(ctx, W, H, u, viewP1S(d)),
+    caption: d => CARDS.find(c => c.id === "p1-findings").caption(viewP1S(d)) },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -1561,6 +1673,7 @@ const SHARE_PHASES = [
   { key: "p05", label: "Phase 0.5", name: "Flash attention", href: "p05", st: d => d.p05 || {} },
   { key: "p1", label: "Phase 1", name: "Context & serving", href: "p1", st: d => d.p1 || {} },
   { key: "p2", label: "Phase 2", name: "Vulkan vs SYCL", href: "p2", st: d => d.p2 || {} },
+  { key: "p1s", label: "Phase 1S", name: "Phase 1 on SYCL", href: "p1s", st: d => d.p1s || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;
@@ -1630,7 +1743,7 @@ function selectTab(k, keepHash) {
   if (D) refresh(true);
 }
 function phaseStatus(p) {
-  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" ? "steps" : "tests"}` : "";
+  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" || p.key === "p1s" ? "steps" : "tests"}` : "";
   if (!x.run_id) return ["not started", "No run yet. Teasers work now; results unlock when the run finishes."];
   if (x.dry) return [`dry run ${x.run_id}`, "Only a dry run so far. Results stay locked until the full run finishes."];
   return x.complete ? [`run ${x.run_id} · complete`, "Run complete: results cards are unlocked. Teaser cards stay number-free."]

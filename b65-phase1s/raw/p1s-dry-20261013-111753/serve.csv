@@ -1,0 +1,2 @@
+model,prompt_tokens,rep,ttft_s,prompt_tok_s,gen_tokens,gen_tok_s,total_s,board_w
+qwen3.8-27b,512,1,1.393,367.86,128,23.38,6.827,177.5

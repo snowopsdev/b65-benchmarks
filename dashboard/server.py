@@ -340,35 +340,52 @@ P1_BENCH = ["tg128", "tg128@d4096", "tg128@d8192", "tg128@d16384", "tg128@d32768
 P1_SIZES = [512, 4096, 16384]
 P1_REPS = 3
 
-def p1_full():
-    """Phase 1 dashboard data (private, measured values included): decode by context depth (fa=0), llama-server
-    TTFT at three prompt sizes, loaded idle power + VRAM. Phase 0.5 fa=0 values are attached as a drift check."""
-    kit = os.path.join(ROOT, "b65-phase1"); base = os.path.join(kit, "raw")
-    runs = sorted(d for d in os.listdir(base) if re.match(r"^p1-\d{8}-\d{6}$", d)) if os.path.isdir(base) else []   # main Phase 1 runs only (p1-swa-* is the Gemma rerun)
+P1_VK_RUN = os.path.join(ROOT, "b65-phase1", "raw", "p1-20261012-180308")      # Phase 1 on Vulkan (fa off)
+P2_RUN = os.path.join(ROOT, "b65-phase2", "raw", "p2-20261013-091509")          # Phase 2 (SYCL fa1 decode = drift check for 1S)
+
+def jsonl_ts(path):
+    recs = [json.loads(l) for l in read_lines(path) if l.strip().startswith("{")]
+    return recs[-1].get("avg_ts") if recs else None
+
+def p1_full(kit_name="b65-phase1", run_re=r"^p1-\d{8}-\d{6}$", log_name="p1-run.log", sycl=False):
+    """Phase 1 dashboard data (private, measured values included): decode by context depth, llama-server
+    TTFT at three prompt sizes, loaded idle power + VRAM. Phase 1 (Vulkan) reads Phase 0.5 fa=0 as a drift check;
+    Phase 1S (sycl=True: b65-phase1s, SYCL fa on) reads Phase 2 SYCL fa1 as the drift check and Phase 1 Vulkan for comparison."""
+    kit = os.path.join(ROOT, kit_name); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(run_re, d)] if os.path.isdir(base) else []   # main Phase 1 runs only (p1-swa-* is the Gemma rerun)
     models = [l.split("|")[0] for l in read_lines(os.path.join(kit, "models.conf")) if l.strip() and not l.startswith("#")]
-    total_steps = len(models) * (len(P1_BENCH) + 1 + len(P1_SIZES) * P1_REPS)
     res = dict(state="not started", run_id=None, models=models, bench_tests=P1_BENCH, sizes=P1_SIZES, reps=P1_REPS,
-               env={}, bench=[], serve=[], idle=[], current=None, done=0, total=total_steps)
+               env={}, bench=[], serve=[], idle=[], current=None, done=0, total=len(models) * (len(P1_BENCH) + 1 + len(P1_SIZES) * P1_REPS),
+               dry=False, sycl=sycl)
     if not runs: return res
-    out = os.path.join(base, runs[-1]); res["run_id"] = runs[-1]
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res["run_id"] = run
+    if "-dry-" in run:   # dry run: first model, tg128 + one 512-token request
+        models = res["models"] = models[:1]; res.update(dry=True, bench_tests=["tg128"], sizes=[512], reps=1, total=1 + 1 + 1)
     pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
     try: alive = bool(pid) and "phase1" in open(f"/proc/{pid}/cmdline").read()
     except OSError: pass
     res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
     res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
-    # Phase 0.5 fa=0 references (tg128 / tg128@d4096 from the follow-up, tg128@d16384 from the main sweep)
-    ref = {}
-    for prefix, key in (("p05b", "fa0.tg128"), ("p05b", "fa0.tg128@d4096"), ("p05", "fa0.tg128@d16384")):
-        d = sweep_dir(prefix)
-        if not d: continue
+    ref, vk = {}, {}
+    if sycl:   # drift check: Phase 2 SYCL fa1 decode; comparison: Phase 1 Vulkan decode + server medians
         for m in models:
-            recs = [json.loads(l) for l in read_lines(f"{d}/{m}.{key}.jsonl") if l.strip().startswith("{")]
-            if recs: ref[(m, key.split(".", 1)[1])] = recs[-1].get("avg_ts")
+            for t in P1_BENCH:
+                ref[(m, t)] = jsonl_ts(f"{P2_RUN}/{m}.sycl.fa1.{t}.jsonl")
+                vk[(m, t)] = jsonl_ts(f"{P1_VK_RUN}/{m}.{t}.jsonl")
+        vrows = list(csv.DictReader(open(f"{P1_VK_RUN}/serve.csv"))) if os.path.exists(f"{P1_VK_RUN}/serve.csv") else []
+        res["vk_serve"] = {m: serve_medians(vrows, m) for m in models}
+    else:   # Phase 0.5 fa=0 references (tg128 / tg128@d4096 from the follow-up, tg128@d16384 from the main sweep)
+        for prefix, key in (("p05b", "fa0.tg128"), ("p05b", "fa0.tg128@d4096"), ("p05", "fa0.tg128@d16384")):
+            d = sweep_dir(prefix)
+            if not d: continue
+            for m in models:
+                recs = [json.loads(l) for l in read_lines(f"{d}/{m}.{key}.jsonl") if l.strip().startswith("{")]
+                if recs: ref[(m, key.split(".", 1)[1])] = recs[-1].get("avg_ts")
     energy = {}
     for r in csv.DictReader(open(f"{out}/energy.csv")) if os.path.exists(f"{out}/energy.csv") else []:
         if r.get("section") == "bench": energy[(r["model"], r["test"])] = r
     # current step from the run log
-    log = read_lines(os.path.join(kit, "p1-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    log = read_lines(os.path.join(kit, log_name)); last = [l[3:].split() for l in log if l.startswith(">> ")]
     serve_rows = list(csv.DictReader(open(f"{out}/serve.csv"))) if os.path.exists(f"{out}/serve.csv") else []
     idle_rows = {r["model"]: r for r in csv.DictReader(open(f"{out}/idle_loaded.csv"))} if os.path.exists(f"{out}/idle_loaded.csv") else {}
     cur = None
@@ -384,12 +401,12 @@ def p1_full():
         elif kind == "server":
             n = sum(1 for r in serve_rows if r["model"] == m)
             phase = "starting llama-server" if m not in idle_rows and n == 0 else \
-                    f"requests {n} of {len(P1_SIZES) * P1_REPS}" if m in idle_rows else "loaded idle power (30 s)"
+                    f"requests {n} of {len(res['sizes']) * res['reps']}" if m in idle_rows else "loaded idle power (30 s)"
             cur = dict(kind="server", model=m, phase=phase)
     res["current"] = cur
     for m in models:
-        for t in P1_BENCH:
-            c = dict(model=m, test=t, status="pending", ref=ref.get((m, t)))
+        for t in res["bench_tests"]:
+            c = dict(model=m, test=t, status="pending", ref=ref.get((m, t)), vk=vk.get((m, t)))
             e = energy.get((m, t))
             if cur and cur["kind"] == "bench" and (cur["model"], cur["test"]) == (m, t): c["status"] = "running"
             elif e:
@@ -401,10 +418,10 @@ def p1_full():
                 elif e["status"] != "ok":
                     c["error"] = "\n".join(l for l in read_lines(f"{out}/{m}.{t}.log")[-6:])
             res["bench"].append(c)
-        for n in P1_SIZES:
+        for n in res["sizes"]:
             rows = [r for r in serve_rows if r["model"] == m and abs(int(float(r["prompt_tokens"] or 0)) - n) <= max(64, n // 20)]
             med = lambda k: (statistics.median(float(r[k]) for r in rows if r.get(k) not in ("", None)) if any(r.get(k) not in ("", None) for r in rows) else None)
-            st = "pending" if not rows else "ok" if len(rows) >= P1_REPS else "running"
+            st = "pending" if not rows else "ok" if len(rows) >= res["reps"] else "running"
             res["serve"].append(dict(model=m, size=n, status=st, reps=len(rows), ttft=med("ttft_s"), prompt_tok_s=med("prompt_tok_s"),
                                      gen_tok_s=med("gen_tok_s"), total_s=med("total_s"), watts=med("board_w"),
                                      ttft_all=[float(r["ttft_s"]) for r in rows if r.get("ttft_s")]))
@@ -415,7 +432,7 @@ def p1_full():
     # failed server starts count as done steps (reported in the log)
     res["server_failed"] = [l.split("for ", 1)[-1] for l in log if l.startswith("!! server did not come up")]
     res["done"] = (sum(1 for c in res["bench"] if c["status"] not in ("pending", "running")) + sum(1 for i in res["idle"] if i["status"] == "ok")
-                   + sum(min(s["reps"], P1_REPS) for s in res["serve"]))
+                   + sum(min(s["reps"], res["reps"]) for s in res["serve"]))
     p0 = sorted(d for d in os.listdir(RAW) if re.match(r"^\d{8}-\d{6}$", d)) if os.path.isdir(RAW) else []
     if p0: res["idle_unloaded_w"] = float(dict(l.split("=", 1) for l in read_lines(os.path.join(RAW, p0[-1], "env.txt")) if "=" in l).get("idle_unloaded_w") or 0) or None
     res["shape"] = power_shape(out)
@@ -481,17 +498,18 @@ def p1g_full():
         if x["idle_w"] is None and x["status"] == "running" and any(s["reps"] for s in x["serve"]): res["done"] += 1
     return res
 
-def p1_share():
+def p1_share(f=None):
     """Phase 1 data for share cards: statuses only until the run is complete (an OOM is reported as "done", since
-    it's a result); afterwards the numbers, except anything listed in holds.conf ("server" holds a model's llama-server rows)."""
-    f = p1_full(); held = holds()
-    complete = f["state"] == "finished" and f["done"] >= f["total"] - len(f["server_failed"]) * (1 + len(P1_SIZES) * P1_REPS)
+    it's a result); afterwards the numbers, except anything listed in holds.conf ("server" holds a model's llama-server rows).
+    Also serves Phase 1S (f = p1s_full()); a dry run never counts as complete."""
+    sycl = f is not None; f = f or p1_full(); held = holds()
+    complete = f["state"] == "finished" and not f.get("dry") and f["done"] >= f["total"] - len(f.get("server_failed", [])) * (1 + len(P1_SIZES) * P1_REPS)
     bench, serve, idle = [], [], []
     for c in f["bench"]:
         st = c["status"]
         if not complete: bench.append(dict(model=c["model"], test=c["test"], status=st if st in ("pending", "running") else "done")); continue
         if is_held(held, c["model"], c["test"], "0"): bench.append(dict(model=c["model"], test=c["test"], status="held")); continue
-        bench.append(dict(model=c["model"], test=c["test"], status=st, tok_s=c.get("tok_s"), sd=c.get("sd"), watts=c.get("watts"), ref=c.get("ref")))
+        bench.append(dict(model=c["model"], test=c["test"], status=st, tok_s=c.get("tok_s"), sd=c.get("sd"), watts=c.get("watts"), ref=c.get("ref"), vk=c.get("vk")))
     for x in f["serve"]:
         if not complete: serve.append(dict(model=x["model"], size=x["size"], status=x["status"] if x["status"] in ("pending", "running") else "done", reps=x["reps"])); continue
         if is_held(held, x["model"], "server", "0"): serve.append(dict(model=x["model"], size=x["size"], status="held", reps=x["reps"])); continue
@@ -499,8 +517,10 @@ def p1_share():
     for x in f["idle"]:
         idle.append(dict(model=x["model"], status=x["status"] if not complete else x["status"], **({} if not complete else dict(watts=x["watts"], vram_mib=x["vram_mib"]))))
     return dict(state=f["state"], complete=complete, done=f["done"], total=f["total"], run_id=f["run_id"], models=f["models"],
-                bench_tests=f["bench_tests"], sizes=f["sizes"], bench=bench, serve=serve, idle=idle, shape=f["shape"],
-                server_failed=f["server_failed"] if complete else [], idle_unloaded_w=f.get("idle_unloaded_w") if complete else None, rerun=p1g_share())
+                bench_tests=f["bench_tests"], sizes=f["sizes"], bench=bench, serve=serve, idle=idle, shape=f.get("shape") or [],
+                server_failed=f.get("server_failed", []) if complete else [], idle_unloaded_w=f.get("idle_unloaded_w") if complete else None,
+                rerun=None if sycl else p1g_share(), sycl=sycl, dry=f.get("dry", False), env=dict(gemma_ckpt=f["env"].get("gemma_ckpt"), compute_runtime=f["env"].get("compute_runtime"), oneapi=f["env"].get("oneapi")),
+                vk_serve={m: [{k: x[k] for k in ("size", "ttft", "gen_tok_s")} for x in v] for m, v in f.get("vk_serve", {}).items()} if complete else {})
 
 P2_TESTS = ["pp512", "pp4096", "pp16384", "tg128", "tg128@d4096", "tg128@d16384", "tg128@d32768"]
 P2_RUNS = [("vulkan", "0"), ("sycl", "0"), ("sycl", "1")]
@@ -610,7 +630,11 @@ def nav_status():
         if dry: s2 = state(dry); s2["state"] = "running" if s2["state"] == "running" else "dry"
     return dict(p0=state(latest(RAW, r"^\d{8}-\d{6}$")), p05=s05,
                 p1=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-\d{8}-\d{6}$")),
-                p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2)
+                p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2,
+                p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")))
+
+def p1s_full():
+    return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
 
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
@@ -644,7 +668,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -656,7 +680,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase2", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-phase2", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -731,6 +755,10 @@ class H(BaseHTTPRequestHandler):
             spark = [max(x[1] for x in h[i:i + k]) for i in range(0, len(h), k)]
             return self.send(200, json.dumps(dict(nav_status(), live=h[-1] if h else None, spark=spark,
                                                   span_s=round(h[-1][0] - h[0][0]) if len(h) > 1 else 0)).encode(), "application/json")
+        if path in ("/p1s", "/p1s.html"):
+            return self.send(200, open(os.path.join(HERE, "p1s.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p1s":
+            return self.send(200, json.dumps(dict(p1=p1s_full(), now=time.time())).encode(), "application/json")
         if path in ("/p2", "/p2.html"):
             return self.send(200, open(os.path.join(HERE, "p2.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p2":
