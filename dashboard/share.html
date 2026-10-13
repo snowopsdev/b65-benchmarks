@@ -1962,7 +1962,7 @@ const CARDS = [
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · B", title: "Gemma's first word on tiny prompts",
         sub: "Gemma 4 31B · llama-server time to first token, cold (no cache) · median of 5 · lower is better", results: true, foot: p1foot(viewP1S(d)) });
       let lx = b.x; cfgs.forEach((c, i) => { rr(ctx, lx, b.y, 14 * u, 14 * u, 3 * u, cols[i % 4]); lx += 22 * u + text(ctx, lab(c), lx + 22 * u, b.y + 12 * u, 14 * u, { color: C.ink2 }) + 20 * u; });
-      const area = { x: b.x, y: b.y + 40 * u, w: b.w, h: b.h - 70 * u }, gw = area.w / sizes.length, vmax = Math.max(...cfgs.flatMap(c => sizes.map(n => val(c, n) || 0)), 0.1);
+      const area = { x: b.x, y: b.y + 40 * u, w: b.w, h: b.h - 96 * u }, gw = area.w / sizes.length, vmax = Math.max(...cfgs.flatMap(c => sizes.map(n => val(c, n) || 0)), 0.1);
       const bw = Math.min(30 * u, (gw - 20 * u) / cfgs.length);
       ctx.fillStyle = C.grid; ctx.fillRect(area.x, area.y + area.h, area.w, 1.2 * u);
       sizes.forEach((n, j) => { const gx = area.x + gw * j + (gw - bw * cfgs.length) / 2;
@@ -1982,15 +1982,15 @@ const CARDS = [
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · C", title: "Does a growing chat reuse its cache?",
         sub: "8-turn chat, ~1.5K tokens added per turn · tokens the server had to re-read on the last turn vs the whole conversation", results: true, foot: p1foot(viewP1S(d)) });
       const rows = keys.map(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), last = rs[rs.length - 1]; const [m, be, cfg] = k.split("|"); return { m, be, cfg, re: +last.prompt_n_processed, ctx: +last.ctx_tokens, ttft: +last.ttft_s }; });
-      const labW = Math.min(330 * u, b.w * 0.36), maxW = b.w - labW - 170 * u, vmax = Math.max(...rows.map(r => r.ctx), 1), rh = Math.min(56 * u, b.h / rows.length), barH = Math.min(26 * u, rh * 0.6);
+      const labW = Math.min(330 * u, b.w * 0.36), maxW = b.w - labW - 170 * u, vmax = Math.max(...rows.map(r => r.ctx), 1), rh = Math.min(56 * u, (b.h - 22 * u) / rows.length), barH = Math.min(26 * u, rh * 0.6);
       rows.forEach((r, i) => { const y = b.y + rh * i + (rh - barH) / 2, m = d.models.find(x => x.name === r.m);
         text(ctx, `${short(m)} · ${r.be === "sycl" ? "SYCL" : "Vulkan"} · ${r.cfg === "ckpt0" ? "checkpoints off" : "checkpoints on"}`, b.x, y + barH * 0.75, 16 * u, { w: 650, max: labW - 12 * u });
         rr(ctx, b.x + labW, y, maxW * r.ctx / vmax, barH, 4 * u, "rgba(255,255,255,0.06)");
-        ctx.beginPath(); ctx.roundRect(b.x + labW, y, Math.max(4 * u, maxW * r.re / vmax), barH, 4 * u); ctx.fillStyle = r.re > r.ctx * 0.5 ? C.critical : mcolor(d.models.indexOf(m)); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(b.x + labW, y, Math.max(4 * u, maxW * r.re / vmax), barH, 4 * u); ctx.fillStyle = r.re >= r.ctx * 0.8 ? C.critical : mcolor(d.models.indexOf(m)); ctx.fill();
         text(ctx, `${r.re.toLocaleString()} of ${r.ctx.toLocaleString()}`, b.x + labW + maxW * r.ctx / vmax + 10 * u, y + barH * 0.75, 15 * u, { w: 700 }); });
-      text(ctx, "Coloured = tokens re-read on turn 8 · faint = the whole conversation · red = most of it re-read (cache thrown away).", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+      text(ctx, "Coloured = tokens re-read on the last turn · faint = the whole conversation · red = 80%+ re-read (cache thrown away).", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
-    caption: d => { const p = d.p5, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = keys.filter(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), l = rs[rs.length - 1]; return +l.prompt_n_processed > +l.ctx_tokens * 0.5; });
+    caption: d => { const p = d.p5, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = keys.filter(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), l = rs[rs.length - 1]; return +l.prompt_n_processed >= +l.ctx_tokens * 0.8; });
       return [["Post", `Does llama-server reuse a growing chat on Intel Arc, or re-read the whole thing every turn? 8-turn chats up to ~12K tokens, context checkpoints on vs off.\n\n${bad.length ? `${bad.length} of ${keys.length} setups re-read most of the conversation each turn.` : `All ${keys.length} setups reuse the cache: only the new turn is processed.`}\n\nDo you run with checkpoints off?`]]; } },
 
   { id: "p5-qwen", name: "D: taming Qwen's thinking", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.D || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
