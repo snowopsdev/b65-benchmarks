@@ -768,8 +768,15 @@ def p3_share():
         for sec, items in x["sections"].items():
             secs_[sec] = dict(done=len(items), n=len(f["ids"].get(sec, [])), **({} if not complete or sec == "writing" else dict(passed=sum(1 for i in items if i["status"] == "pass"))))
         models[m] = dict(status=x["status"], sections=secs_, **({} if not complete else dict(seconds=round(sum((i.get("s") or 0) for v in x["sections"].values() for i in v)))))
+    # writing: only once AJ has ranked every prompt blind (b65-phase3/writing_ranks.json, unblinded with the key afterwards)
+    writing = None
+    try:
+        wr = json.load(open(os.path.join(ROOT, "b65-phase3", "writing_ranks.json")))
+        if complete and wr.get("run_id") == f["run_id"] and len(wr.get("ranks", {})) >= len(f["ids"].get("writing", [])) and wr.get("unblinded"):
+            writing = dict(by_prompt=wr["unblinded"]["by_prompt"], totals=wr["unblinded"]["totals"])
+    except (OSError, ValueError, KeyError): pass
     return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], models=models, sections=f["sections"],
-                ids={k: len(v) for k, v in f["ids"].items()})
+                ids={k: len(v) for k, v in f["ids"].items()}, writing=writing)
 
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""

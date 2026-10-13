@@ -1,0 +1,100 @@
+{
+ "run_id": "p3-20261013-135609",
+ "ranked_by": "AJ",
+ "date": "2026-10-13",
+ "note": "1 = best, 3 = worst, per prompt. Ranked blind from blind_packet.md before the key was opened.",
+ "ranks": {
+  "w01": {
+   "A": 3,
+   "B": 1,
+   "C": 2
+  },
+  "w02": {
+   "A": 3,
+   "B": 1,
+   "C": 2
+  },
+  "w03": {
+   "A": 3,
+   "B": 1,
+   "C": 2
+  },
+  "w04": {
+   "A": 3,
+   "B": 2,
+   "C": 1
+  },
+  "w05": {
+   "A": 3,
+   "B": 1,
+   "C": 2
+  }
+ },
+ "unblinded": {
+  "by_prompt": {
+   "w01": {
+    "gemma-4-31b-qat": 3,
+    "qwen3.8-27b": 1,
+    "muse-glimmer": 2
+   },
+   "w02": {
+    "muse-glimmer": 3,
+    "gemma-4-31b-qat": 1,
+    "qwen3.8-27b": 2
+   },
+   "w03": {
+    "muse-glimmer": 3,
+    "gemma-4-31b-qat": 1,
+    "qwen3.8-27b": 2
+   },
+   "w04": {
+    "qwen3.8-27b": 3,
+    "gemma-4-31b-qat": 2,
+    "muse-glimmer": 1
+   },
+   "w05": {
+    "qwen3.8-27b": 3,
+    "gemma-4-31b-qat": 1,
+    "muse-glimmer": 2
+   }
+  },
+  "totals": {
+   "gemma-4-31b-qat": {
+    "ranks": [
+     3,
+     1,
+     1,
+     2,
+     1
+    ],
+    "firsts": 3,
+    "mean_rank": 1.6,
+    "points": 12
+   },
+   "qwen3.8-27b": {
+    "ranks": [
+     1,
+     2,
+     2,
+     3,
+     3
+    ],
+    "firsts": 1,
+    "mean_rank": 2.2,
+    "points": 9
+   },
+   "muse-glimmer": {
+    "ranks": [
+     2,
+     3,
+     3,
+     1,
+     2
+    ],
+    "firsts": 1,
+    "mean_rank": 2.2,
+    "points": 9
+   }
+  }
+ }
+}

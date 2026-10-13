@@ -1773,7 +1773,9 @@ const CARDS = [
       const items = [["coding", "Coding", "tests passed out of " + p.ids.coding], ["tools", "Tool calling", "correct calls out of " + p.ids.tools], ["notes", "Notes recall", "answers found out of " + p.ids.notes]].map(([k, lab, unit]) => {
         const [who, mx] = best(k); return [`${lab}: ${who.length === ms.length && ms.length > 2 ? "all three tie" : who.join(" & ") + (who.length > 1 ? " tie" : " leads")} (${mx})`, `${ms.map(m => `${short(m)} ${p.models[m.name].sections[k].passed}`).join(" · ")} ${unit}`]; });
       items.push([`Quickest through all 30: ${short(fast[0][0])}`, fast.map(([m, s]) => `${short(m)} ${Math.round(s / 60)} min`).join(" · ") + " · thinking models spend more tokens"]);
-      items.push(["Writing: ranked blind next", "5 prompts, answers shuffled and unlabelled"]);
+      if (p.writing) { const wt = p.writing.totals, best = ms.slice().sort((a, c) => wt[a.name].mean_rank - wt[c.name].mean_rank)[0];
+        items.push([`Writing (blind): ${short(best)} ranks best`, ms.map(m => `${short(m)} ${wt[m.name].mean_rank.toFixed(1)}`).join(" · ") + " mean rank (1 = best) · one rater"]); }
+      else items.push(["Writing: ranked blind next", "5 prompts, answers shuffled and unlabelled"]);
       const rh = b.h / items.length;
       items.forEach(([k, v], i) => { const cy = b.y + rh * i + rh / 2;
         ctx.beginPath(); ctx.arc(b.x + 14 * u, cy - 8 * u, 14 * u, 0, 7); ctx.fillStyle = C.surf; ctx.fill();
@@ -1782,7 +1784,34 @@ const CARDS = [
         text(ctx, v, b.x + 42 * u, cy + 21 * u, 16 * u, { color: C.ink2, max: b.w - 50 * u }); });
     },
     caption: d => { const p = d.p3, ms = d.models.filter(m => p.models[m.name]), sc = (m, k) => p.models[m.name].sections[k].passed;
-      return [["Post", `Are local ~30B models any good? Phase 3 on an Intel Arc Pro B65:\n\n${ms.map(m => `• ${short(m)}: ${sc(m, "coding")}/${p.ids.coding} code, ${sc(m, "tools")}/${p.ids.tools} tools, ${sc(m, "notes")}/${p.ids.notes} recall`).join("\n")}\n\nWriting gets ranked blind next. What should we test next?`]]; } },
+      return [["Post", `Are local ~30B models any good? Phase 3 on an Intel Arc Pro B65:\n\n${ms.map(m => `• ${short(m)}: ${sc(m, "coding")}/${p.ids.coding} code, ${sc(m, "tools")}/${p.ids.tools} tools, ${sc(m, "notes")}/${p.ids.notes} recall`).join("\n")}\n\n${p.writing ? (() => { const wt = p.writing.totals, b = ms.slice().sort((x, y) => wt[x.name].mean_rank - wt[y.name].mean_rank)[0]; return `Writing (blind): ${short(b)} best.`; })() : "Writing gets ranked blind next."} What should we test next?`]]; } },
+  { id: "p3-writing", name: "Phase 3 writing, ranked blind", safe: false, group: "p3",
+    ready: d => !!(d.p3 && d.p3.complete && d.p3.writing), lockMsg: d => d.p3 && d.p3.complete ? "Unlocks when every writing prompt has been ranked blind" : "Unlocks when Phase 3 finishes and the writing is ranked",
+    draw(ctx, W, H, u, d) {
+      const w = d.p3.writing, wide = W > H, ms = d.models.filter(m => w.totals[m.name]).sort((a, c) => w.totals[a.name].mean_rank - w.totals[c.name].mean_rank);
+      const prompts = Object.keys(w.by_prompt).sort(), plab = { w01: "LinkedIn post", w02: "SEO vs AEO", w03: "Why local AI", w04: "Decline email", w05: "Clarity rewrite" };
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 3", title: "Writing, ranked blind",
+        sub: "5 prompts · 3 unlabelled answers each, shuffled per prompt · ranked by a human before the key was opened", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = wide ? Math.min(260 * u, b.w * 0.24) : Math.min(230 * u, b.w * 0.3), sumW = wide ? 170 * u : 140 * u, cw = (b.w - labW - sumW) / prompts.length, headH = 58 * u;
+      const rh = Math.min(wide ? 120 * u : 220 * u, (b.h - headH) / ms.length);
+      prompts.forEach((p, j) => { const x = b.x + labW + cw * j + cw / 2;
+        text(ctx, p, x, b.y + 18 * u, 14 * u, { w: 700, color: C.ink2, align: "center" }); text(ctx, plab[p] || "", x, b.y + 38 * u, 12 * u, { color: C.muted, align: "center", max: cw - 6 * u }); });
+      text(ctx, "mean rank", b.x + b.w - sumW / 2, b.y + 18 * u, 14 * u, { w: 700, color: C.ink2, align: "center" });
+      ms.forEach((m, i) => {
+        const y = b.y + headH + rh * i, cy = y + rh / 2, t = w.totals[m.name], mi = d.models.indexOf(m);
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, cy - 18 * u, 12 * u, 12 * u, 3 * u, mcolor(mi));
+        text(ctx, m.display, b.x + 20 * u, cy - 6 * u, 20 * u, { w: 700, max: labW - 28 * u });
+        text(ctx, `${t.firsts} first place${t.firsts === 1 ? "" : "s"}`, b.x + 20 * u, cy + 16 * u, 14 * u, { color: C.muted });
+        prompts.forEach((p, j) => { const r = w.by_prompt[p][m.name], x = b.x + labW + cw * j + cw / 2, sz = Math.min(40 * u, cw - 14 * u, rh - 20 * u);
+          rr(ctx, x - sz / 2, cy - sz / 2, sz, sz, 8 * u, r === 1 ? mcolor(mi) : C.surf, r === 1 ? null : "rgba(255,255,255,0.10)", 1.5 * u);
+          text(ctx, String(r), x, cy + sz * 0.2, sz * 0.5, { w: 800, color: r === 1 ? C.page : r === 2 ? C.ink : C.muted, align: "center" }); });
+        text(ctx, t.mean_rank.toFixed(1), b.x + b.w - sumW / 2, cy + 12 * u, 34 * u, { w: 800, align: "center" });
+      });
+      text(ctx, "1 = best of the three for that prompt. Small sample: one rater, five prompts.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const w = d.p3.writing, ms = d.models.filter(m => w.totals[m.name]).sort((a, c) => w.totals[a.name].mean_rank - w.totals[c.name].mean_rank);
+      return [["Post", `Writing, ranked blind: 5 prompts, 3 unlabelled answers each, three local models on a 32 GB Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: mean rank ${w.totals[m.name].mean_rank.toFixed(1)}, ${w.totals[m.name].firsts} first place${w.totals[m.name].firsts === 1 ? "" : "s"}`).join("\n")}\n\nOne rater, small sample. Which writes best for you?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
