@@ -1,0 +1,7 @@
+model,backend,fa,test,tok_s,sd,board_w,tok_per_j,invocation_w,gpu_info
+qwen3.8-27b,sycl,0,pp512,663.97,0.372,182.7,3.6341,70.1,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,pp512,639.53,0.466,181.8,3.5169,61.8,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,pp512,445.69,0.161,149.4,2.9833,77.8,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,tg128,23.69,0.007,192.2,0.1233,162.3,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,tg128,23.68,0.01,192.4,0.1231,165.1,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,tg128,19.04,0.046,166.1,0.1146,150.0,Intel(R) Graphics (BMG G31)

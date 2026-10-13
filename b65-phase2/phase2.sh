@@ -37,7 +37,7 @@ stamp() { while IFS= read -r l; do echo "$EPOCHREALTIME $l"; done; }
   echo "oneapi=$(pacman -Q intel-oneapi-basekit intel-oneapi-dpcpp-cpp intel-oneapi-mkl-sycl 2>/dev/null | tr '\n' ' ')"
   echo "igc=$(pacman -Q intel-graphics-compiler 2>/dev/null)"
   echo "vulkan_bench=$("$VK_LB" --version 2>&1 | grep -m1 version)"
-  echo "sycl_bench=$(bash -c "$(sycl_env); '$SY_LB' --version" 2>&1 | grep -m1 version)"
+  echo "sycl_bench=$(bash -c "$(sycl_env); '$SY_LB' --version" 2>&1 | grep -m1 '^version:')"
   echo "sycl_device=$(echo "$SDEVS" | grep -m1 SYCL0)"
   echo "vk_visible=$B65_VK_INDEX"; echo "vram_free_mib=$FREE"; echo "energy_file=${ENERGY:-none}"; echo "reps=$REPS"; echo "dry=$DRY"; } > "$OUT/env.txt"
 

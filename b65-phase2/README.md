@@ -27,6 +27,13 @@ Arch no longer ships `intel-oneapi-basekit`, the package the handoff names. The 
 oneDNN is optional for llama.cpp SYCL and isn't installed. Arch's `onednn` package isn't a GPU build. Installed versions
 are recorded in `packages.txt` and in each run's `env.txt`.
 
+## Build and checks (2026-10-13)
+- AJ installed the packages listed above; versions are in `packages.txt`.
+- `build_sycl.sh` built in about 10 minutes and reports `version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)`. `sycl-ls` shows `[level_zero:gpu][level_zero:0] Intel(R) Arc(TM) Pro B65 Graphics`. The log is `build_sycl.log` (723 compiler warnings, no errors).
+- Dry run `raw/p2-dry-20261013-091018`, Qwen only: all 6 cells ok. SYCL `gpu_info` reads "Intel(R) Arc(TM) Pro B65 Graphics".
+- **Gibberish check** (`raw/p2-spot-20261013-091431`): Qwen ran in llama-server at temperature 0 on SYCL and on Vulkan, with the same prompt and 120 tokens. The text was **identical**, all 583 characters, at 23.92 tok/s on SYCL vs 19.11 on Vulkan.
+- The dry run's `env.txt` has a device-table header where the SYCL version belongs, because `grep version` matched "Driver version". This is fixed for the full run (`grep '^version:'`).
+
 ## Local changes
 - `phase2.sh`:
   - Uses the vendor Vulkan build by default (`../vendor/llama.cpp/build/bin`), and uses awk instead of `bc`, which isn't installed.
@@ -45,3 +52,4 @@ are recorded in `packages.txt` and in each run's `env.txt`.
   - Uses cmake and ninja from the project `.venv`, with a fallback from `setvars.sh` to `oneapi-vars.sh`.
   - Lists the devices llama-bench sees.
   - Logs everything to `build_sycl.log`.
+  - Turns off `set -u` while sourcing `setvars.sh`, because oneAPI's `vars.sh` reads unset variables (`OCL_ICD_FILENAMES`).

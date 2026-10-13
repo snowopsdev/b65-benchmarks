@@ -13,7 +13,7 @@ exec > >(tee "$LOG") 2>&1
 git -C "$SRC" checkout --quiet "$COMMIT"; echo "source commit: $(git -C "$SRC" rev-parse --short HEAD)"
 ENV="/opt/intel/oneapi/setvars.sh"; [ -f "$ENV" ] || ENV="/opt/intel/oneapi/oneapi-vars.sh"
 # shellcheck disable=SC1090
-source "$ENV" --force >/dev/null
+set +u; source "$ENV" --force >/dev/null; set -u   # oneAPI vars.sh reads unset variables
 echo "icpx: $(icpx --version | head -n1)"
 cmake -S "$SRC" -B "$SRC/build-sycl" -G Ninja -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
       -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx -DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=OFF

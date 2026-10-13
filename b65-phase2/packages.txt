@@ -1,0 +1,21 @@
+# installed 2026-10-13 by AJ for Phase 2 (pacman -S --needed ...)
+intel-compute-runtime 26.31.39395.13-1
+intel-gmmlib 22.10.0-1
+intel-graphics-compiler 1:2.40.13-1
+intel-oneapi-common 2026.0.0_235-1
+intel-oneapi-compiler-dpcpp-cpp-runtime 2026.0.0_947-2
+intel-oneapi-compiler-dpcpp-cpp-runtime-libs 2026.0.0_947-2
+intel-oneapi-compiler-shared 2026.0.0_947-1
+intel-oneapi-compiler-shared-runtime 2026.0.0_947-1
+intel-oneapi-compiler-shared-runtime-libs 2026.0.0_947-1
+intel-oneapi-dev-utilities 2026.0.1_16-1
+intel-oneapi-dpcpp-cpp 2026.0.0_947-1
+intel-oneapi-dpcpp-debugger 2026.0.0_220-1
+intel-oneapi-mkl 2026.0.0_908-1
+intel-oneapi-mkl-sycl 2026.0.0_908-1
+intel-oneapi-openmp 2026.0.0_947-1
+intel-oneapi-tbb 2023.0.0_724-1
+intel-oneapi-tcm 1.5.0_489-1
+intel-oneapi-umf 1.1.0_340-2
+level-zero-headers 1.32.0-1
+level-zero-loader 1.32.0-1

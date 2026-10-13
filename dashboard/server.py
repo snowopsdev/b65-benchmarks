@@ -509,7 +509,7 @@ def p2_full():
     """Phase 2 dashboard data: llama-bench on Vulkan fa0 vs SYCL fa0/fa1, per model and test, plus the SYCL build state.
     Vulkan fa0 references from Phase 0.5 / Phase 1 are attached as a drift check."""
     kit = os.path.join(ROOT, "b65-phase2"); base = os.path.join(kit, "raw")
-    runs = sorted(d for d in os.listdir(base) if d.startswith("p2-")) if os.path.isdir(base) else []
+    runs = sorted(d for d in os.listdir(base) if re.match(r"^p2-(dry-)?\d{8}-\d{6}$", d)) if os.path.isdir(base) else []   # not p2-spot-*
     models = [l.split("|")[0] for l in read_lines(os.path.join(kit, "models.conf")) if l.strip() and not l.startswith("#")]
     blog = read_lines(os.path.join(kit, "build_sycl.log"))
     build = dict(state="not started" if not blog else "built" if any(l.startswith("SYCL bins:") for l in blog)
@@ -572,6 +572,22 @@ def p2_full():
     res["total"] = len(res["cells"]); res["done"] = sum(1 for c in res["cells"] if c["status"] not in ("pending", "running"))
     return res
 
+def p2_share():
+    """Phase 2 data for share cards: statuses only until the FULL run (not a dry run) has every cell done (an OOM counts
+    as done, it's a result); afterwards tok/s and board W per cell."""
+    f = p2_full()
+    complete = f["state"] == "finished" and not f["dry"] and f["total"] > 0 and f["done"] >= f["total"]
+    cells = []
+    for c in f["cells"]:
+        st = c["status"]
+        if not complete: cells.append(dict(model=c["model"], run=c["run"], test=c["test"], status=st if st in ("pending", "running") else "done")); continue
+        cells.append(dict(model=c["model"], run=c["run"], test=c["test"], status=st, tok_s=c.get("tok_s"), sd=c.get("sd"), watts=c.get("watts"), ref=c.get("ref")))
+    out = os.path.join(ROOT, "b65-phase2", "raw", f["run_id"]) if f["run_id"] else None
+    return dict(state=f["state"], dry=f["dry"], complete=complete, done=f["done"], total=f["total"], run_id=f["run_id"], models=f["models"],
+                tests=f["tests"], runs=f["runs"], cells=cells, build=dict(state=f["build"]["state"]),
+                sycl=dict(compute_runtime=f["env"].get("compute_runtime"), oneapi=f["env"].get("oneapi")),
+                shape=power_shape(out) if out and os.path.isdir(out) and f["state"] == "running" else [])
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -604,7 +620,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
