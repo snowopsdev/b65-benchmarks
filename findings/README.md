@@ -33,3 +33,9 @@ Release tarballs for each run (raw data, scripts as run, summaries, SHA256SUMS) 
 8. **Gemma on SYCL needs `-b 2048 -ub 2048`:** its 16K first token drops from 58 s to 31 s, 1.6× faster than Vulkan. Checkpoints cost nothing on SYCL (Gemma diagnostic).
 9. **Quality (Phase 3): Muse scores 10/10 coding, 10/10 tools and 5/5 recall, and is quickest.** Qwen and Gemma each miss one coding task by running out of tokens while thinking. Gemma passes with more room; Qwen goes round in circles. In AJ's blind writing ranking, Gemma wins (mean rank 1.6 against 2.2 for both others).
 10. **The canary is clean** (all within 0.1%), and **`-ub 2048` lifts SYCL prefill for all three models** (+35–55% at 16K, decode unchanged). On Vulkan it helps Qwen (+10%) but costs Muse 36% (Phase 4).
+
+## Current defaults (Forge, 2026-10-13)
+- **Engine:** llama.cpp `8bb3cf0d2` SYCL, flash attention on, `-b 2048 -ub 2048`, for all three models.
+- **Gemma's llama-server:** `--ctx-checkpoints 0` is optional on SYCL.
+- **Canary:** stays at ub 512 against the Phase 2 baseline.
+- **Vulkan:** if used, flash attention off and ub 512.

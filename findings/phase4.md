@@ -1,5 +1,10 @@
 # Arc Pro B65 benchmark: Phase 4 findings (canary and micro-batch check)
 
+> **Decision (Forge, 2026-10-13, after checking every number against canary.csv):**
+> - `-b 2048 -ub 2048` is the SYCL default for all three models.
+> - The canary stays at ub 512, so it stays comparable to its baseline. `baseline.json` is unchanged.
+> - Vulkan stays at ub 512.
+
 First canary `p4-20261013-150339`, 2026-10-13, 3:03–3:41 PM ET, run with `UBCHECK=1 B65_VK_INDEX=1` and the default models (Qwen and Muse). All 20 tests ok. Package: `b65-phase4-p4-20261013-150339.tar.gz`.
 
 - **Versions:** the same as the Phase 2 baseline. Kernel 7.2.5-3-omarchy, Mesa 26.2.2, oneAPI DPC++ 2026.0, compute-runtime 26.31.39395.13, Level Zero 1.32.0, llama.cpp 11574 (`8bb3cf0d2`). Nothing has been updated, so this run is also a reproducibility check.
@@ -42,6 +47,6 @@ First canary `p4-20261013-150339`, 2026-10-13, 3:03–3:41 PM ET, run with `UBCH
 - **`compare4.py` fix:** tests without a baseline, such as pp4096 from the micro-batch check, were listed as "+0.0% ok" in the drift table. They're now left out of it and appear only in the micro-batch table.
 
 ## Next
-- **Forge's call, per the handoff:** adopt `-b 2048 -ub 2048` as the SYCL default for Qwen and Muse, like Gemma, and update `baseline.json` afterwards. The canary itself can stay at ub 512 for comparability, or move to the new default with a fresh baseline.
+- **Decided:** ub 2048 is the SYCL default for all three; the canary and `baseline.json` stay at ub 512. Qwen and Muse server time to first token at ub 2048 hasn't been measured yet; llama-bench predicts about 35% faster prefill.
 - **The Muse Vulkan ub 2048 drop** is a candidate llama.cpp Vulkan issue, if Vulkan stays relevant.
 - **Routine:** run `./canary.sh` (about 10 minutes) after any Mesa, kernel, oneAPI, llama.cpp or LM Studio update.
