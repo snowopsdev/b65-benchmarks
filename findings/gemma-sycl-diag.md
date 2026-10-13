@@ -21,7 +21,7 @@ That clears Forge's 45 s target, so under the rule `-ub 2048` becomes Gemma's SY
 | `ckpt0_swafull_16k` (`--swa-full`, ctx 17K) | out of VRAM at load (Level Zero `OUT_OF_DEVICE_MEMORY`) | | | | |
 | `ckpt0_fa0` (FA off, local addition) | 2.66 s | 22.01 s | 91.29 s | 186 / 180 | 19.43 / 16.10 / 10.64 |
 
-All values are the median of 3; repeat runs agree within 0.1 s after the first, cold request. The `ckpt0` row reproduces Phase 1S within 0.1%.
+All values are the median of 3. After the first, cold request, repeat runs agree within 0.1 s, except `default` at 4K (14.92 vs 14.63 s, a 0.28 s spread). The `ckpt0` row reproduces Phase 1S within 0.1%.
 
 llama-bench pp16384 (SYCL, FA on):
 
@@ -34,7 +34,7 @@ llama-bench pp16384 (SYCL, FA on):
 1. **Gemma's SYCL prefill is limited by the 512-token micro-batch.**
    - Raising it to 2048 speeds up prefill by 55% in llama-bench and by 89–96% in the server (290 → 567 tok/s at 4K, 282 → 533 at 16K).
    - At ub 2048 the server is about 14% below llama-bench (533 vs 617). That's the same kind of gap Qwen and Muse show at ub 512, so the extra Gemma-specific server gap is gone.
-2. **Checkpoints don't cost anything on SYCL.** The default-checkpoint server is within 6% of `--ctx-checkpoints 0` at every size (−2% / +6% / +1%) (58.6 vs 58.2 s at 16K). On Vulkan they added about 100 s per prompt. The flag matters for Vulkan, not SYCL.
+2. **Checkpoints don't cost anything on SYCL.** The default-checkpoint server is within 6% of `--ctx-checkpoints 0` at every size: −2% / +6% / +1% at 512 / 4K / 16K (58.6 vs 58.2 s at 16K). On Vulkan they added about 100 s per prompt. The flag matters for Vulkan, not SYCL.
 3. **The 32K allocation isn't the cause.** At 17K context the results are identical to 32K.
 4. **Flash attention has to stay on.** With it off, Gemma's SYCL server is much slower: 91 s at 16K, with generation at 10.6 tok/s.
 5. **`--swa-full` doesn't fit** even at 17K context on SYCL, as at 32K on Vulkan.
@@ -49,3 +49,5 @@ llama-bench pp16384 (SYCL, FA on):
 - **Qwen and Muse weren't tested at ub 2048.** If their SYCL prefill also scales (Phase 2 and 1S both used ub 512), their time to first token could improve too.
 - **Phase 2's prefill comparison still stands,** because both engines used the same default ub of 512. A Vulkan ub-2048 check would show whether Vulkan gains as much.
 - **Gemma's short-prompt gap** (2.8 s vs 1.4 s at 512 tokens) isn't explained by micro-batch size.
+
+> Reviewed by Forge on 2026-10-13: every number matches the raw serve.csv and llama-bench jsonl. The rep-spread exception above (`default` at 4K) was found in a recheck afterwards.
