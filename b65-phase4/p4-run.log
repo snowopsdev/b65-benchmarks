@@ -16,3 +16,42 @@ energy_file=/sys/class/hwmon/hwmon6/energy1_input
 >> sycl qwen3.8-27b pp512 ub512
   sycl qwen3.8-27b pp512 ub512: 639.86 tok/s 184.2W
 >> sycl qwen3.8-27b pp16384 ub512
+  sycl qwen3.8-27b pp16384 ub512: 605.94 tok/s 185.7W
+>> sycl qwen3.8-27b tg128 ub512
+  sycl qwen3.8-27b tg128 ub512: 23.69 tok/s 195.4W
+>> sycl qwen3.8-27b tg128@d16384 ub512
+  sycl qwen3.8-27b tg128@d16384 ub512: 18.64 tok/s 177.4W
+>> sycl qwen3.8-27b pp4096 ub512
+  sycl qwen3.8-27b pp4096 ub512: 645.53 tok/s 186.4W
+>> sycl qwen3.8-27b pp4096 ub2048
+  sycl qwen3.8-27b pp4096 ub2048: 890.74 tok/s 197.0W
+>> sycl qwen3.8-27b pp16384 ub2048
+  sycl qwen3.8-27b pp16384 ub2048: 824.18 tok/s 196.5W
+>> sycl qwen3.8-27b tg128@d16384 ub2048
+  sycl qwen3.8-27b tg128@d16384 ub2048: 18.86 tok/s 180.8W
+>> vulkan qwen3.8-27b pp16384 ub512
+  vulkan qwen3.8-27b pp16384 ub512: 388.16 tok/s 156.8W
+>> vulkan qwen3.8-27b pp16384 ub2048
+  vulkan qwen3.8-27b pp16384 ub2048: 428.7 tok/s 166.8W
+== muse-glimmer
+>> sycl muse-glimmer pp512 ub512
+  sycl muse-glimmer pp512 ub512: 690.61 tok/s 184.0W
+>> sycl muse-glimmer pp16384 ub512
+  sycl muse-glimmer pp16384 ub512: 608.72 tok/s 182.1W
+>> sycl muse-glimmer tg128 ub512
+  sycl muse-glimmer tg128 ub512: 25.64 tok/s 199.5W
+>> sycl muse-glimmer tg128@d16384 ub512
+  sycl muse-glimmer tg128@d16384 ub512: 23.56 tok/s 194.3W
+>> sycl muse-glimmer pp4096 ub512
+  sycl muse-glimmer pp4096 ub512: 652.14 tok/s 183.3W
+>> sycl muse-glimmer pp4096 ub2048
+  sycl muse-glimmer pp4096 ub2048: 906.82 tok/s 194.9W
+>> sycl muse-glimmer pp16384 ub2048
+  sycl muse-glimmer pp16384 ub2048: 820.69 tok/s 193.5W
+>> sycl muse-glimmer tg128@d16384 ub2048
+  sycl muse-glimmer tg128@d16384 ub2048: 23.44 tok/s 193.9W
+>> vulkan muse-glimmer pp16384 ub512
+  vulkan muse-glimmer pp16384 ub512: 429.82 tok/s 162.5W
+>> vulkan muse-glimmer pp16384 ub2048
+  vulkan muse-glimmer pp16384 ub2048: 274.01 tok/s 122.0W
+./canary.sh: line 73: syntax error near unexpected token `done'

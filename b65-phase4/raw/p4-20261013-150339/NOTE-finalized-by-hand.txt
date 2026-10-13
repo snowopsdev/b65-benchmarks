@@ -1,0 +1,1 @@
+summary + done written by hand at 2026-10-13T15:41:43-04:00: canary.sh was edited mid-run (vk_index line), which broke its last lines; all 20 tests had completed

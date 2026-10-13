@@ -9,6 +9,7 @@ flags = 0
 for r in rows:
     if r["backend"] != "sycl" or r["ub"] != "512": continue
     b = base.get(r["model"], {}).get(r["test"])
+    if b is None: continue   # local: no baseline for this test (e.g. pp4096 from the micro-batch check); it shows in the ub table
     if r["tok_s"] in ("FAIL", "") : L.append(f"| {r['model']} | {r['test']} | {b} | FAIL | | | **!!** |"); flags += 1; continue
     now = float(r["tok_s"]); d = (now - b) / b * 100 if b else 0; f = abs(d) > 5; flags += f
     L.append(f"| {r['model']} | {r['test']} | {b} | {now:.2f} | {d:+.1f}% | {r['board_w']} | {'**!!**' if f else 'ok'} |")

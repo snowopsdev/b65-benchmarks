@@ -21,3 +21,9 @@ Plan and how to read results: `HANDOFF.md`. Runs: `raw/p4-*` (smoke tests: `raw/
 
 ## Dry run (`raw/p4-dry-20261013-150059`, Qwen, 1 rep)
 pp512, pp16384, tg128 and tg128@d16384 were all within 0.1% of the baseline. 0 flagged.
+
+## First canary (`raw/p4-20261013-150339`)
+- All 20 tests ran; 0 flagged (all within 0.1%).
+- **Finalized by hand:** `canary.sh` was edited while running (the `vk_index` line), which broke its last lines after the tests were done. The summary and `done` were then written by hand; see `NOTE-finalized-by-hand.txt`.
+- `compare4.py` now leaves tests without a baseline (pp4096) out of the drift table.
+- `raw/p4-recheck-20261013-154203`: Muse Vulkan pp16384 at ub 2048 vs 512, rerun in a fresh process. It reproduced (272.0 vs 429.7 tok/s).
