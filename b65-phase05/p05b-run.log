@@ -1,0 +1,17 @@
+>> qwen3.8-27b fa=0 tg128
+>> qwen3.8-27b fa=0 tg128@d4096
+>> gemma-4-31b-qat fa=0 tg128
+>> gemma-4-31b-qat fa=0 tg128@d4096
+>> muse-glimmer fa=0 tg128
+>> muse-glimmer fa=0 tg128@d4096
+lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf  commit=5a7da681f605  match=yes
+lmstudio-community/gemma-4-31B-it-QAT-GGUF/gemma-4-31B-it-QAT-Q4_0.gguf  commit=12e5eae7a583  match=yes
+lmstudio-community/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf  commit=c34cb7372a72  match=yes
+model              test                fa=0      fa=1  faster
+gemma-4-31b-qat    tg128              19.13         -  
+gemma-4-31b-qat    tg128@d4096         17.4         -  
+muse-glimmer       tg128              20.94         -  
+muse-glimmer       tg128@d4096         18.7         -  
+qwen3.8-27b        tg128              19.08         -  
+qwen3.8-27b        tg128@d4096        18.85         -  
+Done: raw/p05b-20261012-173906

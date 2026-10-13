@@ -1,0 +1,40 @@
+>> qwen3.8-27b fa=0 pp512
+>> qwen3.8-27b fa=0 pp4096
+>> qwen3.8-27b fa=0 pp16384
+>> qwen3.8-27b fa=0 tg128@d16384
+>> qwen3.8-27b fa=1 pp512
+>> qwen3.8-27b fa=1 pp4096
+>> qwen3.8-27b fa=1 pp16384
+>> qwen3.8-27b fa=1 tg128@d16384
+>> gemma-4-31b-qat fa=0 pp512
+>> gemma-4-31b-qat fa=0 pp4096
+>> gemma-4-31b-qat fa=0 pp16384
+>> gemma-4-31b-qat fa=0 tg128@d16384
+>> gemma-4-31b-qat fa=1 pp512
+>> gemma-4-31b-qat fa=1 pp4096
+>> gemma-4-31b-qat fa=1 tg128@d16384
+>> muse-glimmer fa=0 pp512
+>> muse-glimmer fa=0 pp4096
+>> muse-glimmer fa=0 pp16384
+>> muse-glimmer fa=0 tg128@d16384
+>> muse-glimmer fa=1 pp512
+>> muse-glimmer fa=1 pp4096
+>> muse-glimmer fa=1 pp16384
+>> muse-glimmer fa=1 tg128@d16384
+lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf  commit=5a7da681f605  match=yes
+lmstudio-community/gemma-4-31B-it-QAT-GGUF/gemma-4-31B-it-QAT-Q4_0.gguf  commit=12e5eae7a583  match=yes
+lmstudio-community/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf  commit=c34cb7372a72  match=yes
+model              test                fa=0      fa=1  faster
+gemma-4-31b-qat    pp16384            335.4         -  
+gemma-4-31b-qat    pp4096            378.61    111.46  fa=0
+gemma-4-31b-qat    pp512             413.37    294.41  fa=0
+gemma-4-31b-qat    tg128@d16384       15.99     14.57  fa=0
+muse-glimmer       pp16384           429.71    274.51  fa=0
+muse-glimmer       pp4096            483.41    375.32  fa=0
+muse-glimmer       pp512              540.4    522.92  fa=0
+muse-glimmer       tg128@d16384       16.78     11.26  fa=0
+qwen3.8-27b        pp16384           388.14    221.16  fa=0
+qwen3.8-27b        pp4096            431.81    358.02  fa=0
+qwen3.8-27b        pp512             445.65    434.45  fa=0
+qwen3.8-27b        tg128@d16384       17.62     17.33  fa=0
+Done: raw/p05-20261012-163413

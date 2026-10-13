@@ -1,0 +1,7 @@
+test,model,fa,file,status,energy_j,seconds,t_end
+tg128,qwen3.8-27b,0,Qwen3.8-27B-Q4_K_M.gguf,ok,7050.291016,63.525478,1791841235.687509
+tg128@d4096,qwen3.8-27b,0,Qwen3.8-27B-Q4_K_M.gguf,ok,7813.189209,51.710357,1791841287.410792
+tg128,gemma-4-31b-qat,0,gemma-4-31B-it-QAT-Q4_0.gguf,ok,7764.693543,68.121687,1791841386.335256
+tg128@d4096,gemma-4-31b-qat,0,gemma-4-31B-it-QAT-Q4_0.gguf,ok,10252.652588,81.284847,1791841467.628617
+tg128,muse-glimmer,0,Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf,ok,6859.433228,61.001696,1791841553.141382
+tg128@d4096,muse-glimmer,0,Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf,ok,7777.092530,50.355583,1791841603.508432

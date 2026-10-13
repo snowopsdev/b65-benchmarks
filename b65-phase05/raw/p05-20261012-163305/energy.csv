@@ -1,0 +1,3 @@
+test,model,fa,file,status,energy_j,seconds,t_end
+pp512,qwen3.8-27b,0,Qwen3.8-27B-Q4_K_M.gguf,ok,1509.726257,14.473658,1791837230.964286
+pp512,qwen3.8-27b,1,Qwen3.8-27B-Q4_K_M.gguf,ok,1485.766480,13.520649,1791837244.498414
