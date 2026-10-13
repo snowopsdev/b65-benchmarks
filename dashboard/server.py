@@ -639,10 +639,59 @@ def nav_status():
     return dict(p0=state(latest(RAW, r"^\d{8}-\d{6}$")), p05=s05,
                 p1=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-\d{8}-\d{6}$")),
                 p1g=state(latest(os.path.join(ROOT, "b65-phase1", "raw"), r"^p1-swa-\d{8}-\d{6}$")), p2=s2,
-                p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")))
+                p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")),
+                gd=state(latest(os.path.join(ROOT, "b65-gemmadiag", "raw"), r"^gd-\d{8}-\d{6}$")))
 
 def p1s_full():
     return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
+
+GD_VARIANTS = [("ckpt0", "--ctx-checkpoints 0", 32768), ("default", "default checkpoints", 32768), ("ckpt0_ub2048", "--ctx-checkpoints 0 -b 2048 -ub 2048", 32768),
+               ("ckpt0_swafull_16k", "--ctx-checkpoints 0 --swa-full, ctx 17K", 17408), ("ckpt0_ctx16k", "--ctx-checkpoints 0, ctx 17K", 17408),
+               ("ckpt0_fa0", "--ctx-checkpoints 0, flash attention off (local addition)", 32768)]
+
+def gd_full():
+    """Gemma SYCL server prefill diagnostic (b65-gemmadiag/raw/gd-*): llama-bench ub512 vs ub2048, then server variants."""
+    kit = os.path.join(ROOT, "b65-gemmadiag"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^gd-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    res = dict(state="not started", run_id=None, env={}, bench=[], variants=[], current=None, dry=False, sizes=P1_SIZES, reps=P1_REPS,
+               refs={})
+    s1 = os.path.join(ROOT, "b65-phase1s", "raw", "p1s-20261013-111949", "serve.csv")
+    vk = os.path.join(ROOT, "b65-phase1", "raw", "p1-swa-20261013-081841", "ckpt-off", "serve.csv")
+    if os.path.exists(s1): res["refs"]["sycl_p1s"] = serve_medians(list(csv.DictReader(open(s1))), "gemma-4-31b-qat")
+    if os.path.exists(vk): res["refs"]["vulkan_ckpt0"] = serve_medians(list(csv.DictReader(open(vk))), "gemma-4-31b-qat")
+    res["refs"]["bench_pp16384"] = jsonl_ts(os.path.join(P2_RUN, "gemma-4-31b-qat.sycl.fa1.pp16384.jsonl"))
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "gemmadiag" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    log = read_lines(os.path.join(kit, "gd-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    cur = last[-1] if res["state"] == "running" and last else None
+    for ub in (512, 2048):
+        v = jsonl_ts(f"{out}/bench.ub{ub}.jsonl")
+        res["bench"].append(dict(ub=ub, tok_s=v, status="ok" if v else "running" if cur and cur[0] == "bench" and cur[1] == f"ub{ub}" else "pending"))
+    notes = read_lines(f"{out}/notes.txt")
+    for lab, desc, ctx in GD_VARIANTS[:1] if res["dry"] else GD_VARIANTS:
+        d = os.path.join(out, lab); rows = list(csv.DictReader(open(f"{d}/serve.csv"))) if os.path.exists(f"{d}/serve.csv") else []
+        note = next((n.split(": ", 1)[1] for n in notes if n.startswith(lab + ":")), None)
+        running = bool(cur and cur[0] == "server" and cur[1] == lab)
+        sizes = [512] if res["dry"] else P1_SIZES
+        serve = [x for x in serve_medians(rows) if x["size"] in sizes]
+        st = ("oom" if note == "OOM" else "fail") if note else "running" if running else "ok" if serve and all(x["reps"] >= (1 if res["dry"] else P1_REPS) for x in serve) else "pending" if not rows else "stopped"
+        x = dict(name=lab, flags=desc, ctx=ctx, status=st, serve=serve)
+        if running:
+            prog = None
+            for l in read_lines(f"{d}/server.log"):
+                mm = SRV_PROGRESS.search(l)
+                if mm: prog = dict(n_tokens=int(mm.group(1)), progress=float(mm.group(2)), t=float(mm.group(3)))
+                elif "launch_slot_" in l: prog = None
+            res["current"] = dict(variant=lab, flags=desc, phase=f"request {min(len(rows) + 1, len(sizes) * P1_REPS)} of {len(sizes) * (1 if res['dry'] else P1_REPS)}" if rows or any("listening on" in l for l in read_lines(f"{d}/server.log")) else "loading model", prompt=prog)
+        res["variants"].append(x)
+    if cur and cur[0] == "bench": res["current"] = dict(variant=f"llama-bench pp16384 {cur[1]}", flags="", phase="running", prompt=None)
+    res["total"] = len(res["bench"]) + len(res["variants"]); res["done"] = sum(1 for b in res["bench"] if b["status"] == "ok") + sum(1 for v in res["variants"] if v["status"] in ("ok", "oom", "fail"))
+    return res
 
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
@@ -688,7 +737,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-phase2", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -763,6 +812,10 @@ class H(BaseHTTPRequestHandler):
             spark = [max(x[1] for x in h[i:i + k]) for i in range(0, len(h), k)]
             return self.send(200, json.dumps(dict(nav_status(), live=h[-1] if h else None, spark=spark,
                                                   span_s=round(h[-1][0] - h[0][0]) if len(h) > 1 else 0)).encode(), "application/json")
+        if path in ("/gd", "/gd.html"):
+            return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/gd":
+            return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
         if path in ("/p1s", "/p1s.html"):
             return self.send(200, open(os.path.join(HERE, "p1s.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p1s":

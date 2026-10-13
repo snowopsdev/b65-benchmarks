@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B65 Bench · Gemma SYCL diagnostic</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --series-1: #2a78d6; --series-1-fill: rgba(42,120,214,0.10);
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --good-text: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --series-1: #3987e5; --series-1-fill: rgba(57,135,229,0.14); --good-text: #0ca30c;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root { min-height: 100vh; background: var(--page); color: var(--text-primary);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+h1 { font-size: 20px; margin: 0; font-weight: 650; }
+.sub { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); font-weight: 600; font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.running .dot { background: var(--good); animation: pulse 1.6s infinite; }
+.finished .dot { background: var(--good); } .stopped .dot { background: var(--warning); }
+@keyframes pulse { 50% { opacity: .3; } }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .04em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile .unit { font-size: 15px; color: var(--text-secondary); font-weight: 500; margin-left: 3px; }
+.tile .note { color: var(--muted); font-size: 12px; }
+.now { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: center; }
+.now .what { font-size: 18px; font-weight: 600; }
+.bar { height: 6px; border-radius: 3px; background: var(--wash); overflow: hidden; grid-column: 1 / -1; }
+.bar > div { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .4s; }
+#chart { position: relative; }
+#chart svg { display: block; width: 100%; height: 240px; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  white-space: nowrap; display: none; font-variant-numeric: tabular-nums; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 13px; }
+td.test { color: var(--text-secondary); white-space: nowrap; width: 1%; }
+.big { font-weight: 650; font-size: 15px; }
+.sd, .meta { color: var(--muted); font-size: 12px; }
+.st { font-size: 12px; display: inline-flex; gap: 4px; align-items: center; color: var(--text-secondary); }
+.st.failed { color: var(--critical); font-weight: 600; }
+.st.running { color: var(--text-primary); font-weight: 600; }
+.cellbar { height: 3px; background: var(--series-1); border-radius: 2px; margin-top: 4px; opacity: .8; }
+details { border-top: 1px solid var(--grid); padding: 8px 0; }
+summary { cursor: pointer; font-weight: 600; }
+pre { white-space: pre-wrap; font: 12px/1.5 ui-monospace, monospace; color: var(--text-secondary); margin: 8px 0 0; }
+.env { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; font-size: 12px; }
+.env div:nth-child(odd) { color: var(--muted); } .env div:nth-child(even) { word-break: break-word; }
+.err { color: var(--critical); }
+a { color: var(--series-1); }
+.charts img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+.foot { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .viz-root { padding: 12px; } th, td { padding: 6px; } .tile .value { font-size: 24px; } }
+.win { background: rgba(12,163,12,.10); }
+</style>
+<style>
+.viz-root { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; }
+nav { display: flex; gap: 14px; margin-left: auto; }
+td.num { text-align: right; white-space: nowrap; }
+th.num { text-align: right; }
+.delta { font-weight: 650; }
+.delta.up { color: var(--good-text); } .delta.down { color: var(--critical); }
+.pick { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.mrow td { border-top: 2px solid var(--grid); }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+.ok-text { color: var(--good-text); font-weight: 600; } .bad-text { color: var(--critical); font-weight: 600; }
+code { font: 12px ui-monospace, monospace; }
+</style>
+<script src="nav.js"></script>
+</head>
+<body>
+<div class="viz-root"><div class="wrap">
+  <header>
+    <h1>Gemma on SYCL · server prefill diagnostic</h1>
+    <span id="badge" class="badge"><span class="dot"></span><span id="state">connecting…</span></span>
+    <span class="sub" id="runinfo"></span>
+  </header>
+
+  <div class="card">
+    <h2>The question</h2>
+    <p style="margin:0">On SYCL (flash attention on), llama-server prefills Gemma 4 31B at ~282 tok/s while llama-bench gets ~397, so Gemma's 16K first token is
+      <b>58 s on SYCL vs 49 s on Vulkan</b> (both <code>--ctx-checkpoints 0</code>). Forge's rule: a variant that brings 16K time to first token <b>under ~45 s</b> becomes Gemma's SYCL default.</p>
+  </div>
+
+  <div class="card" id="now-card">
+    <h2>Now running</h2>
+    <div class="now">
+      <div><div class="what" id="now-what">–</div><div class="sub" id="now-phase"></div></div>
+      <div class="sub" id="now-count"></div>
+      <div class="bar"><div id="now-bar" style="width:0%"></div></div>
+    </div>
+    <div id="prompt" style="margin-top:12px;display:none">
+      <div class="sub" id="prompt-txt"></div>
+      <div class="bar" style="margin-top:4px"><div id="prompt-bar" style="width:0%;background:var(--s2)"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>llama-bench pp16384, SYCL, flash attention on (does micro-batch size alone explain it?)</h2>
+    <div style="overflow-x:auto"><table id="bench"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>llama-server time to first token (median of 3, 128 tokens generated, prompt cache off)</h2>
+    <div style="overflow-x:auto"><table id="srv"></table></div>
+    <p class="sub" style="margin:10px 0 0;font-size:12px">The green figure is the change vs SYCL in Phase 1S; the 16K cell turns green-outlined if it beats the 45 s target. Prompt tok/s = server prefill rate.</p>
+  </div>
+
+  <div class="card">
+    <h2>Details</h2>
+    <details><summary>Environment (env.txt)</summary><div class="env" id="env"></div></details>
+  </div>
+  <div class="foot" id="foot"></div>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (v, d=1) => v == null || v === "" ? "–" : Number(v).toFixed(d);
+const dur = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return (h ? h + "h " : "") + (h || m ? m + "m " : "") + x + "s"; };
+const kLab = n => n >= 1024 ? n / 1024 + "K" : n;
+let data = null, pollMs = 5000;
+
+function cell(s, ref, st, n) {
+  if (st === "oom") return `<td class="num"><span class="st" style="font-weight:700">OOM</span><div class="meta">didn't fit</div></td>`;
+  if (st === "fail") return `<td class="num"><span class="st failed">✕ server didn't start</span></td>`;
+  if (!s || s.ttft == null) return `<td class="num"><span class="st">${st === "running" ? "running" : "○ pending"}</span></td>`;
+  const r = ref && ref.ttft ? ref.ttft / s.ttft : null, hit = n === 16384 && s.ttft < 45;
+  const cmp = r == null || !isFinite(r) ? "" : Math.abs(r - 1) < 0.03 ? `<span class="sd">same as P1S</span>` : `<span class="delta ${r > 1 ? "up" : "down"}">${r > 1 ? r.toFixed(2) + "× faster" : (1 / r).toFixed(2) + "× slower"}</span>`;
+  return `<td class="num${hit ? " win" : ""}"><span class="big">${fmt(s.ttft, 2)} s</span> ${cmp}
+    <div class="meta">prompt ${fmt(s.prompt_tok_s, 0)} tok/s · gen ${fmt(s.gen_tok_s, 2)} tok/s${s.watts ? " · " + fmt(s.watts, 0) + " W" : ""}</div>
+    <div class="meta">${s.reps} reps${s.ttft_all.length ? " · " + s.ttft_all.map(x => x.toFixed(2)).join(" / ") : ""}</div></td>`;
+}
+
+function render(j) {
+  data = j; const d = j.gd, st = d.state;
+  $("badge").className = "badge " + (st === "not started" ? "stopped" : st);
+  $("state").textContent = ({ running: "Running", finished: "Finished", stopped: "Stopped (incomplete)", "not started": "Not started" }[st] || st) + (d.dry ? " · dry run" : "");
+  const start = d.env.date ? new Date(d.env.date) : null;
+  $("runinfo").textContent = (d.run_id ? `run ${d.run_id}` : "") + (start ? ` · started ${start.toLocaleTimeString()}` : "") + (st === "running" && start ? ` · elapsed ${dur(j.now - start / 1000)}` : "");
+  $("now-count").textContent = d.total ? `${d.done} of ${d.total} steps done` : "";
+  $("now-bar").style.width = (d.total ? 100 * d.done / d.total : 0) + "%";
+  $("now-card").style.display = st === "running" ? "" : "none"; pollMs = st === "running" ? 5000 : 30000;
+  const c = d.current;
+  $("now-what").textContent = c ? `${c.variant}${c.flags ? " · " + c.flags : ""}` : "Between steps";
+  $("now-phase").textContent = c ? c.phase : "";
+  if (c && c.prompt) { $("prompt").style.display = "";
+    $("prompt-txt").textContent = `prompt processing: ${c.prompt.n_tokens.toLocaleString()} tokens (${Math.round(c.prompt.progress * 100)}%) after ${c.prompt.t.toFixed(1)} s · ${(c.prompt.n_tokens / Math.max(c.prompt.t, 0.01)).toFixed(0)} tok/s so far`;
+    $("prompt-bar").style.width = (100 * c.prompt.progress) + "%"; } else $("prompt").style.display = "none";
+  const bref = d.refs.bench_pp16384;
+  $("bench").innerHTML = `<thead><tr><th>Micro-batch (-ub)</th><th class="num">pp16384 tok/s</th><th class="num">vs Phase 2 (ub 512)</th></tr></thead><tbody>` +
+    d.bench.map(b => `<tr><td>${b.ub}</td><td class="num">${b.tok_s ? `<span class="big">${fmt(b.tok_s, 1)}</span>` : `<span class="st">${b.status === "running" ? "running" : "○ pending"}</span>`}</td>
+      <td class="num">${b.tok_s && bref ? `<span class="delta ${b.tok_s >= bref ? "up" : "down"}">${b.tok_s >= bref ? "+" : ""}${fmt(100 * (b.tok_s / bref - 1), 1)}%</span> <span class="sd">vs ${fmt(bref, 1)}</span>` : "–"}</td></tr>`).join("") + "</tbody>";
+  const ref = d.refs.sycl_p1s || [], vk = d.refs.vulkan_ckpt0 || [], sizes = d.dry ? [512] : d.sizes;
+  let h = `<thead><tr><th>Config</th>${sizes.map(n => `<th class="num">${kLab(n)}-token prompt</th>`).join("")}</tr></thead><tbody>`;
+  const refRow = (lab, sub, rows) => `<tr><td><b>${lab}</b><div class="meta">${sub}</div></td>` + sizes.map(n => { const x = rows.find(y => y.size === n);
+    return x ? `<td class="num"><span class="big">${fmt(x.ttft, 2)} s</span><div class="meta">prompt ${fmt(x.prompt_tok_s, 0)} tok/s · gen ${fmt(x.gen_tok_s, 2)} tok/s</div></td>` : "<td></td>"; }).join("") + "</tr>";
+  h += refRow("Vulkan (reference)", "flash attention off, --ctx-checkpoints 0 · Phase 1 rerun", vk);
+  h += refRow("SYCL Phase 1S (reference)", "flash attention on, --ctx-checkpoints 0", ref);
+  d.variants.forEach(v => { h += `<tr><td><b>${esc(v.name)}</b><div class="meta"><code>${esc(v.flags)}</code></div></td>` + sizes.map(n => cell(v.serve.find(x => x.size === n), ref.find(x => x.size === n), v.status, n)).join("") + "</tr>"; });
+  $("srv").innerHTML = h + "</tbody>";
+  $("env").innerHTML = Object.entries(d.env).map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("");
+  $("foot").textContent = `Updated ${new Date(j.now * 1000).toLocaleTimeString()} · refreshes every ${pollMs / 1000} s`;
+}
+async function poll() {
+  try { render(await (await fetch("api/gd", { cache: "no-store" })).json()); }
+  catch (e) { $("state").textContent = "dashboard offline"; $("badge").className = "badge stopped"; }
+  setTimeout(poll, pollMs);
+}
+poll();
+</script>
+</body>
+</html>
