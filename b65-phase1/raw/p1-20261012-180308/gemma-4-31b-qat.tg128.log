@@ -1,0 +1,9 @@
+1791843289.259052 ggml_vulkan: Found 1 Vulkan devices:
+1791843289.259280 ggml_vulkan: 0 = Intel(R) Graphics (BMG G31) (Intel open-source Mesa driver) | uma: 0 | fp16: 1 | bf16: 1 | fp4: 0 | warp size: 32 | shared memory: 49152 | int dot: 1 | matrix cores: KHR_coopmat
+1791843289.260824 llama-bench: benchmark 1/1: starting
+1791843322.695400 llama-bench: benchmark 1/1: warmup generation run
+1791843322.788260 llama-bench: benchmark 1/1: generation run 1/5
+1791843329.469812 llama-bench: benchmark 1/1: generation run 2/5
+1791843336.150039 llama-bench: benchmark 1/1: generation run 3/5
+1791843342.831221 llama-bench: benchmark 1/1: generation run 4/5
+1791843349.514087 llama-bench: benchmark 1/1: generation run 5/5

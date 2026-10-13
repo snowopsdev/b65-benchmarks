@@ -1,0 +1,51 @@
+>> server gemma-4-31b-qat ckpt-off --ctx-checkpoints 0
+>> requests gemma-4-31b-qat ckpt-off
+   gemma-4-31b-qat 512 tok rep1: ttft 1.45s, gen 17.57 tok/s
+   gemma-4-31b-qat 512 tok rep2: ttft 1.36s, gen 17.58 tok/s
+   gemma-4-31b-qat 512 tok rep3: ttft 1.36s, gen 17.56 tok/s
+   gemma-4-31b-qat 4096 tok rep1: ttft 11.09s, gen 16.51 tok/s
+   gemma-4-31b-qat 4096 tok rep2: ttft 11.08s, gen 16.52 tok/s
+   gemma-4-31b-qat 4096 tok rep3: ttft 11.08s, gen 16.52 tok/s
+   gemma-4-31b-qat 16384 tok rep1: ttft 49.36s, gen 13.64 tok/s
+   gemma-4-31b-qat 16384 tok rep2: ttft 49.36s, gen 13.64 tok/s
+   gemma-4-31b-qat 16384 tok rep3: ttft 49.36s, gen 13.65 tok/s
+>> server gemma-4-31b-qat swa-full --swa-full
+!! server did not come up for swa-full (oom), see raw/p1-swa-20261013-081841/swa-full/server.log
+>> server gemma-4-31b-qat default (defaults)
+>> requests gemma-4-31b-qat default
+   gemma-4-31b-qat 512 tok rep1: ttft 24.17s, gen 17.57 tok/s
+   gemma-4-31b-qat 512 tok rep2: ttft 25.41s, gen 17.57 tok/s
+   gemma-4-31b-qat 512 tok rep3: ttft 25.29s, gen 17.57 tok/s
+   gemma-4-31b-qat 4096 tok rep1: ttft 106.21s, gen 16.52 tok/s
+   gemma-4-31b-qat 4096 tok rep2: ttft 108.59s, gen 16.52 tok/s
+   gemma-4-31b-qat 4096 tok rep3: ttft 108.49s, gen 16.52 tok/s
+   gemma-4-31b-qat 16384 tok rep1: ttft 146.75s, gen 13.63 tok/s
+   gemma-4-31b-qat 16384 tok rep2: ttft 146.65s, gen 13.63 tok/s
+   gemma-4-31b-qat 16384 tok rep3: ttft 146.78s, gen 13.64 tok/s
+# Gemma llama-server rerun: p1-swa-20261013-081841
+
+2026-10-13T08:18:41-04:00 · version: 0.6.0-dev (build 11574, commit 8bb3cf0d2) · fa=0 · ctx 32768 · median of reps
+
+| Config | Prompt | TTFT s | Prompt tok/s | Gen tok/s | Board W | Reps |
+|---|---|---|---|---|---|---|
+| baseline (p1-20261012-180308) | 512 | 25.25 | 20 | 17.58 | 86 | 3 |
+| baseline (p1-20261012-180308) | 4096 | 108.30 | 38 | 16.52 | 72 | 3 |
+| baseline (p1-20261012-180308) | 16384 | 146.58 | 112 | 13.64 | 93 | 3 |
+| ckpt-off (--ctx-checkpoints 0) | 512 | 1.36 | 377 | 17.57 | 167 | 3 |
+| ckpt-off (--ctx-checkpoints 0) | 4096 | 11.08 | 370 | 16.52 | 158 | 3 |
+| ckpt-off (--ctx-checkpoints 0) | 16384 | 49.36 | 332 | 13.64 | 155 | 3 |
+| swa-full (--swa-full) | 512 | not run | | | | |
+| swa-full (--swa-full) | 4096 | not run | | | | |
+| swa-full (--swa-full) | 16384 | not run | | | | |
+| default (defaults) | 512 | 25.29 | 20 | 17.57 | 85 | 3 |
+| default (defaults) | 4096 | 108.49 | 38 | 16.52 | 71 | 3 |
+| default (defaults) | 16384 | 146.75 | 112 | 13.63 | 92 | 3 |
+
+## Loaded idle (30 s) and VRAM
+
+| Variant | Status | Idle W | VRAM MiB |
+|---|---|---|---|
+| ckpt-off | ok | 42.8 | 24244 |
+| swa-full | oom |  |  |
+| default | ok | 44.8 | 24244 |
+Done: raw/p1-swa-20261013-081841

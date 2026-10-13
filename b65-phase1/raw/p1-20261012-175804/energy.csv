@@ -1,0 +1,2 @@
+section,test,model,status,energy_j,seconds,t_end
+bench,tg128,qwen3.8-27b,ok,7403.160095,71.763615,1791842421.636090

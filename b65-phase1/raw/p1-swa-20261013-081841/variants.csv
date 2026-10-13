@@ -1,0 +1,4 @@
+variant,flags,status,loaded_idle_w,vram_used_mib
+ckpt-off,--ctx-checkpoints 0,ok,42.815452,24244
+swa-full,--swa-full,oom,,
+default,,ok,44.790997,24244
