@@ -110,7 +110,7 @@ def status():
     latest = run_state(os.path.join(RAW, runs[-1])) if runs else None
     charts = sorted(f for f in os.listdir(CHARTS) if f.endswith(".png")) if os.path.isdir(CHARTS) else []
     return dict(now=time.time(), run=latest, runs=runs[::-1], charts=charts[::-1],
-                live=HIST[-1] if HIST else None, history=list(HIST), sensors=bool(XE.get("energy")))
+                sensors=bool(XE.get("energy")))
 
 
 # --- share cards: the server decides what is safe to publish ---
@@ -727,19 +727,22 @@ class H(BaseHTTPRequestHandler):
         if path == "/nav.js":
             return self.send(200, open(os.path.join(HERE, "nav.js"), "rb").read(), "text/javascript; charset=utf-8")
         if path == "/api/nav":
-            return self.send(200, json.dumps(nav_status()).encode(), "application/json")
+            h = list(HIST); k = max(1, len(h) // 90)
+            spark = [max(x[1] for x in h[i:i + k]) for i in range(0, len(h), k)]
+            return self.send(200, json.dumps(dict(nav_status(), live=h[-1] if h else None, spark=spark,
+                                                  span_s=round(h[-1][0] - h[0][0]) if len(h) > 1 else 0)).encode(), "application/json")
         if path in ("/p2", "/p2.html"):
             return self.send(200, open(os.path.join(HERE, "p2.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p2":
-            return self.send(200, json.dumps(dict(p2=p2_full(), live=HIST[-1] if HIST else None, history=list(HIST), now=time.time())).encode(), "application/json")
+            return self.send(200, json.dumps(dict(p2=p2_full(), now=time.time())).encode(), "application/json")
         if path in ("/p1g", "/p1g.html"):
             return self.send(200, open(os.path.join(HERE, "p1g.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p1g":
-            return self.send(200, json.dumps(dict(p1g=p1g_full(), live=HIST[-1] if HIST else None, history=list(HIST), now=time.time())).encode(), "application/json")
+            return self.send(200, json.dumps(dict(p1g=p1g_full(), now=time.time())).encode(), "application/json")
         if path == "/api/p1":
-            return self.send(200, json.dumps(dict(p1=p1_full(), live=HIST[-1] if HIST else None, history=list(HIST), now=time.time())).encode(), "application/json")
+            return self.send(200, json.dumps(dict(p1=p1_full(), now=time.time())).encode(), "application/json")
         if path == "/api/p05":
-            return self.send(200, json.dumps(dict(p05=p05_full(), live=HIST[-1] if HIST else None, history=list(HIST), now=time.time())).encode(), "application/json")
+            return self.send(200, json.dumps(dict(p05=p05_full(), now=time.time())).encode(), "application/json")
         if path == "/api/status":
             return self.send(200, json.dumps(status()).encode(), "application/json")
         if path.startswith("/charts/"):

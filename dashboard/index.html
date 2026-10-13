@@ -37,7 +37,7 @@ h1 { font-size: 20px; margin: 0; font-weight: 650; }
 .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
 .card h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px;
   text-transform: uppercase; letter-spacing: .04em; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
 .tile .label { color: var(--text-secondary); font-size: 13px; }
 .tile .value { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
 .tile .unit { font-size: 15px; color: var(--text-secondary); font-weight: 500; margin-left: 3px; }
@@ -77,19 +77,16 @@ a { color: var(--series-1); }
 <body>
 <div class="viz-root"><div class="wrap">
   <header>
-    <h1>Arc Pro B65 · llama.cpp Vulkan bench</h1>
+    <h1>Phase 0 · baseline (Vulkan, flash attention on)</h1>
     <span id="badge" class="badge"><span class="dot"></span><span id="state">connecting…</span></span>
     <span class="sub" id="runinfo"></span>
   </header>
 
   <div class="tiles">
-    <div class="card tile"><div class="label">Board power (now)</div><div class="value" id="t-w">–</div><div class="note" id="t-w-note">xe hwmon, card</div></div>
-    <div class="card tile"><div class="label">GPU package temp</div><div class="value" id="t-pkg">–</div><div class="note" id="t-vram">VRAM –</div></div>
-    <div class="card tile"><div class="label">Fan</div><div class="value" id="t-fan">–</div><div class="note">&nbsp;</div></div>
     <div class="card tile"><div class="label">Idle, model unloaded</div><div class="value" id="t-idle">–</div><div class="note">measured at run start (30 s)</div></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="now-card">
     <h2>Now running</h2>
     <div class="now">
       <div><div class="what" id="now-what">–</div><div class="sub" id="now-phase"></div></div>
@@ -98,10 +95,6 @@ a { color: var(--series-1); }
     </div>
   </div>
 
-  <div class="card">
-    <h2>Board power, last 30 min</h2>
-    <div id="chart"><svg id="svg" role="img" aria-label="Board power over time"></svg><div class="tip" id="tip"></div></div>
-  </div>
 
   <div class="card">
     <h2>Results (tok/s mean ± sd over 5 reps · board W during timed reps · tokens per joule for decode)</h2>
@@ -127,11 +120,11 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const fmt = (v, d=1) => v == null || v === "" ? "–" : Number(v).toFixed(d);
 const dur = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
   return (h ? h + "h " : "") + (h || m ? m + "m " : "") + x + "s"; };
-let data = null, hover = null;
+let data = null;
 
 function render(d) {
   data = d;
-  const r = d.run, live = d.live;
+  const r = d.run;
   // header
   const st = r ? r.state : "no runs";
   $("badge").className = "badge " + st;
@@ -142,18 +135,13 @@ function render(d) {
       (st === "running" && start ? ` · elapsed ${dur(d.now - start/1000)}` : "");
   }
   // tiles
-  if (live) {
-    $("t-w").innerHTML = `${fmt(live[1])}<span class="unit">W</span>`;
-    $("t-pkg").innerHTML = live[2] != null ? `${fmt(live[2],0)}<span class="unit">°C</span>` : "–";
-    $("t-vram").textContent = live[3] != null ? `VRAM ${fmt(live[3],0)} °C` : "";
-    $("t-fan").innerHTML = live[4] != null ? `${fmt(live[4],0)}<span class="unit">rpm</span>` : "–";
-  } else if (!d.sensors) { $("t-w-note").textContent = "xe energy counter not found"; }
   $("t-idle").innerHTML = r && r.env.idle_unloaded_w ? `${fmt(r.env.idle_unloaded_w)}<span class="unit">W</span>` : "–";
   // now running
   const tests = r ? r.tests : [], doneN = tests.filter(t => !["pending","running"].includes(t.status)).length;
   const cur = tests.find(t => t.status === "running");
   $("now-count").textContent = tests.length ? `${doneN} of ${tests.length} steps done` : "";
   $("now-bar").style.width = tests.length ? (100 * doneN / tests.length) + "%" : "0%";
+  $("now-card").style.display = st === "running" ? "" : "none"; pollMs = st === "running" ? 5000 : 30000;
   if (cur) {
     $("now-what").textContent = `${cur.model} · ${TEST_NAME[cur.test] || cur.test}`;
     $("now-phase").textContent = (cur.phase || "") + (cur.started ? ` · ${dur(d.now - cur.started)} in this test` : "");
@@ -162,7 +150,6 @@ function render(d) {
     $("now-phase").textContent = st === "finished" && r.done_at ? `finished ${new Date(r.done_at).toLocaleString()}` : "";
   }
   renderTable(tests);
-  renderChart();
   // details
   $("spot").innerHTML = tests.filter(t => t.test === "spotcheck").map(t =>
     `<pre><b>${esc(t.model)}</b> · ${t.status === "ok" ? "" : esc(t.status)}\n${esc(t.text || "")}</pre>`).join("") || "<pre>none yet</pre>";
@@ -170,7 +157,7 @@ function render(d) {
   $("charts").innerHTML = d.charts.length ? d.charts.slice(0, 4).map(c =>
     `<div class="meta">${esc(c)}</div><img loading="lazy" src="charts/${encodeURIComponent(c)}" alt="${esc(c)}">`).join("") : "<pre>Charts are drawn when a run finishes.</pre>";
   $("runs").innerHTML = d.runs.map(x => esc(x)).join("<br>");
-  $("foot").textContent = `Updated ${new Date(d.now*1000).toLocaleTimeString()} · refreshes every 2 s · read-only view of raw/ and the xe hwmon sensors`;
+  $("foot").textContent = `Updated ${new Date(d.now*1000).toLocaleTimeString()} · refreshes every ${pollMs / 1000} s · read-only view of raw/ and the xe hwmon sensors`;
 }
 
 function renderTable(tests) {
@@ -178,7 +165,8 @@ function renderTable(tests) {
   const rows = TEST_ORDER.filter(t => tests.some(x => x.test === t));
   const max = {};  // longest bar per test row, so bars compare models within one test
   for (const t of tests) if (t.tok_s) max[t.test] = Math.max(max[t.test] || 0, t.tok_s);
-  let h = `<thead><tr><th>Test</th>${models.map(m => `<th>${esc(m)}</th>`).join("")}</tr></thead><tbody>`;
+  const NAMES = { "qwen3.8-27b": "Qwen3.8 27B", "gemma-4-31b-qat": "Gemma 4 31B QAT", "muse-glimmer": "Muse Glimmer 28B" };
+  let h = `<thead><tr><th>Test</th>${models.map(m => `<th>${esc(NAMES[m] || m)}</th>`).join("")}</tr></thead><tbody>`;
   for (const test of rows) {
     h += `<tr><td class="test">${esc(TEST_NAME[test] || test)}</td>`;
     for (const m of models) {
@@ -203,48 +191,12 @@ function renderTable(tests) {
   $("results").innerHTML = h + "</tbody>";
 }
 
-function renderChart() {
-  const svg = $("svg"), W = svg.clientWidth || 800, H = 240, P = {l: 44, r: 12, t: 10, b: 24};
-  const pts = (data && data.history) || [];
-  if (pts.length < 2) { svg.innerHTML = `<text x="${P.l}" y="40" fill="var(--muted)" font-size="12">collecting samples…</text>`; return; }
-  const t0 = pts[0][0], t1 = pts[pts.length-1][0];
-  const ymax = Math.max(50, Math.ceil(Math.max(...pts.map(p => p[1])) / 50) * 50);
-  const x = t => P.l + (t - t0) / Math.max(1, t1 - t0) * (W - P.l - P.r);
-  const y = v => H - P.b - v / ymax * (H - P.t - P.b);
-  let g = "";
-  for (let v = 0; v <= ymax; v += 50) {
-    g += `<line x1="${P.l}" x2="${W-P.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? "var(--grid)" : "var(--axis)"}" stroke-width="1"/>
-      <text x="${P.l-8}" y="${y(v)+4}" text-anchor="end" fill="var(--muted)" font-size="11">${v} W</text>`;
-  }
-  const step = Math.max(60, Math.ceil((t1 - t0) / 6 / 60) * 60);
-  for (let t = Math.ceil(t0 / step) * step; t <= t1; t += step)
-    g += `<text x="${x(t)}" y="${H-6}" text-anchor="middle" fill="var(--muted)" font-size="11">${new Date(t*1000).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</text>`;
-  const line = pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + "," + y(p[1]).toFixed(1)).join("");
-  const area = line + `L${x(t1).toFixed(1)},${y(0)}L${x(t0).toFixed(1)},${y(0)}Z`;
-  g += `<path d="${area}" fill="var(--series-1-fill)"/><path d="${line}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
-  if (hover != null) {
-    const p = pts.reduce((a, b) => Math.abs(x(b[0]) - hover) < Math.abs(x(a[0]) - hover) ? b : a);
-    g += `<line x1="${x(p[0])}" x2="${x(p[0])}" y1="${P.t}" y2="${H-P.b}" stroke="var(--axis)" stroke-width="1"/>
-      <circle cx="${x(p[0])}" cy="${y(p[1])}" r="4" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;
-    const tip = $("tip"); tip.style.display = "block";
-    tip.innerHTML = `<b>${fmt(p[1])} W</b> · ${new Date(p[0]*1000).toLocaleTimeString()}` +
-      (p[2] != null ? `<br><span class="sd">GPU ${fmt(p[2],0)} °C · VRAM ${fmt(p[3],0)} °C · fan ${fmt(p[4],0)} rpm</span>` : "");
-    const left = Math.min(x(p[0]) + 12, W - tip.offsetWidth - 4);
-    tip.style.left = left + "px"; tip.style.top = (y(p[1]) - 48 < 0 ? y(p[1]) + 12 : y(p[1]) - 48) + "px";
-  } else $("tip").style.display = "none";
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.innerHTML = g;
-}
 
-const svgEl = $("svg");
-svgEl.addEventListener("pointermove", e => { hover = e.clientX - svgEl.getBoundingClientRect().left; renderChart(); });
-svgEl.addEventListener("pointerleave", () => { hover = null; renderChart(); });
-window.addEventListener("resize", renderChart);
-
+let pollMs = 5000;
 async function poll() {
   try { render(await (await fetch("api/status", {cache: "no-store"})).json()); }
   catch (e) { $("state").textContent = "dashboard offline"; $("badge").className = "badge stopped"; }
-  setTimeout(poll, 2000);
+  setTimeout(poll, pollMs);
 }
 poll();
 </script>
