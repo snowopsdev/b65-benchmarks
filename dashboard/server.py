@@ -676,6 +676,7 @@ def gd_full():
     for lab, desc, ctx in GD_VARIANTS[:1] if res["dry"] else GD_VARIANTS:
         d = os.path.join(out, lab); rows = list(csv.DictReader(open(f"{d}/serve.csv"))) if os.path.exists(f"{d}/serve.csv") else []
         note = next((n.split(": ", 1)[1] for n in notes if n.startswith(lab + ":")), None)
+        if note and note != "OOM" and any(re.search(r"OUT_OF_DEVICE_MEMORY|out of memory|failed to allocate", l, re.I) for l in read_lines(f"{d}/server.log")): note = "OOM"   # Level Zero wording
         running = bool(cur and cur[0] == "server" and cur[1] == lab)
         sizes = [512] if res["dry"] else P1_SIZES
         serve = [x for x in serve_medians(rows) if x["size"] in sizes]
@@ -692,6 +693,15 @@ def gd_full():
     if cur and cur[0] == "bench": res["current"] = dict(variant=f"llama-bench pp16384 {cur[1]}", flags="", phase="running", prompt=None)
     res["total"] = len(res["bench"]) + len(res["variants"]); res["done"] = sum(1 for b in res["bench"] if b["status"] == "ok") + sum(1 for v in res["variants"] if v["status"] in ("ok", "oom", "fail"))
     return res
+
+def gd_share():
+    """Gemma SYCL diagnostic for share cards: medians only once the full (non-dry) run has finished."""
+    g = gd_full(); done = g["state"] == "finished" and not g["dry"]
+    pick = lambda rows: [{k: x[k] for k in ("size", "ttft", "prompt_tok_s", "gen_tok_s")} for x in rows]
+    return dict(run_id=g["run_id"], state=g["state"], complete=done,
+                variants={v["name"]: dict(status=v["status"], serve=pick(v["serve"]) if done else []) for v in g["variants"]},
+                bench={b["ub"]: b["tok_s"] for b in g["bench"]} if done else {},
+                vulkan=pick(g["refs"].get("vulkan_ckpt0", [])) if done else [])
 
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
@@ -725,7 +735,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,

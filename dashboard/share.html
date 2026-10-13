@@ -1503,6 +1503,38 @@ const CARDS = [
   { id: "p1s-findings", name: "Phase 1S key findings", safe: false, group: "p1s", ready: d => p1ready(viewP1S(d)), lockMsg: d => p1lock(viewP1S(d)),
     draw: (ctx, W, H, u, d) => CARDS.find(c => c.id === "p1-findings").draw(ctx, W, H, u, viewP1S(d)),
     caption: d => CARDS.find(c => c.id === "p1-findings").caption(viewP1S(d)) },
+  { id: "p1s-gemma-ub", name: "Gemma on SYCL: one more flag", safe: false, group: "p1s",
+    ready: d => !!(d.gd && d.gd.complete && ((d.gd.variants || {}).ckpt0_ub2048 || {}).status === "ok"),
+    lockMsg: d => d.gd && d.gd.state === "running" ? "Unlocks when the Gemma diagnostic finishes" : "Gemma diagnostic not run yet",
+    draw(ctx, W, H, u, d) {
+      const g = d.models.find(m => m.name.startsWith("gemma")) || d.models[1], sizes = [512, 4096, 16384], gd = d.gd;
+      const get = (k, n) => ((k === "vulkan" ? gd.vulkan : (gd.variants[k] || {}).serve) || []).find(x => x.size === n) || {};
+      const rows = [["vulkan", "Vulkan, --ctx-checkpoints 0", C.axis], ["ckpt0", "SYCL, default micro-batch (512)", "#6a6a66"], ["ckpt0_ub2048", "SYCL, -b 2048 -ub 2048", mcolor(d.models.indexOf(g))]];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 1 ON SYCL", title: `${short(g)} on SYCL: one more flag`,
+        sub: "time to first token · llama-server, 32K context · median of 3 · lower is better", results: true, foot: p1foot(viewP1S(d)) });
+      let lx = b.x; rows.forEach(([, lab, col]) => { ctx.beginPath(); ctx.roundRect(lx, b.y, 14 * u, 14 * u, 3 * u); ctx.fillStyle = col; ctx.fill();
+        lx += 22 * u + text(ctx, lab, lx + 22 * u, b.y + 12 * u, 15 * u, { color: C.ink2 }) + 26 * u; });
+      const area = { x: b.x, y: b.y + 40 * u, w: b.w, h: b.h - 40 * u }, gh = area.h / sizes.length;
+      const barH = Math.min(34 * u, (gh - 24 * u) / 3 - 3 * u), labW = Math.min(170 * u, b.w * 0.2), maxW = b.w - labW - 230 * u;
+      const vmax = Math.max(...sizes.flatMap(n => rows.map(([k]) => get(k, n).ttft || 0)), 0.1);
+      sizes.forEach((n, gi) => {
+        const inner = 3 * (barH + 4 * u), top = area.y + gh * gi + (gh - inner) / 2;
+        text(ctx, `${sizeLab(n)}-token`, area.x, top + inner / 2 - 2 * u, 20 * u, { w: 650 });
+        text(ctx, "prompt", area.x, top + inner / 2 + 18 * u, 14 * u, { color: C.muted });
+        rows.forEach(([k, , col], i) => {
+          const t = get(k, n).ttft, y = top + i * (barH + 4 * u); if (t == null) return;
+          const w = Math.max(6 * u, maxW * t / vmax), base = get("ckpt0", n).ttft, fs = Math.min(19 * u, barH * .8);
+          ctx.beginPath(); ctx.roundRect(area.x + labW, y, w, barH, [0, 4 * u, 4 * u, 0]); ctx.fillStyle = col; ctx.fill();
+          const tw = text(ctx, secs(t), area.x + labW + w + 10 * u, y + barH * .76, fs, { w: 750 });
+          if (k === "ckpt0_ub2048" && base && base / t >= 1.05) text(ctx, `${(base / t).toFixed(1)}× faster`, area.x + labW + w + 22 * u + tw, y + barH * .76, fs * .9, { w: 700, color: C.good });
+        });
+      });
+      text(ctx, "Why: SYCL prefill for Gemma is limited by llama-server's default 512-token micro-batch. Decode is 5–6% slower at depth with 2048.",
+        b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const g = d.models.find(m => m.name.startsWith("gemma")) || d.models[1], gd = d.gd, f = (k, n) => secs((((k === "vulkan" ? gd.vulkan : gd.variants[k].serve) || []).find(x => x.size === n) || {}).ttft);
+      return [["Post", `${short(g)} 4 on a 32 GB Arc Pro B65, SYCL backend: first token on a 16K prompt took ${f("ckpt0", 16384)}. Vulkan: ${f("vulkan", 16384)}.\n\nOne more flag, -b 2048 -ub 2048:\n• 4K: ${f("ckpt0", 4096)} → ${f("ckpt0_ub2048", 4096)}\n• 16K: ${f("ckpt0", 16384)} → ${f("ckpt0_ub2048", 16384)}\n\nNow faster than Vulkan. Running Gemma on Intel?`],
+        ["Short take", `Gemma 4 on Intel Arc with llama.cpp SYCL? Add -ub 2048. 16K-prompt first token: ${f("ckpt0", 16384)} → ${f("ckpt0_ub2048", 16384)}.`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];

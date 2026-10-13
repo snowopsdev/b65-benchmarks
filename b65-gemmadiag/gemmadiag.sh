@@ -45,7 +45,7 @@ for V in "${VARIANTS[@]}"; do
   if [ $ok = 1 ]; then
     python3 serve_bench.py --port $PORT --model "gemma-$LAB" --out "$OUT/$LAB" --energy "$ENERGY" $( [ "$DRY" = 1 ] && echo --dry ) || echo "!! bench failed $LAB"
   else
-    grep -iE "out of memory|failed to allocate" "$OUT/$LAB/server.log" && echo "$LAB: OOM" >> "$OUT/notes.txt" || echo "$LAB: server did not start" >> "$OUT/notes.txt"
+    grep -qiE "out of memory|failed to allocate|OUT_OF_DEVICE_MEMORY" "$OUT/$LAB/server.log" && echo "$LAB: OOM" >> "$OUT/notes.txt" || echo "$LAB: server did not start" >> "$OUT/notes.txt"
   fi
   kill $SP 2>/dev/null || true; wait $SP 2>/dev/null || true; sleep 5
   [ "$DRY" = 1 ] && break
