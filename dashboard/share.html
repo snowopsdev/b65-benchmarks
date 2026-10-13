@@ -1916,6 +1916,101 @@ const CARDS = [
     },
     caption: d => { const p = d.us, f = (rows, n) => secs(((rows || []).find(x => x.size === n) || {}).ttft), ms = d.models.filter(m => p.models.some(x => x.model === m.name));
       return [["Post", `Time to first token on a 16K prompt, Intel Arc Pro B65, llama.cpp SYCL, -ub 512 → -ub 2048:\n\n${ms.map(m => { const x = p.models.find(y => y.model === m.name); return `• ${short(m)}: ${f(x.ub512, 16384)} → ${f(x.ub2048, 16384)}`; }).join("\n")}\n\nOne flag. Have you tuned your -ub?`]]; } },
+  // ---------- Phase 5: open questions ----------
+  { id: "p5-preview", name: "Phase 5: four open questions", safe: true, group: "p5",
+    draw(ctx, W, H, u, d) {
+      const p = d.p5 || {}, wide = W > H, done = !!p.complete;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5", title: done ? "Phase 5: four answers" : "Four loose ends",
+        sub: "Earlier phases left questions. Phase 5 runs one test for each.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const qs = [["A", "A new baseline", "lock in -ub 2048 as the canary's reference for all three models"], ["B", "Gemma's slow short prompts", "fixed cost per request, batch size, or warm-up? Prompts of 16 to 4,096 tokens"],
+                  ["C", "Does chat reuse its cache?", "8-turn chats growing to ~12K tokens, context checkpoints on vs off"], ["D", "Can Qwen stop overthinking?", "thinking budgets, a repetition penalty, Qwen's own sampler, or thinking off"]];
+      const cols = wide ? 2 : 1, cw = (b.w - 30 * u * (cols - 1)) / cols, rows = Math.ceil(qs.length / cols), rh = (b.h - 16 * u * (rows - 1)) / rows;
+      qs.forEach(([k, t, v], i) => { const x = b.x + (cw + 30 * u) * (i % cols), y = b.y + (rh + 16 * u) * Math.floor(i / cols);
+        rr(ctx, x, y, cw, rh, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+        ctx.beginPath(); ctx.arc(x + 36 * u, y + 40 * u, 18 * u, 0, 7); ctx.fillStyle = C.series[i % 3]; ctx.fill();
+        text(ctx, k, x + 36 * u, y + 47 * u, 19 * u, { w: 800, color: C.page, align: "center" });
+        text(ctx, t, x + 66 * u, y + 47 * u, 22 * u, { w: 750, max: cw - 80 * u });
+        ctx.font = `400 ${16 * u}px ${FONT}`; wrap(ctx, v, cw - 44 * u).slice(0, 3).forEach((l, j) => text(ctx, l, x + 22 * u, y + 92 * u + j * 22 * u, 16 * u, { color: C.ink2 })); });
+    },
+    caption: d => [["Post", `Phase 5 on the Arc Pro B65 closes four loose ends:\n\nA) a new -ub 2048 baseline\nB) why Gemma is slow on tiny prompts\nC) does a multi-turn chat reuse its cache?\nD) can Qwen stop overthinking a coding task?\n\nWhich answer do you want first?`]] },
+
+  { id: "p5-baseline", name: "A: new baseline at ub 2048", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.A || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p5, wide = W > H, ref = p.ref.p4_ub2048 || {}, tests = ["pp512", "pp16384", "tg128", "tg128@d16384"], tl = { pp512: "Prefill 512", pp16384: "Prefill 16K", tg128: "Decode @ 0", "tg128@d16384": "Decode @ 16K" };
+      const ms = d.models.filter(m => p.A.some(r => r.model === m.name));
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · A", title: "The new baseline",
+        sub: "llama-bench, SYCL, flash attention on, -b 2048 -ub 2048 · 5 runs · tok/s · the canary's reference from now on", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(230 * u, b.w * 0.26), cw = (b.w - labW) / tests.length, headH = 46 * u, rh = Math.min(wide ? 140 * u : 240 * u, (b.h - headH) / ms.length);
+      tests.forEach((t, j) => text(ctx, tl[t], b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
+      ms.forEach((m, i) => { const y = b.y + headH + rh * i, cy = y + rh / 2; ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, cy - 16 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m))); text(ctx, m.display, b.x + 20 * u, cy - 4 * u, 19 * u, { w: 700, max: labW - 28 * u });
+        tests.forEach((t, j) => { const r = p.A.find(x => x.model === m.name && x.test === t), x = b.x + labW + cw * j + cw / 2; if (!r || r.tok_s === "FAIL") { text(ctx, r ? "failed" : "–", x, cy, 16 * u, { color: C.muted, align: "center" }); return; }
+          const v = +r.tok_s, rf = ref[`${m.name}|${t}`];
+          text(ctx, v.toFixed(v > 100 ? 0 : 2), x, cy, 28 * u, { w: 800, align: "center" });
+          text(ctx, rf ? `vs Phase 4: ${v >= rf ? "+" : "−"}${Math.abs(100 * (v / rf - 1)).toFixed(1)}%` : `${(+r.board_w || 0).toFixed(0)} W`, x, cy + 22 * u, 13 * u, { color: C.ink2, align: "center" }); }); });
+    },
+    caption: d => { const p = d.p5, g = (m, t) => (p.A.find(r => r.model === m && r.test === t) || {}).tok_s;
+      return [["Post", `New reference numbers for the Arc Pro B65 (llama.cpp SYCL, -ub 2048), 16K prefill / decode:\n\n${d.models.filter(m => p.A.some(r => r.model === m.name)).map(m => `• ${short(m)}: ${Math.round(g(m.name, "pp16384"))} / ${(+g(m.name, "tg128")).toFixed(1)} tok/s`).join("\n")}\n\nEvery future driver update gets checked against these. What should break first?`]]; } },
+
+  { id: "p5-short", name: "B: Gemma on tiny prompts", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.B || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p5, wide = W > H, cfgs = [...new Set(p.B.map(r => `${r.backend}|${r.cfg}`))], sizes = [...new Set(p.B.map(r => +r.prompt_tokens))].sort((a, c) => a - c);
+      const med = a => { a = a.filter(x => x >= 0).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+      const val = (c, n) => { const [be, cfg] = c.split("|"); return med(p.B.filter(r => r.backend === be && r.cfg === cfg && +r.prompt_tokens === n && r.cached === "0").map(r => +r.ttft_s)); };
+      const lab = c => { const [be, cfg] = c.split("|"); return `${be === "sycl" ? "SYCL" : "Vulkan"} ${cfg.replace("ub", "ub ").replace("-nowarm", ", no warm-up")}`; };
+      const cols = [C.series[0], C.series[1], C.series[2], C.axis];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · B", title: "Gemma's first word on tiny prompts",
+        sub: "Gemma 4 31B · llama-server time to first token, cold (no cache) · median of 5 · lower is better", results: true, foot: p1foot(viewP1S(d)) });
+      let lx = b.x; cfgs.forEach((c, i) => { rr(ctx, lx, b.y, 14 * u, 14 * u, 3 * u, cols[i % 4]); lx += 22 * u + text(ctx, lab(c), lx + 22 * u, b.y + 12 * u, 14 * u, { color: C.ink2 }) + 20 * u; });
+      const area = { x: b.x, y: b.y + 40 * u, w: b.w, h: b.h - 70 * u }, gw = area.w / sizes.length, vmax = Math.max(...cfgs.flatMap(c => sizes.map(n => val(c, n) || 0)), 0.1);
+      const bw = Math.min(30 * u, (gw - 20 * u) / cfgs.length);
+      ctx.fillStyle = C.grid; ctx.fillRect(area.x, area.y + area.h, area.w, 1.2 * u);
+      sizes.forEach((n, j) => { const gx = area.x + gw * j + (gw - bw * cfgs.length) / 2;
+        cfgs.forEach((c, i) => { const v = val(c, n); if (v == null) return; const h = area.h * v / vmax, x = gx + i * bw;
+          ctx.beginPath(); ctx.roundRect(x + 2 * u, area.y + area.h - h, bw - 4 * u, h, [3 * u, 3 * u, 0, 0]); ctx.fillStyle = cols[i % 4]; ctx.fill();
+          text(ctx, v < 10 ? v.toFixed(1) : v.toFixed(0), x + bw / 2, area.y + area.h - h - 6 * u, 12 * u, { w: 700, align: "center" }); });
+        text(ctx, `${n} tokens`, area.x + gw * j + gw / 2, area.y + area.h + 22 * u, 15 * u, { w: 650, color: C.ink2, align: "center" }); });
+      text(ctx, "seconds to first token. A flat floor across sizes means a fixed cost per request, not prompt processing.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.p5, med = a => { a = a.sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; }, v = (be, cfg, n) => med(p.B.filter(r => r.backend === be && r.cfg === cfg && +r.prompt_tokens === n && r.cached === "0").map(r => +r.ttft_s));
+      return [["Post", `Gemma 4 on Intel Arc, time to first word on a 16-token prompt:\n\n• SYCL: ${(v("sycl", "ub2048", 16) || 0).toFixed(2)} s\n• Vulkan: ${(v("vulkan", "ub512", 16) || 0).toFixed(2)} s\n\nWith 4,096 tokens: SYCL ${(v("sycl", "ub2048", 4096) || 0).toFixed(1)} s, Vulkan ${(v("vulkan", "ub512", 4096) || 0).toFixed(1)} s. Do you notice a one-second start?`]]; } },
+
+  { id: "p5-cache", name: "C: does chat reuse its cache?", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.C || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p5, wide = W > H, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))];
+      const ms = d.models.filter(m => keys.some(k => k.startsWith(m.name + "|")));
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · C", title: "Does a growing chat reuse its cache?",
+        sub: "8-turn chat, ~1.5K tokens added per turn · tokens the server had to re-read on the last turn vs the whole conversation", results: true, foot: p1foot(viewP1S(d)) });
+      const rows = keys.map(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), last = rs[rs.length - 1]; const [m, be, cfg] = k.split("|"); return { m, be, cfg, re: +last.prompt_n_processed, ctx: +last.ctx_tokens, ttft: +last.ttft_s }; });
+      const labW = Math.min(330 * u, b.w * 0.36), maxW = b.w - labW - 170 * u, vmax = Math.max(...rows.map(r => r.ctx), 1), rh = Math.min(56 * u, b.h / rows.length), barH = Math.min(26 * u, rh * 0.6);
+      rows.forEach((r, i) => { const y = b.y + rh * i + (rh - barH) / 2, m = d.models.find(x => x.name === r.m);
+        text(ctx, `${short(m)} · ${r.be === "sycl" ? "SYCL" : "Vulkan"} · ${r.cfg === "ckpt0" ? "checkpoints off" : "checkpoints on"}`, b.x, y + barH * 0.75, 16 * u, { w: 650, max: labW - 12 * u });
+        rr(ctx, b.x + labW, y, maxW * r.ctx / vmax, barH, 4 * u, "rgba(255,255,255,0.06)");
+        ctx.beginPath(); ctx.roundRect(b.x + labW, y, Math.max(4 * u, maxW * r.re / vmax), barH, 4 * u); ctx.fillStyle = r.re > r.ctx * 0.5 ? C.critical : mcolor(d.models.indexOf(m)); ctx.fill();
+        text(ctx, `${r.re.toLocaleString()} of ${r.ctx.toLocaleString()}`, b.x + labW + maxW * r.ctx / vmax + 10 * u, y + barH * 0.75, 15 * u, { w: 700 }); });
+      text(ctx, "Coloured = tokens re-read on turn 8 · faint = the whole conversation · red = most of it re-read (cache thrown away).", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.p5, keys = [...new Set(p.C.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = keys.filter(k => { const rs = p.C.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k), l = rs[rs.length - 1]; return +l.prompt_n_processed > +l.ctx_tokens * 0.5; });
+      return [["Post", `Does llama-server reuse a growing chat on Intel Arc, or re-read the whole thing every turn? 8-turn chats up to ~12K tokens, context checkpoints on vs off.\n\n${bad.length ? `${bad.length} of ${keys.length} setups re-read most of the conversation each turn.` : `All ${keys.length} setups reuse the cache: only the new turn is processed.`}\n\nDo you run with checkpoints off?`]]; } },
+
+  { id: "p5-qwen", name: "D: taming Qwen's thinking", safe: false, group: "p5", ready: d => !!(d.p5 && d.p5.complete && (d.p5.D || []).length), lockMsg: () => "Unlocks when Phase 5 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p5, wide = W > H, vs = [...new Set(p.D.map(r => r.variant))], q = d.models.find(m => m.name.startsWith("qwen")) || d.models[0];
+      const med = a => { a = a.filter(x => !isNaN(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+      const lab = { "think-4k": "Thinking, 4K-token cap", "think-8k": "Thinking, 8K cap", "think-16k": "Thinking, 16K cap", "think-8k-pp1.5": "8K cap + presence penalty 1.5", "think-8k-qwen-sampler": "8K cap + Qwen's sampler", nothink: "Thinking off" };
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 5 · D", title: `Can ${short(q)} stop overthinking?`,
+        sub: "the coding task Qwen looped on in Phase 3 · 5 tries per setting · passes, and how often it ran out of room", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(330 * u, b.w * 0.36), cw = (b.w - labW) / 3, headH = 44 * u, rh = Math.min(70 * u, (b.h - headH) / vs.length);
+      ["Passed", "Hit the cap", "Median tokens"].forEach((h, j) => text(ctx, h, b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
+      vs.forEach((v, i) => { const rs = p.D.filter(r => r.variant === v), y = b.y + headH + rh * i, cy = y + rh / 2, pass = rs.filter(r => r.pass === "1").length, cap = rs.filter(r => r.finish_reason === "length").length;
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        text(ctx, lab[v] || v, b.x, cy + 6 * u, 18 * u, { w: 650, max: labW - 12 * u });
+        text(ctx, `${pass}/${rs.length}`, b.x + labW + cw / 2, cy + 8 * u, 26 * u, { w: 800, align: "center", color: pass === rs.length ? C.good : pass ? C.ink : C.critical });
+        text(ctx, `${cap}/${rs.length}`, b.x + labW + cw * 1.5, cy + 8 * u, 22 * u, { w: 700, align: "center", color: cap ? C.critical : C.ink2 });
+        const t = med(rs.map(r => +r.completion_tokens)); text(ctx, t == null ? "–" : Math.round(t).toLocaleString(), b.x + labW + cw * 2.5, cy + 8 * u, 22 * u, { w: 700, align: "center" }); });
+    },
+    caption: d => { const p = d.p5, vs = [...new Set(p.D.map(r => r.variant))], pr = v => { const rs = p.D.filter(r => r.variant === v); return `${rs.filter(r => r.pass === "1").length}/${rs.length}`; };
+      return [["Post", `Qwen3.8 27B overthought a simple Python task until it ran out of tokens. 5 tries per fix, passes:\n\n${vs.map(v => `• ${v}: ${pr(v)}`).join("\n")}\n\nHow do you stop reasoning models from looping?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -2092,6 +2187,7 @@ const SHARE_PHASES = [
   { key: "p3", label: "Phase 3", name: "Quality checks", href: "p3", st: d => d.p3 || {} },
   { key: "p4", label: "Phase 4", name: "Canary", href: "p4", st: d => d.p4 || {} },
   { key: "us", label: "Phase 4+", name: "Server at ub 2048", href: "us", st: d => d.us || {} },
+  { key: "p5", label: "Phase 5", name: "Open questions", href: "p5", st: d => d.p5 || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;

@@ -871,6 +871,42 @@ def us_share():
                 models=[dict(model=x["model"], from_diag=x["from_diag"], **({} if not complete else dict(ub2048=keep(x["ub2048"]), ub512=keep(x["ub512"]), vulkan=keep(x["vulkan"]),
                              vram_mib=x["vram_mib"], vram512_mib=x["vram512_mib"]))) for x in f["models"]])
 
+def p5_full():
+    """Phase 5 (b65-phase5/raw/p5-*): A new ub2048 baseline, B Gemma short-prompt TTFT, C multi-turn cache, D Qwen thinking on c08."""
+    kit = os.path.join(ROOT, "b65-phase5"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^p5-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    res = dict(state="not started", run_id=None, env={}, dry=False, A=[], B=[], C=[], D=[], current=None, parts=[], ref={})
+    try:
+        b512 = json.load(open(os.path.join(ROOT, "b65-phase4", "baseline.json"))); res["ref"]["baseline_ub512"] = {k: v for k, v in b512.items() if not k.startswith("_")}
+    except (OSError, ValueError): pass
+    p4 = os.path.join(ROOT, "b65-phase4", "raw", "p4-20261013-150339", "canary.csv")
+    if os.path.exists(p4): res["ref"]["p4_ub2048"] = {f"{r['model']}|{r['test']}": float(r["tok_s"]) for r in csv.DictReader(open(p4)) if r["backend"] == "sycl" and r["ub"] == "2048" and r["tok_s"] not in ("", "FAIL")}
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "phase5" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    res["parts"] = (env.get("parts_list") or "A B C D").split()
+    for k, fn_ in (("A", "A_baseline.csv"), ("B", "B_ttft.csv"), ("C", "C_multiturn.csv"), ("D", "D_think.csv")):
+        f = os.path.join(out, fn_)
+        if os.path.exists(f): res[k] = list(csv.DictReader(open(f)))
+    # A: attach timed-rep W already in the csv; B: medians per (backend,cfg,size,cached)
+    log = read_lines(os.path.join(kit, "p5-run.log"))
+    marks = [l[3:] for l in log if l.startswith(">> ")]
+    if res["state"] == "running" and marks:
+        part = next((m.split()[1] for m in reversed(marks) if m.startswith("part ")), None)
+        tail = [l for l in log if l.strip()][-1].strip()
+        res["current"] = dict(part=part, step=marks[-1], last=tail[:160])
+    return res
+
+def p5_share():
+    f = p5_full(); complete = f["state"] == "finished" and not f["dry"]
+    return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], parts=f["parts"],
+                progress={k: len(f[k]) for k in ("A", "B", "C", "D")}, **({k: f[k] for k in ("A", "B", "C", "D")} if complete else {}),
+                ref=f["ref"] if complete else {})
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -903,7 +939,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p5=p5_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -996,6 +1032,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p5", "/p5.html"):
+            return self.send(200, open(os.path.join(HERE, "p5.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p5":
+            return self.send(200, json.dumps(dict(p5=p5_full(), now=time.time())).encode(), "application/json")
         if path in ("/us", "/us.html"):
             return self.send(200, open(os.path.join(HERE, "us.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/us":
