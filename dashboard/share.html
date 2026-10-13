@@ -1879,6 +1879,43 @@ const CARDS = [
     caption: d => { const p = d.p4, ch = (b, m) => { const a = p.rows.find(r => r.backend === b && r.model === m && r.test === "pp16384" && r.ub === "512"), z = p.rows.find(r => r.backend === b && r.model === m && r.test === "pp16384" && r.ub === "2048"); return a && z && a.tok_s && z.tok_s ? 100 * (z.tok_s / a.tok_s - 1) : null; };
       const ms = d.models.filter(m => p.rows.some(r => r.model === m.name && r.ub === "2048")), f = v => v == null ? "n/a" : `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(0)}%`;
       return [["Post", `Gemma 4 got +55% prefill on Intel Arc from one llama.cpp flag (-ub 2048). Does it work for the others?\n\n${ms.map(m => `• ${short(m)}: SYCL ${f(ch("sycl", m.name))}, Vulkan ${f(ch("vulkan", m.name))}`).join("\n")}\n\n(16K-prompt prefill, ub 512 → 2048.) Have you tuned -ub?`]]; } },
+  // ---------- llama-server at -ub 2048 (follow-up to Phase 4) ----------
+  { id: "us-preview", name: "Server at ub 2048: the question", safe: true, group: "us",
+    draw(ctx, W, H, u, d) {
+      const p = d.us || {}, wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · NEW DEFAULT", title: "One flag, every model?",
+        sub: "-ub 2048 made Gemma answer 1.9× sooner. In llama-bench it lifts every model's prefill 35–55%. Does that reach the chat box?", live: p.state === "running", results: !!p.complete, foot: p1foot(viewP1S(d)) });
+      const rows = [["What changes", "llama-server reads the prompt 2,048 tokens at a time instead of 512"], ["What's measured", "time to first token at 512, 4K and 16K-token prompts, 3 runs each"],
+                    ["Same everything else", "SYCL, flash attention on, 32K context, prompt cache off"], ["The models", "Qwen3.8 27B and Muse Glimmer 28B (Gemma already measured)"]];
+      const rh = (b.h - 10 * u) / rows.length, colW = wide ? b.w * 0.6 : b.w;
+      rows.forEach(([k, v], i) => { const cy = b.y + rh * i + rh / 2; text(ctx, k, b.x, cy - 6 * u, 22 * u, { w: 700, max: colW }); text(ctx, v, b.x, cy + 20 * u, 16 * u, { color: C.ink2, max: colW }); });
+      if (wide) { const bx = b.x + colW + 30 * u, bw = b.w - colW - 30 * u; rr(ctx, bx, b.y, bw, b.h - 10 * u, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+        text(ctx, "THE FLAG", bx + 22 * u, b.y + 36 * u, 15 * u, { w: 750, color: C.ink2 });
+        text(ctx, "-ub 2048", bx + 22 * u, b.y + 110 * u, 52 * u, { w: 800, max: bw - 44 * u });
+        ctx.font = `650 ${18 * u}px ${FONT}`; wrap(ctx, "plus -b 2048 · now the SYCL default for all three models", bw - 44 * u).forEach((l, i) => text(ctx, l, bx + 22 * u, b.y + 150 * u + i * 24 * u, 18 * u, { color: C.ink2 })); }
+    },
+    caption: d => [["Post", `One llama.cpp flag (-ub 2048) made Gemma 4 answer a long prompt 1.9× sooner on Intel Arc. In llama-bench it lifts every model's prefill 35–55%.\n\nTesting whether that reaches the chat box for Qwen and Muse. Guess the speed-up?`]] },
+
+  { id: "us-ttft", name: "First token at the new default", safe: false, group: "us", ready: d => !!(d.us && d.us.complete), lockMsg: d => `Unlocks when the server rerun finishes (${(d.us || {}).done || 0} of ${(d.us || {}).total || 0} steps)`,
+    draw(ctx, W, H, u, d) {
+      const p = d.us, wide = W > H, f = (rows, n) => ((rows || []).find(x => x.size === n) || {}).ttft;
+      const ms = d.models.filter(m => p.models.some(x => x.model === m.name)), mx = m => p.models.find(x => x.model === m.name);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · NEW DEFAULT", title: "Same card, one flag, sooner answers",
+        sub: "llama-server time to first token · SYCL, flash attention on · 32K context · median of 3 · lower is better", results: true, foot: p1foot(viewP1S(d)) });
+      const cols = [["vulkan", "Vulkan (Phase 1)", C.axis], ["ub512", "SYCL, ub 512", "#5a5a56"], ["ub2048", "SYCL, ub 2048", null]], sizes = [4096, 16384];
+      let lx = b.x; cols.forEach(([, l, c], i) => { rr(ctx, lx, b.y, 14 * u, 14 * u, 3 * u, c || C.series[0]); lx += 22 * u + text(ctx, l + (i === 2 ? " (model colour)" : ""), lx + 22 * u, b.y + 12 * u, 15 * u, { color: C.ink2 }) + 24 * u; });
+      const area = { y: b.y + 36 * u, h: b.h - 52 * u }, groups = ms.flatMap(m => sizes.map(n => [m, n])), gh = area.h / groups.length;
+      const barH = Math.min(18 * u, (gh - 8 * u) / 3 - 2 * u), labW = Math.min(260 * u, b.w * 0.28), vmax = Math.max(...groups.flatMap(([m, n]) => cols.map(([k]) => f(mx(m)[k], n) || 0)), 1), maxW = b.w - labW - 200 * u;
+      groups.forEach(([m, n], gi) => { const top = area.y + gh * gi + (gh - 3 * (barH + 2 * u)) / 2, mi = d.models.indexOf(m), base = f(mx(m).ub512, n);
+        text(ctx, `${short(m)}, ${n / 1024}K prompt`, b.x, top + 1.5 * barH + 6 * u, 16 * u, { w: 650, max: labW - 10 * u });
+        cols.forEach(([k, , c], i) => { const v = f(mx(m)[k], n), y = top + i * (barH + 2 * u); if (v == null) return; const w = Math.max(4 * u, maxW * v / vmax);
+          ctx.beginPath(); ctx.roundRect(b.x + labW, y, w, barH, [0, 3 * u, 3 * u, 0]); ctx.fillStyle = c || mcolor(mi); ctx.fill();
+          const tw = text(ctx, secs(v), b.x + labW + w + 8 * u, y + barH * 0.8, Math.min(15 * u, barH * 0.95), { w: i === 2 ? 800 : 600 });
+          if (i === 2 && base && base / v >= 1.05) text(ctx, `${(base / v).toFixed(1)}× faster`, b.x + labW + w + 16 * u + tw, y + barH * 0.8, Math.min(14 * u, barH * 0.9), { w: 700, color: C.good }); }); });
+      text(ctx, "Gemma's ub 2048 numbers are from the Gemma diagnostic; its Vulkan reference uses --ctx-checkpoints 0.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.us, f = (rows, n) => secs(((rows || []).find(x => x.size === n) || {}).ttft), ms = d.models.filter(m => p.models.some(x => x.model === m.name));
+      return [["Post", `Time to first token on a 16K prompt, Intel Arc Pro B65, llama.cpp SYCL, -ub 512 → -ub 2048:\n\n${ms.map(m => { const x = p.models.find(y => y.model === m.name); return `• ${short(m)}: ${f(x.ub512, 16384)} → ${f(x.ub2048, 16384)}`; }).join("\n")}\n\nOne flag. Have you tuned your -ub?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
@@ -2054,6 +2091,7 @@ const SHARE_PHASES = [
   { key: "gd", label: "Gemma diag", name: "SYCL prefill fix", href: "gd", st: d => d.gd || {} },
   { key: "p3", label: "Phase 3", name: "Quality checks", href: "p3", st: d => d.p3 || {} },
   { key: "p4", label: "Phase 4", name: "Canary", href: "p4", st: d => d.p4 || {} },
+  { key: "us", label: "Phase 4+", name: "Server at ub 2048", href: "us", st: d => d.us || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;
@@ -2123,7 +2161,7 @@ function selectTab(k, keepHash) {
   if (D) refresh(true);
 }
 function phaseStatus(p) {
-  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" || p.key === "p1s" ? "steps" : p.key === "p3" ? "answers" : "tests"}` : "";
+  const x = p.st(D), n = x.total ? `${x.done}/${x.total} ${p.key === "p1" || p.key === "p1s" || p.key === "us" ? "steps" : p.key === "p3" ? "answers" : "tests"}` : "";
   if (!x.run_id) return ["not started", "No run yet. Teasers work now; results unlock when the run finishes."];
   if (x.dry) return [`dry run ${x.run_id}`, "Only a dry run so far. Results stay locked until the full run finishes."];
   return x.complete ? [`run ${x.run_id} · complete`, "Run complete: results cards are unlocked. Teaser cards stay number-free."]

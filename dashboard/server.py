@@ -642,7 +642,9 @@ def nav_status():
                 p1s=state(latest(os.path.join(ROOT, "b65-phase1s", "raw"), r"^p1s-\d{8}-\d{6}$")),
                 gd=state(latest(os.path.join(ROOT, "b65-gemmadiag", "raw"), r"^gd-\d{8}-\d{6}$")),
                 p3=state(latest(os.path.join(ROOT, "b65-phase3", "raw"), r"^p3-\d{8}-\d{6}$")),
-                p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")))
+                p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")),
+                us=state(latest(os.path.join(ROOT, "b65-ubserve", "raw"), r"^us-\d{8}-\d{6}$")),
+                p5=state(latest(os.path.join(ROOT, "b65-phase5", "raw"), r"^p5-\d{8}-\d{6}$")))
 
 def p1s_full():
     return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
@@ -831,6 +833,44 @@ def p4_share():
     return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], rows=rows,
                 flags=f["flags"] if complete else None, env={k: f["env"].get(k) for k in ("kernel", "mesa", "level_zero", "llama_sycl", "oneapi")} if complete else {})
 
+def us_full():
+    """llama-server at -b 2048 -ub 2048 for Qwen and Muse (b65-ubserve/raw/us-*), vs Phase 1S (ub 512) and Phase 1 Vulkan;
+    Gemma's ub 2048 server numbers come from the Gemma diagnostic (ckpt0_ub2048)."""
+    kit = os.path.join(ROOT, "b65-ubserve"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^us-\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    p1s = os.path.join(ROOT, "b65-phase1s", "raw", "p1s-20261013-111949"); gdv = os.path.join(ROOT, "b65-gemmadiag", "raw", "gd-20261013-123933", "ckpt0_ub2048", "serve.csv")
+    rows = lambda f: list(csv.DictReader(open(f))) if os.path.exists(f) else []
+    ref512 = rows(f"{p1s}/serve.csv"); vk = rows(f"{P1_VK_RUN}/serve.csv"); gk = rows(os.path.join(ROOT, "b65-phase1", "raw", "p1-swa-20261013-081841", "ckpt-off", "serve.csv"))
+    res = dict(state="not started", run_id=None, env={}, models=[], current=None, done=0, total=0)
+    if not runs: return res
+    run = max(runs); out = os.path.join(base, run); res["run_id"] = run
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "ubserve" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    now = rows(f"{out}/serve.csv"); idle = {r["model"]: r for r in rows(f"{out}/idle_loaded.csv")}
+    i512 = {r["model"]: r for r in rows(f"{p1s}/idle_loaded.csv")}
+    log = read_lines(os.path.join(kit, "us-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    for m in env.get("models", "").split() + ["gemma-4-31b-qat"]:
+        gem = m.startswith("gemma")
+        x = dict(model=m, from_diag=gem, ub2048=serve_medians(rows(gdv) if gem else now, None if gem else m), ub512=serve_medians(ref512, m),
+                 vulkan=serve_medians(gk if gem else vk, m), idle_w=float(idle[m]["loaded_idle_w"]) if m in idle and idle[m].get("loaded_idle_w") else None,
+                 vram_mib=int(idle[m]["vram_used_mib"]) if m in idle and (idle[m].get("vram_used_mib") or "").isdigit() else None,
+                 vram512_mib=int(i512[m]["vram_used_mib"]) if m in i512 and (i512[m].get("vram_used_mib") or "").isdigit() else None)
+        res["models"].append(x)
+    res["total"] = len(env.get("models", "").split()) * (1 + len(P1_SIZES) * P1_REPS)
+    res["done"] = sum(min(s_["reps"], P1_REPS) for x in res["models"] if not x["from_diag"] for s_ in x["ub2048"]) + len(idle)
+    if res["state"] == "running" and last: res["current"] = dict(step=last[-1][0], model=last[-1][1])
+    return res
+
+def us_share():
+    f = us_full(); complete = f["state"] == "finished"
+    keep = lambda rows_: [{k: r[k] for k in ("size", "ttft", "prompt_tok_s", "gen_tok_s")} for r in rows_]
+    return dict(state=f["state"], complete=complete, run_id=f["run_id"], done=f["done"], total=f["total"],
+                models=[dict(model=x["model"], from_diag=x["from_diag"], **({} if not complete else dict(ub2048=keep(x["ub2048"]), ub512=keep(x["ub512"]), vulkan=keep(x["vulkan"]),
+                             vram_mib=x["vram_mib"], vram512_mib=x["vram512_mib"]))) for x in f["models"]])
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -863,7 +903,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -875,7 +915,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "b65-ubserve", "b65-phase5", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -956,6 +996,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/us", "/us.html"):
+            return self.send(200, open(os.path.join(HERE, "us.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/us":
+            return self.send(200, json.dumps(dict(us=us_full(), now=time.time())).encode(), "application/json")
         if path in ("/p4", "/p4.html"):
             return self.send(200, open(os.path.join(HERE, "p4.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p4":

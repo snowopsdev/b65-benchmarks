@@ -1,0 +1,23 @@
+>> server qwen3.8-27b
+>> requests qwen3.8-27b
+   qwen3.8-27b 512 tok rep1: ttft 1.41s, gen 23.33 tok/s
+   qwen3.8-27b 512 tok rep2: ttft 0.96s, gen 23.34 tok/s
+   qwen3.8-27b 512 tok rep3: ttft 0.96s, gen 23.34 tok/s
+   qwen3.8-27b 4096 tok rep1: ttft 4.88s, gen 22.42 tok/s
+   qwen3.8-27b 4096 tok rep2: ttft 4.87s, gen 22.41 tok/s
+   qwen3.8-27b 4096 tok rep3: ttft 4.87s, gen 22.38 tok/s
+   qwen3.8-27b 16384 tok rep1: ttft 20.48s, gen 18.79 tok/s
+   qwen3.8-27b 16384 tok rep2: ttft 20.48s, gen 18.78 tok/s
+   qwen3.8-27b 16384 tok rep3: ttft 20.48s, gen 18.78 tok/s
+>> server muse-glimmer
+>> requests muse-glimmer
+   muse-glimmer 512 tok rep1: ttft 1.31s, gen 25.45 tok/s
+   muse-glimmer 512 tok rep2: ttft 0.87s, gen 25.44 tok/s
+   muse-glimmer 512 tok rep3: ttft 0.87s, gen 25.42 tok/s
+   muse-glimmer 4096 tok rep1: ttft 4.80s, gen 24.02 tok/s
+   muse-glimmer 4096 tok rep2: ttft 4.77s, gen 24.03 tok/s
+   muse-glimmer 4096 tok rep3: ttft 4.77s, gen 24.02 tok/s
+   muse-glimmer 16384 tok rep1: ttft 20.53s, gen 22.97 tok/s
+   muse-glimmer 16384 tok rep2: ttft 20.53s, gen 22.98 tok/s
+   muse-glimmer 16384 tok rep3: ttft 20.52s, gen 22.95 tok/s
+Done: raw/us-20261013-161926
