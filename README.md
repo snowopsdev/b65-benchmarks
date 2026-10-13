@@ -10,6 +10,7 @@ Measured llama.cpp Vulkan numbers on an Intel Arc Pro B65 32 GB (Omarchy). B65 o
 | `run.sh`, `report.py`, `powerwin.py`, `models.conf` | Phase 0 kit (prefill + decode sweep); `raw/` and `charts/` are its runs; `results.csv` is the merged table |
 | `b65-phase05/` | Phase 0.5 kit (flash attention off vs on) and its `raw/` runs |
 | `b65-phase1/` | Phase 1 kit (context depth, llama-server, loaded idle), the Gemma checkpoint rerun script, Forge's `HANDOFF.md` and its `raw/` runs |
+| `b65-phase2/` | Phase 2 kit (Vulkan vs SYCL), local fixes listed in its README, and its `raw/` runs |
 | `dashboard/` | Live tailnet dashboard + share cards (`server.py`, one page per phase, `share.html`) |
 | `holds.conf` | Results withheld from share cards (currently none) |
 | `dist/` | Release tarballs (not committed; regenerated from the raw runs) |
@@ -94,6 +95,7 @@ Instagram/Threads) with Download / Copy image / Share and a suggested caption fo
 ### Phase dashboards
 - `/p05`: Phase 0.5 flash-attention sweep (off vs on, with Phase 0 reference and provenance).
 - `/p1`: Phase 1 (decode by context depth with OOMs, llama-server TTFT, loaded idle power + VRAM, drift check vs Phase 0.5).
+- `/p2`: Phase 2, Vulkan (FA off) vs SYCL (FA off/on) per model and test, SYCL build state, decode verdict so far.
 - `/p1g`: Phase 1 follow-up, Gemma llama-server rerun (`b65-phase1/gemma_server_rerun.sh` → `raw/p1-swa-*`): `--ctx-checkpoints 0` / `--swa-full` / defaults vs the Phase 1 baseline.
 
 ### Files

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B65 Bench · Phase 2 · Vulkan vs SYCL</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --series-1: #2a78d6; --series-1-fill: rgba(42,120,214,0.10);
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --good-text: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --series-1: #3987e5; --series-1-fill: rgba(57,135,229,0.14); --good-text: #0ca30c;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root { min-height: 100vh; background: var(--page); color: var(--text-primary);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+h1 { font-size: 20px; margin: 0; font-weight: 650; }
+.sub { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); font-weight: 600; font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.running .dot { background: var(--good); animation: pulse 1.6s infinite; }
+.finished .dot { background: var(--good); } .stopped .dot { background: var(--warning); }
+@keyframes pulse { 50% { opacity: .3; } }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .04em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile .unit { font-size: 15px; color: var(--text-secondary); font-weight: 500; margin-left: 3px; }
+.tile .note { color: var(--muted); font-size: 12px; }
+.now { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: center; }
+.now .what { font-size: 18px; font-weight: 600; }
+.bar { height: 6px; border-radius: 3px; background: var(--wash); overflow: hidden; grid-column: 1 / -1; }
+.bar > div { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .4s; }
+#chart { position: relative; }
+#chart svg { display: block; width: 100%; height: 240px; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  white-space: nowrap; display: none; font-variant-numeric: tabular-nums; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 13px; }
+td.test { color: var(--text-secondary); white-space: nowrap; width: 1%; }
+.big { font-weight: 650; font-size: 15px; }
+.sd, .meta { color: var(--muted); font-size: 12px; }
+.st { font-size: 12px; display: inline-flex; gap: 4px; align-items: center; color: var(--text-secondary); }
+.st.failed { color: var(--critical); font-weight: 600; }
+.st.running { color: var(--text-primary); font-weight: 600; }
+.cellbar { height: 3px; background: var(--series-1); border-radius: 2px; margin-top: 4px; opacity: .8; }
+details { border-top: 1px solid var(--grid); padding: 8px 0; }
+summary { cursor: pointer; font-weight: 600; }
+pre { white-space: pre-wrap; font: 12px/1.5 ui-monospace, monospace; color: var(--text-secondary); margin: 8px 0 0; }
+.env { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; font-size: 12px; }
+.env div:nth-child(odd) { color: var(--muted); } .env div:nth-child(even) { word-break: break-word; }
+.err { color: var(--critical); }
+a { color: var(--series-1); }
+.charts img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+.foot { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .viz-root { padding: 12px; } th, td { padding: 6px; } .tile .value { font-size: 24px; } }
+</style>
+<style>
+.viz-root { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; }
+nav { display: flex; gap: 14px; margin-left: auto; }
+td.num { text-align: right; white-space: nowrap; }
+th.num { text-align: right; }
+.delta { font-weight: 650; }
+.delta.up { color: var(--good-text); } .delta.down { color: var(--critical); }
+.pick { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.mrow td { border-top: 2px solid var(--grid); }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+.ok-text { color: var(--good-text); font-weight: 600; } .bad-text { color: var(--critical); font-weight: 600; }
+code { font: 12px ui-monospace, monospace; }
+.tag { font-size: 11px; color: var(--muted); }
+.win { outline: 2px solid var(--good); outline-offset: -2px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="viz-root"><div class="wrap">
+  <header>
+    <h1>Phase 2 · Vulkan vs SYCL</h1>
+    <span id="badge" class="badge"><span class="dot"></span><span id="state">connecting…</span></span>
+    <span class="sub" id="runinfo"></span>
+    <nav><a href="./">Phase 0</a><a href="p05">Phase 0.5</a><a href="p1">Phase 1</a><a href="p1g">Gemma rerun</a><a href="files/b65-phase2/">Files</a><a href="share">Share cards</a></nav>
+  </header>
+
+  <div class="card">
+    <h2>The question</h2>
+    <p style="margin:0">Same commit (llama.cpp <code>8bb3cf0d2</code>), same GGUFs, same tests: is Intel's SYCL backend faster than Vulkan on the B65?
+      Vulkan decode sits at ~55% of the card's bandwidth ceiling. Rule: <b>SYCL ≥10% faster on decode → SYCL becomes the default engine</b>; within ±10% or slower → keep Vulkan.
+      Vulkan runs with flash attention off (Phase 0.5); SYCL is tested with it off and on.</p>
+  </div>
+
+  <div class="tiles">
+    <div class="card tile"><div class="label">Board power (now)</div><div class="value" id="t-w">–</div><div class="note">xe hwmon, card</div></div>
+    <div class="card tile"><div class="label">GPU package temp</div><div class="value" id="t-pkg">–</div><div class="note" id="t-vram">VRAM –</div></div>
+    <div class="card tile"><div class="label">Progress</div><div class="value" id="t-prog">–</div><div class="note">tests done</div></div>
+    <div class="card tile"><div class="label">SYCL vs Vulkan, decode (so far)</div><div class="value" id="t-dec">–</div><div class="note" id="t-dec-n">best SYCL setting, mean over finished decode tests</div></div>
+  </div>
+
+  <div class="card">
+    <h2>SYCL build</h2>
+    <div class="sub" id="build"></div>
+    <details id="build-log-d" style="display:none"><summary>Build log (tail)</summary><pre id="build-log"></pre></details>
+  </div>
+
+  <div class="card">
+    <h2>Now running</h2>
+    <div class="now">
+      <div><div class="what" id="now-what">–</div><div class="sub" id="now-phase"></div></div>
+      <div class="sub" id="now-count"></div>
+      <div class="bar"><div id="now-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Board power, last 30 min</h2>
+    <div id="chart"><svg id="svg" role="img" aria-label="Board power over time"></svg><div class="tip" id="tip"></div></div>
+  </div>
+
+  <div id="tables"></div>
+  <p class="sub" style="margin:0;font-size:12px">tok/s, mean ± sd of 5 reps · board W over the timed reps · the outlined cell is the fastest of the three ·
+    "P0.5/P1" is the same Vulkan test from an earlier phase (drift check) · OOM = didn't fit in VRAM, a result, not a failure.</p>
+
+  <div class="card">
+    <h2>Details</h2>
+    <details><summary>Environment (env.txt)</summary><div class="env" id="env"></div></details>
+  </div>
+  <div class="foot" id="foot"></div>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const DISPLAY = { "qwen3.8-27b": "Qwen3.8 27B", "gemma-4-31b-qat": "Gemma 4 31B QAT", "muse-glimmer": "Muse Glimmer 28B" };
+const TLAB = { pp512: "prefill 512", pp4096: "prefill 4K", pp16384: "prefill 16K", tg128: "decode @ 0", "tg128@d4096": "decode @ 4K", "tg128@d16384": "decode @ 16K", "tg128@d32768": "decode @ 32K" };
+const RLAB = { "vulkan/fa0": "Vulkan · FA off", "sycl/fa0": "SYCL · FA off", "sycl/fa1": "SYCL · FA on" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (v, d=1) => v == null || v === "" ? "–" : Number(v).toFixed(d);
+const dur = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return (h ? h + "h " : "") + (h || m ? m + "m " : "") + x + "s"; };
+let data = null, hover = null;
+
+function cell(c, win) {
+  if (!c) return "<td></td>";
+  const ref = c.ref ? `<div class="meta">P0.5/P1: ${fmt(c.ref, 2)}</div>` : "";
+  if (c.status === "ok") { const d = c.tok_s >= 100 ? 1 : 2;
+    return `<td class="num${win ? " win" : ""}"><span class="big">${fmt(c.tok_s, d)}</span> <span class="sd">± ${fmt(c.sd, d)}</span>
+      <div class="meta">${c.watts ? fmt(c.watts) + " W · " + (c.tok_s / c.watts).toFixed(c.tok_s / c.watts < 1 ? 3 : 2) + " tok/J" : "– W"}${c.seconds ? " · " + dur(c.seconds) : ""}</div>${ref}</td>`; }
+  if (c.status === "running") return `<td class="num"><span class="st running"><span class="dot" style="background:var(--good)"></span>running</span>${ref}</td>`;
+  if (c.status === "pending") return `<td class="num"><span class="st">○ pending</span>${ref}</td>`;
+  if (c.status === "oom") return `<td class="num"><span class="st" style="font-weight:700">OOM</span><div class="meta">didn't fit</div></td>`;
+  return `<td class="num"><span class="st failed">✕ ${esc(c.status)}</span><pre class="err">${esc(c.error || "")}</pre></td>`;
+}
+
+function render(j) {
+  data = j; const d = j.p2, live = j.live, st = d.state;
+  $("badge").className = "badge " + (st === "not started" ? "stopped" : st);
+  $("state").textContent = ({ running: "Running", finished: "Finished", stopped: "Stopped (incomplete)", "not started": "Not started" }[st] || st) + (d.dry ? " · dry run" : "");
+  const start = d.env.date ? new Date(d.env.date) : null;
+  $("runinfo").textContent = (d.run_id ? `run ${d.run_id}` : "") + (start ? ` · started ${start.toLocaleTimeString()}` : "") +
+    (st === "running" && start ? ` · elapsed ${dur(j.now - start / 1000)}` : "");
+  if (live) {
+    $("t-w").innerHTML = `${fmt(live[1])}<span class="unit">W</span>`;
+    $("t-pkg").innerHTML = live[2] != null ? `${fmt(live[2], 0)}<span class="unit">°C</span>` : "–";
+    $("t-vram").textContent = live[3] != null ? `VRAM ${fmt(live[3], 0)} °C` : "";
+  }
+  $("t-prog").innerHTML = d.total ? `${d.done}<span class="unit">/ ${d.total}</span>` : "–";
+  const b = d.build;
+  $("build").innerHTML = { "not started": "Not built yet (waiting on the oneAPI / Level Zero install).", building: "Building…", failed: "<span class='bad-text'>Build failed</span>, see the log below.",
+    built: `<span class="ok-text">Built</span> · ${esc(b.version || "")}` }[b.state] + (b.devices.length ? `<div class="meta" style="margin-top:6px">${b.devices.map(esc).join("<br>")}</div>` : "");
+  $("build-log-d").style.display = b.tail.length ? "" : "none"; $("build-log").textContent = b.tail.join("\n");
+  $("now-count").textContent = d.total ? `${d.done} of ${d.total} tests done` : "";
+  $("now-bar").style.width = (d.total ? 100 * d.done / d.total : 0) + "%";
+  const c = d.current;
+  $("now-what").textContent = c ? `${DISPLAY[c.model] || c.model} · ${RLAB[`${c.backend}/fa${c.fa}`]} · ${TLAB[c.test] || c.test}` : st === "finished" ? "Run complete" : st === "running" ? "Between tests" : "Run is not active";
+  $("now-phase").textContent = c ? c.phase + (c.started ? ` · ${dur(j.now - c.started)} in this test` : "") : "";
+  // decode verdict so far: mean over decode tests where Vulkan and at least one SYCL setting are done
+  const get = (m, r, t) => d.cells.find(x => x.model === m && x.run === r && x.test === t);
+  const ratios = [];
+  d.models.forEach(m => d.tests.filter(t => t.startsWith("tg")).forEach(t => {
+    const v = get(m, "vulkan/fa0", t), s = ["sycl/fa0", "sycl/fa1"].map(r => get(m, r, t)).filter(x => x && x.status === "ok");
+    if (v && v.status === "ok" && s.length) ratios.push(Math.max(...s.map(x => x.tok_s)) / v.tok_s - 1); }));
+  if (ratios.length) { const r = ratios.reduce((a, x) => a + x, 0) / ratios.length * 100;
+    $("t-dec").innerHTML = `<span class="${r >= 10 ? "ok-text" : r < -10 ? "bad-text" : ""}">${r >= 0 ? "+" : ""}${r.toFixed(1)}%</span>`;
+    $("t-dec-n").textContent = `${ratios.length} decode test${ratios.length > 1 ? "s" : ""} · ${r >= 10 ? "over the +10% bar" : "under the +10% bar"}`; }
+  else { $("t-dec").textContent = "–"; $("t-dec-n").textContent = "best SYCL setting, mean over finished decode tests"; }
+  $("tables").innerHTML = d.models.map((m, i) => {
+    let h = `<div class="card" style="margin-bottom:16px"><h2><span class="swatch" style="background:var(--s${i + 1})"></span>${esc(DISPLAY[m] || m)}</h2><div style="overflow-x:auto"><table>
+      <thead><tr><th>Test</th>${d.runs.map(r => `<th class="num">${RLAB[r]}</th>`).join("")}<th class="num">SYCL best vs Vulkan</th></tr></thead><tbody>`;
+    d.tests.forEach(t => {
+      const cs = d.runs.map(r => get(m, r, t)), ok = cs.filter(x => x && x.status === "ok"), best = ok.length > 1 ? Math.max(...ok.map(x => x.tok_s)) : null;
+      const v = cs[0] && cs[0].status === "ok" ? cs[0].tok_s : null, sb = Math.max(...cs.slice(1).filter(x => x && x.status === "ok").map(x => x.tok_s), -1);
+      const delta = v && sb > 0 ? (sb / v - 1) * 100 : null;
+      h += `<tr><td class="test">${TLAB[t] || t}</td>${cs.map(x => cell(x, best != null && x && x.status === "ok" && x.tok_s === best)).join("")}
+        <td class="num">${delta == null ? "–" : `<span class="delta ${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%</span>`}</td></tr>`;
+    });
+    return h + "</tbody></table></div></div>";
+  }).join("") || `<div class="card"><span class="sub">No Phase 2 run yet.</span></div>`;
+  $("env").innerHTML = Object.entries(d.env).map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("");
+  renderChart();
+  $("foot").textContent = `Updated ${new Date(j.now * 1000).toLocaleTimeString()} · refreshes every 5 s`;
+}
+function renderChart() {
+  const svg = $("svg"), W = svg.clientWidth || 800, H = 240, P = {l: 44, r: 12, t: 10, b: 24};
+  const pts = (data && data.history) || [];
+  if (pts.length < 2) { svg.innerHTML = `<text x="${P.l}" y="40" fill="var(--muted)" font-size="12">collecting samples…</text>`; return; }
+  const t0 = pts[0][0], t1 = pts[pts.length-1][0];
+  const ymax = Math.max(50, Math.ceil(Math.max(...pts.map(p => p[1])) / 50) * 50);
+  const x = t => P.l + (t - t0) / Math.max(1, t1 - t0) * (W - P.l - P.r);
+  const y = v => H - P.b - v / ymax * (H - P.t - P.b);
+  let g = "";
+  for (let v = 0; v <= ymax; v += 50) {
+    g += `<line x1="${P.l}" x2="${W-P.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? "var(--grid)" : "var(--axis)"}" stroke-width="1"/>
+      <text x="${P.l-8}" y="${y(v)+4}" text-anchor="end" fill="var(--muted)" font-size="11">${v} W</text>`;
+  }
+  const step = Math.max(60, Math.ceil((t1 - t0) / 6 / 60) * 60);
+  for (let t = Math.ceil(t0 / step) * step; t <= t1; t += step)
+    g += `<text x="${x(t)}" y="${H-6}" text-anchor="middle" fill="var(--muted)" font-size="11">${new Date(t*1000).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</text>`;
+  const line = pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + "," + y(p[1]).toFixed(1)).join("");
+  const area = line + `L${x(t1).toFixed(1)},${y(0)}L${x(t0).toFixed(1)},${y(0)}Z`;
+  g += `<path d="${area}" fill="var(--series-1-fill)"/><path d="${line}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  if (hover != null) {
+    const p = pts.reduce((a, b) => Math.abs(x(b[0]) - hover) < Math.abs(x(a[0]) - hover) ? b : a);
+    g += `<line x1="${x(p[0])}" x2="${x(p[0])}" y1="${P.t}" y2="${H-P.b}" stroke="var(--axis)" stroke-width="1"/>
+      <circle cx="${x(p[0])}" cy="${y(p[1])}" r="4" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;
+    const tip = $("tip"); tip.style.display = "block";
+    tip.innerHTML = `<b>${fmt(p[1])} W</b> · ${new Date(p[0]*1000).toLocaleTimeString()}` +
+      (p[2] != null ? `<br><span class="sd">GPU ${fmt(p[2],0)} °C · VRAM ${fmt(p[3],0)} °C · fan ${fmt(p[4],0)} rpm</span>` : "");
+    const left = Math.min(x(p[0]) + 12, W - tip.offsetWidth - 4);
+    tip.style.left = left + "px"; tip.style.top = (y(p[1]) - 48 < 0 ? y(p[1]) + 12 : y(p[1]) - 48) + "px";
+  } else $("tip").style.display = "none";
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = g;
+}
+
+const svgEl = $("svg");
+svgEl.addEventListener("pointermove", e => { hover = e.clientX - svgEl.getBoundingClientRect().left; renderChart(); });
+svgEl.addEventListener("pointerleave", () => { hover = null; renderChart(); });
+window.addEventListener("resize", renderChart);
+async function poll() {
+  try { render(await (await fetch("api/p2", { cache: "no-store" })).json()); }
+  catch (e) { $("state").textContent = "dashboard offline"; $("badge").className = "badge stopped"; }
+  setTimeout(poll, 5000);
+}
+poll();
+</script>
+</body>
+</html>

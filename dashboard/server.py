@@ -502,6 +502,76 @@ def p1_share():
                 bench_tests=f["bench_tests"], sizes=f["sizes"], bench=bench, serve=serve, idle=idle, shape=f["shape"],
                 server_failed=f["server_failed"] if complete else [], idle_unloaded_w=f.get("idle_unloaded_w") if complete else None, rerun=p1g_share())
 
+P2_TESTS = ["pp512", "pp4096", "pp16384", "tg128", "tg128@d4096", "tg128@d16384", "tg128@d32768"]
+P2_RUNS = [("vulkan", "0"), ("sycl", "0"), ("sycl", "1")]
+
+def p2_full():
+    """Phase 2 dashboard data: llama-bench on Vulkan fa0 vs SYCL fa0/fa1, per model and test, plus the SYCL build state.
+    Vulkan fa0 references from Phase 0.5 / Phase 1 are attached as a drift check."""
+    kit = os.path.join(ROOT, "b65-phase2"); base = os.path.join(kit, "raw")
+    runs = sorted(d for d in os.listdir(base) if d.startswith("p2-")) if os.path.isdir(base) else []
+    models = [l.split("|")[0] for l in read_lines(os.path.join(kit, "models.conf")) if l.strip() and not l.startswith("#")]
+    blog = read_lines(os.path.join(kit, "build_sycl.log"))
+    build = dict(state="not started" if not blog else "built" if any(l.startswith("SYCL bins:") for l in blog)
+                 else "failed" if any(re.search(r"(error|failed|FAILED)", l) for l in blog[-30:]) else "building",
+                 version=next((l for l in blog if "build " in l and "commit" in l), None),
+                 devices=[l.strip() for l in blog if re.match(r"\s*(SYCL\d|\[level_zero)", l)], tail=blog[-12:])
+    res = dict(state="not started", run_id=None, models=models, tests=P2_TESTS, runs=[f"{b}/fa{f}" for b, f in P2_RUNS],
+               env={}, cells=[], current=None, done=0, total=0, build=build, dry=False)
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:])   # newest by timestamp, dry run or full
+    out = os.path.join(base, run); res["run_id"] = run; res["dry"] = run.startswith("p2-dry-")
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "phase2" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    tests = ["pp512", "tg128"] if res["dry"] else P2_TESTS
+    mods = models[:1] if res["dry"] else models
+    res["tests"] = tests; res["models"] = mods
+    energy = {(r["backend"], r["fa"], r["test"], r["model"]): r for r in csv.DictReader(open(f"{out}/energy.csv"))} if os.path.exists(f"{out}/energy.csv") else {}
+    log = read_lines(os.path.join(kit, "p2-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
+    cur = None
+    if res["state"] == "running" and last:
+        m, b, fa, t = last[-1][0], last[-1][1], last[-1][2].split("=")[1], last[-1][3]
+        if (b, fa, t, m) not in energy:
+            tag = f"{m}.{b}.fa{fa}.{t}"; lines = read_lines(f"{out}/{tag}.log"); phase = None
+            for l in lines:
+                mm = PROGRESS.match(l)
+                if mm: phase = mm.group(2)
+            t0 = float(lines[0].split(" ", 1)[0]) if lines and re.match(r"^\d+\.\d+ ", lines[0]) else None
+            cur = dict(model=m, backend=b, fa=fa, test=t, phase=phase or ("loading model / JIT compiling" if b == "sycl" else "loading model"), started=t0)
+    res["current"] = cur
+    # Vulkan fa0 references: P0.5 prefill + tg@16K, P0.5b tg128 / tg@4K, Phase 1 tg@32K
+    ref = {}
+    for prefix, keys in (("p05", ("pp512", "pp4096", "pp16384", "tg128@d16384")), ("p05b", ("tg128", "tg128@d4096"))):
+        d = sweep_dir(prefix)
+        for m in mods:
+            for k in keys:
+                recs = [json.loads(l) for l in read_lines(f"{d}/{m}.fa0.{k}.jsonl") if l.strip().startswith("{")] if d else []
+                if recs: ref[(m, k)] = recs[-1].get("avg_ts")
+    p1 = os.path.join(ROOT, "b65-phase1", "raw", "p1-20261012-180308")
+    for m in mods:
+        recs = [json.loads(l) for l in read_lines(f"{p1}/{m}.tg128@d32768.jsonl") if l.strip().startswith("{")]
+        if recs: ref[(m, "tg128@d32768")] = recs[-1].get("avg_ts")
+    for m in mods:
+        for b, fa in P2_RUNS:
+            for t in tests:
+                c = dict(model=m, run=f"{b}/fa{fa}", test=t, status="pending", ref=ref.get((m, t)) if b == "vulkan" else None)
+                e = energy.get((b, fa, t, m)); tag = f"{m}.{b}.fa{fa}.{t}"
+                if cur and (cur["model"], cur["backend"], cur["fa"], cur["test"]) == (m, b, fa, t): c["status"] = "running"
+                elif e:
+                    c["status"] = e["status"]; c["seconds"] = float(e["seconds"]) if e.get("seconds") else None
+                    recs = [json.loads(l) for l in read_lines(f"{out}/{tag}.jsonl") if l.strip().startswith("{")]
+                    if e["status"] == "ok" and recs:
+                        j = recs[-1]; w = test_watts(out, f"{m}.{b}.fa{fa}", t, j, float(e["t_end"]) if e.get("t_end") else None)
+                        c.update(tok_s=j.get("avg_ts"), sd=j.get("stddev_ts"), watts=w or None, gpu=j.get("gpu_info"))
+                    elif e["status"] != "ok":
+                        c["error"] = "\n".join(l for l in read_lines(f"{out}/{tag}.log")[-6:])
+                res["cells"].append(c)
+    res["total"] = len(res["cells"]); res["done"] = sum(1 for c in res["cells"] if c["status"] not in ("pending", "running"))
+    return res
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -546,7 +616,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase2", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -614,6 +684,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "p05.html"), "rb").read(), "text/html; charset=utf-8")
         if path in ("/p1", "/p1.html"):
             return self.send(200, open(os.path.join(HERE, "p1.html"), "rb").read(), "text/html; charset=utf-8")
+        if path in ("/p2", "/p2.html"):
+            return self.send(200, open(os.path.join(HERE, "p2.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p2":
+            return self.send(200, json.dumps(dict(p2=p2_full(), live=HIST[-1] if HIST else None, history=list(HIST), now=time.time())).encode(), "application/json")
         if path in ("/p1g", "/p1g.html"):
             return self.send(200, open(os.path.join(HERE, "p1g.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p1g":
