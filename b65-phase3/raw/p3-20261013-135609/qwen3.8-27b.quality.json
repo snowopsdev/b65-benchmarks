@@ -1,0 +1,276 @@
+{
+ "model": "qwen3.8-27b",
+ "coding": [
+  {
+   "id": "c01",
+   "pass": true,
+   "err": "",
+   "s": 8.76,
+   "finish": "stop",
+   "reasoning_chars": 581,
+   "tokens": 173
+  },
+  {
+   "id": "c02",
+   "pass": true,
+   "err": "",
+   "s": 24.27,
+   "finish": "stop",
+   "reasoning_chars": 1809,
+   "tokens": 555
+  },
+  {
+   "id": "c03",
+   "pass": true,
+   "err": "",
+   "s": 32.7,
+   "finish": "stop",
+   "reasoning_chars": 1918,
+   "tokens": 747
+  },
+  {
+   "id": "c04",
+   "pass": true,
+   "err": "",
+   "s": 15.39,
+   "finish": "stop",
+   "reasoning_chars": 731,
+   "tokens": 346
+  },
+  {
+   "id": "c05",
+   "pass": true,
+   "err": "",
+   "s": 28.67,
+   "finish": "stop",
+   "reasoning_chars": 2305,
+   "tokens": 652
+  },
+  {
+   "id": "c06",
+   "pass": true,
+   "err": "",
+   "s": 23.7,
+   "finish": "stop",
+   "reasoning_chars": 1792,
+   "tokens": 540
+  },
+  {
+   "id": "c07",
+   "pass": true,
+   "err": "",
+   "s": 55.16,
+   "finish": "stop",
+   "reasoning_chars": 4454,
+   "tokens": 1268
+  },
+  {
+   "id": "c08",
+   "pass": false,
+   "err": "Traceback (most recent call last):\n  File \"/tmp/tmplat8t40k.py\", line 3, in <module>\n    assert extract_canonical('<head><link rel=\"canonical\" href=\"https://x.com/a\"></head>')=='https://x.com/a'\n           ^^^^^^^^^^^^^^^^^\nNameError: name 'extract_canonical' is not defined\n",
+   "s": 89.19,
+   "finish": "length",
+   "reasoning_chars": 8568,
+   "tokens": 2048
+  },
+  {
+   "id": "c09",
+   "pass": true,
+   "err": "",
+   "s": 12.45,
+   "finish": "stop",
+   "reasoning_chars": 661,
+   "tokens": 275
+  },
+  {
+   "id": "c10",
+   "pass": true,
+   "err": "",
+   "s": 15.17,
+   "finish": "stop",
+   "reasoning_chars": 804,
+   "tokens": 340
+  }
+ ],
+ "tools": [
+  {
+   "id": "t01",
+   "pass": true,
+   "why": "",
+   "s": 5.09,
+   "finish": "tool_calls",
+   "reasoning_chars": 131,
+   "tokens": 70
+  },
+  {
+   "id": "t02",
+   "pass": true,
+   "why": "",
+   "s": 3.88,
+   "finish": "tool_calls",
+   "reasoning_chars": 95,
+   "tokens": 78
+  },
+  {
+   "id": "t03",
+   "pass": true,
+   "why": "",
+   "s": 5.11,
+   "finish": "tool_calls",
+   "reasoning_chars": 119,
+   "tokens": 107
+  },
+  {
+   "id": "t04",
+   "pass": true,
+   "why": "",
+   "s": 3.15,
+   "finish": "tool_calls",
+   "reasoning_chars": 110,
+   "tokens": 61
+  },
+  {
+   "id": "t05",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 1.67,
+   "finish": "stop",
+   "reasoning_chars": 77,
+   "tokens": 26
+  },
+  {
+   "id": "t06",
+   "pass": true,
+   "why": "",
+   "s": 2.99,
+   "finish": "tool_calls",
+   "reasoning_chars": 137,
+   "tokens": 57
+  },
+  {
+   "id": "t07",
+   "pass": true,
+   "why": "",
+   "s": 4.77,
+   "finish": "tool_calls",
+   "reasoning_chars": 181,
+   "tokens": 99
+  },
+  {
+   "id": "t08",
+   "pass": true,
+   "why": "",
+   "s": 4.04,
+   "finish": "tool_calls",
+   "reasoning_chars": 96,
+   "tokens": 82
+  },
+  {
+   "id": "t09",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 15.36,
+   "finish": "stop",
+   "reasoning_chars": 972,
+   "tokens": 349
+  },
+  {
+   "id": "t10",
+   "pass": true,
+   "why": "",
+   "s": 5.74,
+   "finish": "tool_calls",
+   "reasoning_chars": 429,
+   "tokens": 122
+  }
+ ],
+ "notes": [
+  {
+   "id": "n01",
+   "pass": true,
+   "answer": "gemma's pp16384 prefill speed with flash attention off was 335 tok/s.",
+   "s": 24.83,
+   "finish": "stop",
+   "reasoning_chars": 439,
+   "tokens": 198
+  },
+  {
+   "id": "n02",
+   "pass": true,
+   "answer": "the `--ctx-checkpoints 0` flag fixed gemma's slow time-to-first-token.",
+   "s": 8.06,
+   "finish": "stop",
+   "reasoning_chars": 483,
+   "tokens": 156
+  },
+  {
+   "id": "n03",
+   "pass": true,
+   "answer": "sycl won phase 2, with flash attention on becoming the default.",
+   "s": 4.86,
+   "finish": "stop",
+   "reasoning_chars": 261,
+   "tokens": 89
+  },
+  {
+   "id": "n04",
+   "pass": true,
+   "answer": "the idle gpu board power with nothing loaded in phase 0 was 43.1 w.",
+   "s": 6.39,
+   "finish": "stop",
+   "reasoning_chars": 354,
+   "tokens": 121
+  },
+  {
+   "id": "n05",
+   "pass": true,
+   "answer": "qwen 3.8 27b regressed on sycl decode at 32k context.",
+   "s": 9.31,
+   "finish": "stop",
+   "reasoning_chars": 421,
+   "tokens": 182
+  }
+ ],
+ "writing": [
+  {
+   "id": "w01",
+   "text": "Excited to share a new local-AI benchmarking project built around the Intel Arc Pro B65.\n\nOur goal is simple: measure what modern AI workloads can do on a single workstation GPU, without sending data to the cloud. We\u2019ll track inference speed, memory efficiency, model size, and real-world usability across popular open-source models.\n\nThis is especially relevant for teams exploring privacy-first AI, edge deployment, and cost-effective local inference. The Arc Pro B65 brings serious compute to the table, and we want to see how it performs under realistic conditions.\n\nStay tuned for benchmarks, methodology, and practical takeaways. If you\u2019re working with local AI, I\u2019d love to hear what matters most to you. Let's build better local AI together.\n\n#LocalAI #IntelArc #AI",
+   "s": 76.03,
+   "finish": "stop",
+   "reasoning_chars": 4814,
+   "tokens": 1755
+  },
+  {
+   "id": "w02",
+   "text": "SEO optimizes content to rank in traditional search results, driving clicks to your site. AEO optimizes for answer engines\u2014AI assistants, chatbots, and featured snippets\u2014so your brand is cited directly in the answer.\n\nSEO targets keywords, backlinks, and page experience. AEO targets clarity, entity clarity, structured data, and source credibility.\n\nIn practice, SEO still matters because AI engines often draw from indexed, authoritative pages. But AEO shifts focus from \u201cget clicked\u201d to \u201cget cited.\u201d For marketers, that means creating concise, factual, well-structured content that answers questions directly and is easy for machines to verify.",
+   "s": 27.77,
+   "finish": "stop",
+   "reasoning_chars": 1746,
+   "tokens": 640
+  },
+  {
+   "id": "w03",
+   "text": "- **Privacy and control:** Running AI locally keeps data and prompts on your own hardware, reducing reliance on third-party cloud services.\n- **Cost and access:** After the initial GPU investment, local inference can be cheaper and avoids API rate limits, usage fees, or service outages.\n- **Customization and experimentation:** You can fine-tune, modify, or test models freely without depending on external providers or their restrictions.",
+   "s": 5.44,
+   "finish": "stop",
+   "reasoning_chars": 93,
+   "tokens": 111
+  },
+  {
+   "id": "w04",
+   "text": "Dear Colleague,\n\nThank you for your invitation. Unfortunately, I cannot attend the proposed meeting due to a prior commitment. I would still value the opportunity to discuss the matter with you. Would next Tuesday work for you? I am available from 10:00 a.m. to 3:00 p.m. and can join by video call or in person. Please let me know if that time suits you, or suggest another option. I appreciate your understanding and look forward to connecting soon.\n\nBest regards,",
+   "s": 83.71,
+   "finish": "stop",
+   "reasoning_chars": 5402,
+   "tokens": 1955
+  },
+  {
+   "id": "w05",
+   "text": "Flash attention\u2019s performance depends on the backend, which is why it performed poorly on one backend but well on another.",
+   "s": 6.08,
+   "finish": "stop",
+   "reasoning_chars": 468,
+   "tokens": 124
+  }
+ ]
+}

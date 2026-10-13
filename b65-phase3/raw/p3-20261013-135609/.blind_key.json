@@ -1,0 +1,27 @@
+{
+ "w01": {
+  "A": "gemma-4-31b-qat",
+  "B": "qwen3.8-27b",
+  "C": "muse-glimmer"
+ },
+ "w02": {
+  "A": "muse-glimmer",
+  "B": "gemma-4-31b-qat",
+  "C": "qwen3.8-27b"
+ },
+ "w03": {
+  "A": "muse-glimmer",
+  "B": "gemma-4-31b-qat",
+  "C": "qwen3.8-27b"
+ },
+ "w04": {
+  "A": "qwen3.8-27b",
+  "B": "gemma-4-31b-qat",
+  "C": "muse-glimmer"
+ },
+ "w05": {
+  "A": "qwen3.8-27b",
+  "B": "gemma-4-31b-qat",
+  "C": "muse-glimmer"
+ }
+}

@@ -1,0 +1,276 @@
+{
+ "model": "muse-glimmer",
+ "coding": [
+  {
+   "id": "c01",
+   "pass": true,
+   "err": "",
+   "s": 9.4,
+   "finish": "stop",
+   "reasoning_chars": 752,
+   "tokens": 205
+  },
+  {
+   "id": "c02",
+   "pass": true,
+   "err": "",
+   "s": 22.97,
+   "finish": "stop",
+   "reasoning_chars": 2142,
+   "tokens": 571
+  },
+  {
+   "id": "c03",
+   "pass": true,
+   "err": "",
+   "s": 22.59,
+   "finish": "stop",
+   "reasoning_chars": 1688,
+   "tokens": 561
+  },
+  {
+   "id": "c04",
+   "pass": true,
+   "err": "",
+   "s": 17.91,
+   "finish": "stop",
+   "reasoning_chars": 1354,
+   "tokens": 442
+  },
+  {
+   "id": "c05",
+   "pass": true,
+   "err": "",
+   "s": 14.26,
+   "finish": "stop",
+   "reasoning_chars": 1240,
+   "tokens": 349
+  },
+  {
+   "id": "c06",
+   "pass": true,
+   "err": "",
+   "s": 21.31,
+   "finish": "stop",
+   "reasoning_chars": 1922,
+   "tokens": 528
+  },
+  {
+   "id": "c07",
+   "pass": true,
+   "err": "",
+   "s": 17.25,
+   "finish": "stop",
+   "reasoning_chars": 1546,
+   "tokens": 425
+  },
+  {
+   "id": "c08",
+   "pass": true,
+   "err": "",
+   "s": 31.51,
+   "finish": "stop",
+   "reasoning_chars": 2861,
+   "tokens": 786
+  },
+  {
+   "id": "c09",
+   "pass": true,
+   "err": "",
+   "s": 14.57,
+   "finish": "stop",
+   "reasoning_chars": 1091,
+   "tokens": 357
+  },
+  {
+   "id": "c10",
+   "pass": true,
+   "err": "",
+   "s": 15.71,
+   "finish": "stop",
+   "reasoning_chars": 1196,
+   "tokens": 386
+  }
+ ],
+ "tools": [
+  {
+   "id": "t01",
+   "pass": true,
+   "why": "",
+   "s": 5.44,
+   "finish": "tool_calls",
+   "reasoning_chars": 127,
+   "tokens": 91
+  },
+  {
+   "id": "t02",
+   "pass": true,
+   "why": "",
+   "s": 7.48,
+   "finish": "tool_calls",
+   "reasoning_chars": 379,
+   "tokens": 176
+  },
+  {
+   "id": "t03",
+   "pass": true,
+   "why": "",
+   "s": 8.8,
+   "finish": "tool_calls",
+   "reasoning_chars": 444,
+   "tokens": 209
+  },
+  {
+   "id": "t04",
+   "pass": true,
+   "why": "",
+   "s": 3.45,
+   "finish": "tool_calls",
+   "reasoning_chars": 71,
+   "tokens": 74
+  },
+  {
+   "id": "t05",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 0.96,
+   "finish": "stop",
+   "reasoning_chars": 0,
+   "tokens": 11
+  },
+  {
+   "id": "t06",
+   "pass": true,
+   "why": "",
+   "s": 4.35,
+   "finish": "tool_calls",
+   "reasoning_chars": 156,
+   "tokens": 97
+  },
+  {
+   "id": "t07",
+   "pass": true,
+   "why": "",
+   "s": 10.89,
+   "finish": "tool_calls",
+   "reasoning_chars": 787,
+   "tokens": 262
+  },
+  {
+   "id": "t08",
+   "pass": true,
+   "why": "",
+   "s": 6.97,
+   "finish": "tool_calls",
+   "reasoning_chars": 331,
+   "tokens": 163
+  },
+  {
+   "id": "t09",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 1.59,
+   "finish": "stop",
+   "reasoning_chars": 0,
+   "tokens": 27
+  },
+  {
+   "id": "t10",
+   "pass": true,
+   "why": "",
+   "s": 3.44,
+   "finish": "tool_calls",
+   "reasoning_chars": 123,
+   "tokens": 74
+  }
+ ],
+ "notes": [
+  {
+   "id": "n01",
+   "pass": true,
+   "answer": "gemma's pp16384 prefill speed with flash attention off in phase 0.5 was 335 tok/s.",
+   "s": 28.77,
+   "finish": "stop",
+   "reasoning_chars": 920,
+   "tokens": 407
+  },
+  {
+   "id": "n02",
+   "pass": true,
+   "answer": "the slow time-to-first-token was fixed with `--ctx-checkpoints 0`.",
+   "s": 7.22,
+   "finish": "stop",
+   "reasoning_chars": 512,
+   "tokens": 164
+  },
+  {
+   "id": "n03",
+   "pass": true,
+   "answer": "sycl won phase 2.",
+   "s": 5.46,
+   "finish": "stop",
+   "reasoning_chars": 428,
+   "tokens": 121
+  },
+  {
+   "id": "n04",
+   "pass": true,
+   "answer": "the idle gpu board power with nothing loaded in phase 0 was 43.1 w.",
+   "s": 6.85,
+   "finish": "stop",
+   "reasoning_chars": 488,
+   "tokens": 155
+  },
+  {
+   "id": "n05",
+   "pass": true,
+   "answer": "qwen 3.8 27b regressed on sycl decode at 32k context.",
+   "s": 8.03,
+   "finish": "stop",
+   "reasoning_chars": 489,
+   "tokens": 184
+  }
+ ],
+ "writing": [
+  {
+   "id": "w01",
+   "text": "Excited to kick off a local-AI benchmarking project on Intel Arc Pro B65!\n\nWe\u2019re putting Intel\u2019s pro GPU through real-world workloads: LLMs, vision models, and multimodal inference \u2014 all running locally, no cloud dependency.\n\nGoal: measure throughput, latency, power efficiency, and stability across open models with OpenVINO, DirectML, and oneAPI. We\u2019ll publish reproducible configs, driver versions, and raw results.\n\nWhy Arc Pro B65? It\u2019s a compact, workstation-class GPU with Xe2 architecture and XMX AI accelerators, perfect for edge and on-prem AI testing.\n\nFollow along for weekly updates, charts, and lessons learned. If you\u2019re testing local AI on Intel Arc, let\u2019s compare notes.\n\nOpen data, honest numbers, and insights for developers building AI where data lives.\n\n#LocalAI #IntelArc #AIatEdge #Benchmarking #OpenVINO",
+   "s": 58.22,
+   "finish": "stop",
+   "reasoning_chars": 4953,
+   "tokens": 1446
+  },
+  {
+   "id": "w02",
+   "text": "SEO gets you ranked. AEO gets you cited.\n\n**SEO = Search Engine Optimization.** You optimize content for Google/Bing to rank higher in traditional search results. Focus: keywords, backlinks, technical health, and content that earns clicks.\n\n**AEO = Answer Engine Optimization.** You optimize for AI assistants like ChatGPT, Perplexity, and Google's AI Overviews to be the source they quote. Focus: clear, concise answers, structured data, FAQs, and authoritative, conversational content that can be summarized.\n\nSEO drives traffic to your site. AEO drives brand mentions and trust when users never leave the AI.",
+   "s": 32.18,
+   "finish": "stop",
+   "reasoning_chars": 2848,
+   "tokens": 803
+  },
+  {
+   "id": "w03",
+   "text": "* **Privacy and data control** - Models run locally so sensitive prompts, documents, and outputs never leave your machine or go to a third-party API.\n* **Cost and performance** - No per-token fees and full use of your own hardware; you can run models repeatedly, at scale, and tune performance for your specific GPU.\n* **Customization and offline access** - You can fine-tune, modify, and run open models on your own terms, and use them without internet connectivity or service limits.",
+   "s": 12.79,
+   "finish": "stop",
+   "reasoning_chars": 961,
+   "tokens": 312
+  },
+  {
+   "id": "w04",
+   "text": "Dear Alex,\n\nThank you for inviting me to meet this week. I appreciate the opportunity, but I am unable to attend the scheduled meeting due to a prior commitment.\n\nWould it be possible to reschedule for next Tuesday, October 20th, at a time convenient for you? I am flexible in the morning or early afternoon.\n\nI appreciate your flexibility greatly. Please let me know if that works. Thank you for your understanding and your kind consideration always.\n\nBest regards,\nJordan",
+   "s": 79.84,
+   "finish": "stop",
+   "reasoning_chars": 6442,
+   "tokens": 2000
+  },
+  {
+   "id": "w05",
+   "text": "Flash Attention's performance is backend-dependent. That's why it performed poorly on one backend and well on another.\n\nAlternative:\nThe performance of Flash Attention varies by backend implementation, which explains why it was bad on one backend and good on another.",
+   "s": 12.26,
+   "finish": "stop",
+   "reasoning_chars": 1256,
+   "tokens": 298
+  }
+ ]
+}

@@ -5,3 +5,107 @@ qwen3.8-27b c03 PASS stop
 qwen3.8-27b c04 PASS stop
 qwen3.8-27b c05 PASS stop
 qwen3.8-27b c06 PASS stop
+qwen3.8-27b c07 PASS stop
+qwen3.8-27b c08 FAIL length
+qwen3.8-27b c09 PASS stop
+qwen3.8-27b c10 PASS stop
+qwen3.8-27b t01 PASS tool_calls
+qwen3.8-27b t02 PASS tool_calls
+qwen3.8-27b t03 PASS tool_calls
+qwen3.8-27b t04 PASS tool_calls
+qwen3.8-27b t05 PASS stop
+qwen3.8-27b t06 PASS tool_calls
+qwen3.8-27b t07 PASS tool_calls
+qwen3.8-27b t08 PASS tool_calls
+qwen3.8-27b t09 PASS stop
+qwen3.8-27b t10 PASS tool_calls
+qwen3.8-27b n01 PASS stop
+qwen3.8-27b n02 PASS stop
+qwen3.8-27b n03 PASS stop
+qwen3.8-27b n04 PASS stop
+qwen3.8-27b n05 PASS stop
+qwen3.8-27b w01 done stop
+qwen3.8-27b w02 done stop
+qwen3.8-27b w03 done stop
+qwen3.8-27b w04 done stop
+qwen3.8-27b w05 done stop
+>> server gemma-4-31b-qat
+gemma-4-31b-qat c01 PASS stop
+gemma-4-31b-qat c02 PASS stop
+gemma-4-31b-qat c03 PASS stop
+gemma-4-31b-qat c04 PASS stop
+gemma-4-31b-qat c05 PASS stop
+gemma-4-31b-qat c06 PASS stop
+gemma-4-31b-qat c07 PASS stop
+gemma-4-31b-qat c08 FAIL length
+gemma-4-31b-qat c09 PASS stop
+gemma-4-31b-qat c10 PASS stop
+gemma-4-31b-qat t01 PASS tool_calls
+gemma-4-31b-qat t02 PASS tool_calls
+gemma-4-31b-qat t03 PASS tool_calls
+gemma-4-31b-qat t04 PASS tool_calls
+gemma-4-31b-qat t05 PASS stop
+gemma-4-31b-qat t06 PASS tool_calls
+gemma-4-31b-qat t07 PASS tool_calls
+gemma-4-31b-qat t08 PASS tool_calls
+gemma-4-31b-qat t09 PASS stop
+gemma-4-31b-qat t10 PASS tool_calls
+gemma-4-31b-qat n01 PASS stop
+gemma-4-31b-qat n02 PASS stop
+gemma-4-31b-qat n03 PASS stop
+gemma-4-31b-qat n04 PASS stop
+gemma-4-31b-qat n05 PASS stop
+gemma-4-31b-qat w01 done stop
+gemma-4-31b-qat w02 done stop
+gemma-4-31b-qat w03 done stop
+gemma-4-31b-qat w04 done stop
+gemma-4-31b-qat w05 done stop
+>> server muse-glimmer
+muse-glimmer c01 PASS stop
+muse-glimmer c02 PASS stop
+muse-glimmer c03 PASS stop
+muse-glimmer c04 PASS stop
+muse-glimmer c05 PASS stop
+muse-glimmer c06 PASS stop
+muse-glimmer c07 PASS stop
+muse-glimmer c08 PASS stop
+muse-glimmer c09 PASS stop
+muse-glimmer c10 PASS stop
+muse-glimmer t01 PASS tool_calls
+muse-glimmer t02 PASS tool_calls
+muse-glimmer t03 PASS tool_calls
+muse-glimmer t04 PASS tool_calls
+muse-glimmer t05 PASS stop
+muse-glimmer t06 PASS tool_calls
+muse-glimmer t07 PASS tool_calls
+muse-glimmer t08 PASS tool_calls
+muse-glimmer t09 PASS stop
+muse-glimmer t10 PASS tool_calls
+muse-glimmer n01 PASS stop
+muse-glimmer n02 PASS stop
+muse-glimmer n03 PASS stop
+muse-glimmer n04 PASS stop
+muse-glimmer n05 PASS stop
+muse-glimmer w01 done stop
+muse-glimmer w02 done stop
+muse-glimmer w03 done stop
+muse-glimmer w04 done stop
+muse-glimmer w05 done stop
+# Phase 3 quality summary
+
+| Model | Coding | Tools | Notes recall | Total s |
+|---|---|---|---|---|
+| gemma-4-31b-qat | 9/10 | 10/10 | 5/5 | 708 |
+| muse-glimmer | 10/10 | 10/10 | 5/5 | 492 |
+| qwen3.8-27b | 9/10 | 10/10 | 5/5 | 610 |
+
+Failures:
+- gemma-4-31b-qat c08: //x.com/a"></head>')=='https://x.com/a'
+           ^^^^^^^^^^^^^^^^^
+NameError: name 'extract_canonical' is not defined
+
+- qwen3.8-27b c08: //x.com/a"></head>')=='https://x.com/a'
+           ^^^^^^^^^^^^^^^^^
+NameError: name 'extract_canonical' is not defined
+
+Done: raw/p3-20261013-135609

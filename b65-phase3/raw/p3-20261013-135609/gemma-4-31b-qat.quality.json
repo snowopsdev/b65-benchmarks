@@ -1,0 +1,276 @@
+{
+ "model": "gemma-4-31b-qat",
+ "coding": [
+  {
+   "id": "c01",
+   "pass": true,
+   "err": "",
+   "s": 19.0,
+   "finish": "stop",
+   "reasoning_chars": 1046,
+   "tokens": 364
+  },
+  {
+   "id": "c02",
+   "pass": true,
+   "err": "",
+   "s": 37.01,
+   "finish": "stop",
+   "reasoning_chars": 1452,
+   "tokens": 762
+  },
+  {
+   "id": "c03",
+   "pass": true,
+   "err": "",
+   "s": 29.7,
+   "finish": "stop",
+   "reasoning_chars": 1140,
+   "tokens": 593
+  },
+  {
+   "id": "c04",
+   "pass": true,
+   "err": "",
+   "s": 34.3,
+   "finish": "stop",
+   "reasoning_chars": 1586,
+   "tokens": 693
+  },
+  {
+   "id": "c05",
+   "pass": true,
+   "err": "",
+   "s": 22.05,
+   "finish": "stop",
+   "reasoning_chars": 1021,
+   "tokens": 426
+  },
+  {
+   "id": "c06",
+   "pass": true,
+   "err": "",
+   "s": 34.62,
+   "finish": "stop",
+   "reasoning_chars": 1912,
+   "tokens": 700
+  },
+  {
+   "id": "c07",
+   "pass": true,
+   "err": "",
+   "s": 35.13,
+   "finish": "stop",
+   "reasoning_chars": 1962,
+   "tokens": 708
+  },
+  {
+   "id": "c08",
+   "pass": false,
+   "err": "Traceback (most recent call last):\n  File \"/tmp/tmp3ytfvc7n.py\", line 3, in <module>\n    assert extract_canonical('<head><link rel=\"canonical\" href=\"https://x.com/a\"></head>')=='https://x.com/a'\n           ^^^^^^^^^^^^^^^^^\nNameError: name 'extract_canonical' is not defined\n",
+   "s": 100.21,
+   "finish": "length",
+   "reasoning_chars": 7692,
+   "tokens": 2048
+  },
+  {
+   "id": "c09",
+   "pass": true,
+   "err": "",
+   "s": 21.25,
+   "finish": "stop",
+   "reasoning_chars": 936,
+   "tokens": 412
+  },
+  {
+   "id": "c10",
+   "pass": true,
+   "err": "",
+   "s": 67.29,
+   "finish": "stop",
+   "reasoning_chars": 2631,
+   "tokens": 1387
+  }
+ ],
+ "tools": [
+  {
+   "id": "t01",
+   "pass": true,
+   "why": "",
+   "s": 8.53,
+   "finish": "tool_calls",
+   "reasoning_chars": 380,
+   "tokens": 122
+  },
+  {
+   "id": "t02",
+   "pass": true,
+   "why": "",
+   "s": 7.83,
+   "finish": "tool_calls",
+   "reasoning_chars": 293,
+   "tokens": 116
+  },
+  {
+   "id": "t03",
+   "pass": true,
+   "why": "",
+   "s": 8.73,
+   "finish": "tool_calls",
+   "reasoning_chars": 277,
+   "tokens": 135
+  },
+  {
+   "id": "t04",
+   "pass": true,
+   "why": "",
+   "s": 5.28,
+   "finish": "tool_calls",
+   "reasoning_chars": 153,
+   "tokens": 61
+  },
+  {
+   "id": "t05",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 4.31,
+   "finish": "stop",
+   "reasoning_chars": 162,
+   "tokens": 44
+  },
+  {
+   "id": "t06",
+   "pass": true,
+   "why": "",
+   "s": 5.04,
+   "finish": "tool_calls",
+   "reasoning_chars": 163,
+   "tokens": 56
+  },
+  {
+   "id": "t07",
+   "pass": true,
+   "why": "",
+   "s": 8.73,
+   "finish": "tool_calls",
+   "reasoning_chars": 313,
+   "tokens": 135
+  },
+  {
+   "id": "t08",
+   "pass": true,
+   "why": "",
+   "s": 7.7,
+   "finish": "tool_calls",
+   "reasoning_chars": 252,
+   "tokens": 117
+  },
+  {
+   "id": "t09",
+   "pass": true,
+   "why": "no-call expected",
+   "s": 25.2,
+   "finish": "stop",
+   "reasoning_chars": 1550,
+   "tokens": 488
+  },
+  {
+   "id": "t10",
+   "pass": true,
+   "why": "",
+   "s": 5.1,
+   "finish": "tool_calls",
+   "reasoning_chars": 135,
+   "tokens": 53
+  }
+ ],
+ "notes": [
+  {
+   "id": "n01",
+   "pass": true,
+   "answer": "gemma's pp16384 prefill speed with flash attention off was 335 tok/s.",
+   "s": 34.34,
+   "finish": "stop",
+   "reasoning_chars": 603,
+   "tokens": 321
+  },
+  {
+   "id": "n02",
+   "pass": true,
+   "answer": "the server flag `--ctx-checkpoints 0` fixed gemma's slow time-to-first-token.",
+   "s": 12.55,
+   "finish": "stop",
+   "reasoning_chars": 545,
+   "tokens": 206
+  },
+  {
+   "id": "n03",
+   "pass": true,
+   "answer": "sycl won phase 2 and became the default.",
+   "s": 9.27,
+   "finish": "stop",
+   "reasoning_chars": 427,
+   "tokens": 146
+  },
+  {
+   "id": "n04",
+   "pass": true,
+   "answer": "the idle gpu board power with no model loaded in phase 0 was 43.1 w.",
+   "s": 9.15,
+   "finish": "stop",
+   "reasoning_chars": 420,
+   "tokens": 145
+  },
+  {
+   "id": "n05",
+   "pass": true,
+   "answer": "qwen 3.8 27b regressed on sycl decode at 32k context.",
+   "s": 13.72,
+   "finish": "stop",
+   "reasoning_chars": 488,
+   "tokens": 226
+  }
+ ],
+ "writing": [
+  {
+   "id": "w01",
+   "text": "\ud83d\ude80 Excited to announce my latest project: a deep dive into local AI benchmarking on the **Intel Arc Pro B65**! \ud83d\udcbb\n\nAs the shift toward private, on-device AI accelerates, understanding hardware efficiency is more critical than ever. I\u2019ll be putting this GPU through its paces\u2014testing LLM inference speeds, image generation latency, and VRAM stability across various professional workflows.\n\nMy goal? To provide transparent, real-world data on how the B65 handles the demands of modern local AI stacks. Whether you're a developer or a creative, I hope these insights help you optimize your setup.\n\nStay tuned for the full performance breakdown! \ud83d\udcca\n\n#IntelArc #LocalAI #AIHardware #Benchmarking #TechInnovation #IntelArcPro #GenerativeAI #GPU",
+   "s": 27.75,
+   "finish": "stop",
+   "reasoning_chars": 1562,
+   "tokens": 569
+  },
+  {
+   "id": "w02",
+   "text": "**SEO (Search Engine Optimization)** is about **visibility and traffic**. The goal is to rank high in search engine results pages (SERPs) so users click through to your website. It relies on keywords, backlinks, and technical site health to win the \"click.\"\n\n**AEO (Answer Engine Optimization)** is about **authority and immediacy**. With the rise of AI (ChatGPT, Perplexity, Google SGE), users often receive a direct answer without ever visiting a website. AEO optimizes your content to be the *single source of truth* that AI engines synthesize and present as the definitive answer.\n\n**The bottom line:** SEO drives users to your landing page; AEO ensures your brand is the answer the AI provides. SEO is for the browser; AEO is for the engine.",
+   "s": 32.44,
+   "finish": "stop",
+   "reasoning_chars": 2184,
+   "tokens": 677
+  },
+  {
+   "id": "w03",
+   "text": "* **Privacy and Security:** Data remains on local hardware, eliminating the risk of third-party providers logging sensitive information or using your inputs to train future models.\n* **Cost Efficiency:** After the initial hardware investment, there are no recurring subscription fees or per-token API costs, making it more economical for high-volume usage.\n* **Full Control and Customization:** Users can run uncensored models, avoid corporate \"guardrails\" or filters, and fine-tune specific models for niche tasks without relying on a provider's updates.",
+   "s": 23.23,
+   "finish": "stop",
+   "reasoning_chars": 1492,
+   "tokens": 476
+  },
+  {
+   "id": "w04",
+   "text": "Subject: Meeting Request - [Project Name]\n\nDear [Name],\n\nThank you for the invitation to meet. Unfortunately, I have a scheduling conflict at the proposed time and will be unable to attend.\n\nWould you be available to meet next Tuesday instead? I am free most of the day, but 10:00 AM would work best for me. Please let me know if that fits your schedule, or feel free to suggest an alternative time.\n\nI look forward to connecting with you soon.\n\nBest regards,\n\n[Your Name]",
+   "s": 26.21,
+   "finish": "stop",
+   "reasoning_chars": 1567,
+   "tokens": 544
+  },
+  {
+   "id": "w05",
+   "text": "Depending on who you are talking to, here are a few ways to rewrite this, ranging from casual to professional:\n\n**Option 1: Natural & Clear (Best for a quick message or email)**\n> \"Flash Attention's performance depends on the backend, which is why it worked well in one case but poorly in another.\"\n\n**Option 2: Professional/Technical (Best for a report or documentation)**\n> \"The efficiency of Flash Attention varies by backend, which explains the discrepancy in performance between the two environments.\"\n\n**Option 3: Concise (Best for a slide or a brief update)**\n> \"Flash Attention performance is backend-dependent, leading to inconsistent results across different setups.\"\n\n**Key Improvements Made:**\n*   **\"The thing with...\"** $\\rightarrow$ Replaced with the actual subject (**\"performance\"** or **\"efficiency\"**).\n*   **\"Bad/Good\"** $\\rightarrow$ Replaced with more descriptive terms like **\"poorly,\" \"worked well,\"** or **\"discrepancy.\"**\n*   **\"On one... on other one\"** $\\rightarrow$ Clarified to **\"in one case,\" \"between the two,\"** or **\"across different setups.\"**",
+   "s": 32.54,
+   "finish": "stop",
+   "reasoning_chars": 1803,
+   "tokens": 680
+  }
+ ]
+}
