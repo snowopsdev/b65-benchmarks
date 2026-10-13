@@ -393,7 +393,7 @@ function facts2(d) {
   const wr = cs => { const w = cs.map(c => c.watts); return !w.length ? "–" : wRange(Math.min(...w), Math.max(...w)); };
   const tj = cs => { const v = mean(cs.map(c => c.tok_s / c.watts)); return v == null ? "–" : v.toFixed(3); };
   const oom = [...new Set(ms.flatMap(m => tests.flatMap(t => d.p2.runs.map(r => (p2c(d, m, r, t) || {}).status === "oom" ? `${short(m)} ${RUNLAB[r]} ${P2LAB[t].join(" ")}` : null))).filter(Boolean))];
-  const verdict = decMean == null ? "Decode comparison incomplete" : decMean >= 10 ? "SYCL wins: new default engine" : decMean <= -10 ? "Vulkan wins clearly: keep Vulkan" : "A wash: keep Vulkan";
+  const verdict = decMean == null ? "Decode comparison incomplete" : decMean >= 10 ? "SYCL clears the +10% decode bar" : decMean <= -10 ? "Vulkan is 10%+ faster on decode" : "A wash: within 10% on decode";
   return { ms, per, decMean, preMean, verdict, faDec: fa(dec), faPre: fa(pre), oom,
     d0v: rng("vulkan/fa0", "tg128"), d0s: rng(bestRun("tg128"), "tg128"), d32v: rng("vulkan/fa0", "tg128@d32768"), d32s: rng(bestRun("tg128@d32768"), "tg128@d32768"),
     wv: wr(decW("vulkan/fa0")), ws: wr(decW(sRun)), jv: tj(decW("vulkan/fa0")), js: tj(decW(sRun)) };
@@ -1291,7 +1291,7 @@ const CARDS = [
       rr(ctx, b.x, py, b.w, barH - 10 * u, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
       text(ctx, done ? "Run complete" : full && p.state === "running" ? "Running now" : full && p.state === "stopped" ? "Paused" : p.build.state === "building" ? "Building the SYCL engine" : "Starting soon",
         b.x + 20 * u, py + 26 * u, 18 * u, { w: 700 });
-      text(ctx, "The winner becomes the default engine for the rest of the series", b.x + 20 * u, py + 48 * u, 15 * u, { color: C.ink2, max: b.w * 0.6 });
+      text(ctx, "The result decides the engine for the rest of the series", b.x + 20 * u, py + 48 * u, 15 * u, { color: C.ink2, max: b.w * 0.6 });
       if (full) { const tx = b.x + b.w - 20 * u, bw2 = Math.min(260 * u, b.w * 0.3);
         text(ctx, `${p.done} / ${p.total} tests`, tx, py + 26 * u, 17 * u, { w: 700, align: "right" });
         rr(ctx, tx - bw2, py + 38 * u, bw2, 10 * u, 5 * u, C.page);

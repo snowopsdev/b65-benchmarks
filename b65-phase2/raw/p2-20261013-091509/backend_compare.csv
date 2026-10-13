@@ -1,0 +1,64 @@
+model,backend,fa,test,tok_s,sd,board_w,tok_per_j,invocation_w,gpu_info
+gemma-4-31b-qat,sycl,0,pp16384,384.63,0.02,170.1,2.2614,166.8,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,pp16384,397.37,0.016,164.3,2.4184,161.3,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,pp16384,335.29,0.123,151.6,2.2109,149.7,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,pp4096,418.36,0.067,169.1,2.4734,156.2,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,pp4096,414.44,1.145,162.8,2.5455,151.8,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,pp4096,378.54,0.127,147.5,2.566,140.0,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,pp512,468.64,0.181,170.7,2.7449,110.2,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,pp512,410.75,0.14,168.2,2.4425,71.8,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,pp512,414.48,0.467,144.1,2.8754,78.3,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,tg128,22.18,0.011,175.8,0.1262,153.7,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,tg128,22.45,0.031,176.1,0.1275,154.9,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,tg128,19.16,0.002,181.9,0.1054,163.1,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,tg128@d16384,13.37,0.206,164.6,0.0812,137.5,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,tg128@d16384,18.29,0.215,171.7,0.1065,151.5,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,tg128@d16384,16.0,0.138,181.3,0.0882,135.1,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,tg128@d32768,9.99,0.116,166.0,0.0602,139.0,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,tg128@d32768,16.06,0.164,168.9,0.0951,152.7,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,tg128@d32768,12.84,0.084,180.9,0.071,134.8,Intel(R) Graphics (BMG G31)
+gemma-4-31b-qat,sycl,0,tg128@d4096,17.09,0.346,166.2,0.1029,136.8,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,sycl,1,tg128@d4096,20.46,0.269,174.7,0.1171,151.1,Intel(R) Arc(TM) Pro B65 Graphics
+gemma-4-31b-qat,vulkan,0,tg128@d4096,17.39,0.16,178.8,0.0973,125.9,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,pp16384,508.84,0.041,176.2,2.8875,172.2,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,pp16384,608.7,0.057,181.8,3.3481,177.0,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,pp16384,429.73,0.139,161.7,2.6572,159.4,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,pp4096,580.08,0.116,178.4,3.2518,161.9,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,pp4096,651.98,0.227,181.8,3.586,163.5,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,pp4096,483.03,0.315,159.9,3.0204,150.7,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,pp512,688.19,0.648,183.1,3.758,107.5,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,pp512,691.22,0.939,184.6,3.7442,72.5,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,pp512,539.92,0.55,159.0,3.3956,67.0,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,tg128,25.15,0.002,197.7,0.1272,171.5,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,tg128,25.66,0.024,199.4,0.1287,174.2,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,tg128,20.94,0.001,175.5,0.1193,159.0,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,tg128@d16384,18.41,0.331,179.8,0.1024,164.5,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,tg128@d16384,23.56,0.002,193.6,0.1217,172.7,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,tg128@d16384,16.79,0.07,168.2,0.0998,156.4,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,tg128@d32768,15.74,0.239,173.3,0.0908,165.0,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,tg128@d32768,22.29,0.002,190.0,0.1173,173.2,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,tg128@d32768,14.73,0.062,165.4,0.089,159.0,Intel(R) Graphics (BMG G31)
+muse-glimmer,sycl,0,tg128@d4096,21.07,0.434,186.2,0.1131,163.4,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,sycl,1,tg128@d4096,24.64,0.003,197.0,0.1251,172.1,Intel(R) Arc(TM) Pro B65 Graphics
+muse-glimmer,vulkan,0,tg128@d4096,18.71,0.086,171.0,0.1094,154.6,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,pp16384,571.17,0.07,184.9,3.0886,179.8,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,pp16384,606.15,0.071,185.6,3.2661,180.1,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,pp16384,388.17,0.035,155.9,2.4893,153.6,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,pp4096,635.1,0.134,186.2,3.4112,166.0,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,pp4096,645.52,0.17,185.6,3.4774,165.3,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,pp4096,431.84,0.053,153.2,2.8184,144.4,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,pp512,663.55,0.489,185.4,3.5781,108.7,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,pp512,639.96,0.505,184.9,3.4613,109.4,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,pp512,445.55,0.193,151.5,2.9401,111.1,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,tg128,23.69,0.005,195.1,0.1214,166.2,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,tg128,23.68,0.007,194.9,0.1215,167.4,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,tg128,19.08,0.002,170.2,0.1121,154.1,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,tg128@d16384,17.79,0.008,181.8,0.0979,166.7,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,tg128@d16384,18.63,0.003,176.4,0.1056,164.0,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,tg128@d16384,17.69,0.016,173.0,0.1022,153.9,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,tg128@d32768,14.11,0.002,177.4,0.0795,168.8,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,tg128@d32768,15.26,0.012,164.6,0.0927,164.3,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,tg128@d32768,16.16,0.038,175.8,0.0919,156.9,Intel(R) Graphics (BMG G31)
+qwen3.8-27b,sycl,0,tg128@d4096,21.87,0.006,190.8,0.1146,165.6,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,sycl,1,tg128@d4096,22.22,0.004,189.5,0.1172,165.3,Intel(R) Arc(TM) Pro B65 Graphics
+qwen3.8-27b,vulkan,0,tg128@d4096,18.84,0.015,171.3,0.11,152.9,Intel(R) Graphics (BMG G31)
