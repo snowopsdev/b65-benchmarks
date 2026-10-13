@@ -20,7 +20,7 @@ Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p
 3. **Time to first token for Qwen and Muse:** 1.3–1.7 s on a 512-token prompt, about 42 s on a 16K prompt (Phase 1).
 4. **Gemma + llama-server: use `--ctx-checkpoints 0`.** The default context checkpoints for sliding-window models cost 25 s on a 512-token prompt. With them off, it's 1.4 s. The multi-turn cost of turning them off isn't measured yet (Phase 1 follow-up).
 5. **Idle with a model loaded is about 45 W**, against 43 W with nothing loaded.
-6. **SYCL with flash attention on beats Vulkan:** +21.8% decode and +31.2% prefill on average, at the same llama.cpp commit (Phase 2). That clears the +10% rule. The exception is Qwen at 32K, where SYCL is 5.6% slower. Unlike Vulkan, SYCL wants flash attention on.
+6. **SYCL with flash attention on beats Vulkan:** +21.8% decode and +31.2% prefill on average, at the same llama.cpp commit (Phase 2). That clears the +10% rule, so **SYCL with flash attention on is the default engine from here (Forge, 2026-10-13)**. The exception is Qwen at 32K, where SYCL is 5.6% slower. Unlike Vulkan, SYCL wants flash attention on.
 
 ## Packages
 

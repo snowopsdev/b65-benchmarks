@@ -18,7 +18,9 @@ Run `p2-20261013-091509`, 2026-10-13, 9:15–10:53 AM ET. All 63 tests ok, no ou
 - **Power:** GPU board power from xe hwmon only, averaged over the timed reps. No wall meter. The board power cap is 200 W.
 
 ## Headline
-**SYCL with flash attention on is 21.8% faster than Vulkan on decode and 31.2% faster on prefill, averaged over all three models.** That clears the plan's +10% decode rule. Under that rule SYCL becomes the default engine, pending AJ and Forge's call.
+**SYCL with flash attention on is 21.8% faster than Vulkan on decode and 31.2% faster on prefill, averaged over all three models.** That clears the plan's +10% decode rule.
+
+**Decision (Forge, 2026-10-13):** SYCL with flash attention on is the default engine. Per the plan, Phase 1 is rerun on SYCL with flash attention on.
 
 | SYCL setting vs Vulkan (FA off) | Decode, mean of 12 | Prefill, mean of 9 |
 |---|---|---|
@@ -59,6 +61,13 @@ Per model, SYCL with FA on vs Vulkan:
 | | tg128 @16K | 16.79 | 18.41 | **23.56** | +40% |
 | | tg128 @32K | 14.73 | 15.74 | **22.29** | +51% |
 
+The "Best SYCL" column takes whichever SYCL setting is faster on each test. Against the chosen default alone (SYCL with flash attention on), prefill is lower in three places:
+- Gemma pp512: −0.9%, a tie, not +13%.
+- Gemma pp4096: +9.5%, not +11%.
+- Qwen pp512: +44%, not +49%.
+
+Decode is the same either way, except that Qwen at 32K is −5.6% with flash attention on and −12.7% with it off. From here on, the share cards compare SYCL with flash attention on against Vulkan.
+
 Board W per cell is in `phase2_summary.md` and `backend_compare.csv`.
 
 ## Findings
@@ -72,18 +81,33 @@ Board W per cell is in `phase2_summary.md` and `backend_compare.csv`.
    - On SYCL it barely changes prefill (+3%).
    - SYCL with flash attention off is slower than Vulkan for Gemma decode at depth (−22% at 32K), so the setting matters.
 3. **There's one exception: Qwen at 32K.** SYCL is 5.6% slower than Vulkan there with flash attention on (15.26 vs 16.16), and 12.7% slower with it off. Qwen's decode advantage shrinks with depth: +24%, +18%, +5%, −6%.
-4. **Decode is closer to the bandwidth ceiling.** SYCL decode at 0 context reaches about 400–430 GB/s of the published 608 GB/s (65–71%), compared with Vulkan's 53–58% in Phase 0. This uses the same approximation as Phase 0: tok/s × file size.
-5. **SYCL is more efficient but draws more power.**
-   - Decode tokens per joule average 0.115 on SYCL with flash attention on, against 0.100 on Vulkan (+15%).
-   - Decode board power is 165–199 W on SYCL and 165–182 W on Vulkan.
+   - At 16K Qwen is only +5.3%, so SYCL clears +10% at 0 and 4K context for every model, but not at 16K for Qwen.
+   - Qwen's average decode gain, +10.4%, only just clears the bar.
+   - **The order of falloff with context changes.** From 0 to 32K tokens of context:
+     - Qwen: −15% on Vulkan, −36% on SYCL. It falls off fastest on SYCL.
+     - Gemma: −33% on Vulkan, −28.5% on SYCL.
+     - Muse: −30% on Vulkan, −13% on SYCL. Its falloff is gentlest on SYCL.
+4. **Gemma passes the registry's 15 tok/s line at 32K on SYCL:** 16.06 tok/s, against 12.84 on Vulkan. Its falloff with context is still steep (−28.5%); the gain comes from a faster start, not a flatter curve.
+5. **Decode is closer to the bandwidth ceiling.** SYCL decode at 0 context reaches about 400–430 GB/s of the published 608 GB/s (65–71%), compared with Vulkan's 53–58% in Phase 0. This uses the same approximation as Phase 0: tok/s × file size.
+6. **SYCL is more efficient, and it doesn't always draw more power.**
+   - Decode tokens per joule average 0.115 on SYCL with flash attention on, against 0.100 on Vulkan (+15%). Decode at 0 context improves for all three:
+     - Qwen: 0.112 to 0.122
+     - Gemma: 0.105 to 0.128
+     - Muse: 0.119 to 0.129
+   - Power with SYCL and flash attention on, compared with Vulkan:
+     - Prefill: 13–33 W more for every model.
+     - Qwen and Muse decode: 18–26 W more, except Qwen at 16K (+3 W) and at 32K (−11 W).
+     - **Gemma decode: 4–12 W less.**
+   - Overall, decode board power is 165–199 W on SYCL and 165–182 W on Vulkan.
    - Muse's SYCL decode at 0 context averaged 199.4 W against the 200 W cap, so it may be power-limited there. Throttling wasn't measured.
    - Prefill is 3.14 tok/J on SYCL with flash attention on, against 2.78 on Vulkan.
-6. **The Vulkan numbers are stable.** Vulkan with flash attention off reproduces the Phase 0.5 and Phase 1 values within 0.4% on all 21 tests, so the differences come from the engine, not drift. The largest run-to-run spread is 2.1% (Muse, SYCL with flash attention off, tg @4K); everything else is under 2%.
+7. **The Vulkan numbers are stable.** Vulkan with flash attention off reproduces the Phase 0.5 and Phase 1 values within 0.4% on all 21 tests, so the differences come from the engine, not drift. The largest run-to-run spread is 2.1% (Muse, SYCL with flash attention off, tg @4K); everything else is under 2%.
 
 ## Checks
 - **Output isn't gibberish.** Each model wrote the same 120-token answer at temperature 0 on SYCL and on Vulkan, in llama-server:
   - Qwen, SYCL flash attention off (`raw/p2-spot-20261013-091431`): output identical to Vulkan.
   - Gemma and Muse, SYCL flash attention on (`raw/p2-spot-20261013-105352`): Muse identical; Gemma coherent and the same until a small wording difference. That difference is expected, because flash attention on vs off changes the arithmetic order.
+  - Qwen, SYCL flash attention on (the chosen default; `raw/p2-spot-20261013-110712`): identical to Vulkan as well. All three models are now checked on the default setting.
   - SYCL speed in these runs matched llama-bench: Qwen 23.9, Gemma 22.4, Muse 25.9 tok/s.
 - **The speeds aren't absurd.** SYCL draws more power than Vulkan, not near zero.
 - **Dry run:** `raw/p2-dry-20261013-091018`. Its `env.txt` recorded a device-table header instead of the SYCL version; that's fixed for the full run.
@@ -102,3 +126,11 @@ This was answered before Phase 2 by `b65-phase1/raw/p1-swa-20261013-081841`.
 ## Posting status
 - **Cleared:** everything in this run. Nothing is held in `holds.conf`.
 - **When posting:** say "best SYCL setting" or "SYCL with flash attention on", and mention Qwen's −6% at 32K so the summary isn't one-sided.
+
+## Review of Forge's Phase 2 findings (2026-10-13)
+These are checked against `backend_compare.csv`. The verdict, the table, the Gemma and Muse flash-attention numbers, the biggest wins, and the Muse tok/J example are all correct. Corrections:
+- **"Clears the 10% decode rule on all three models at short and mid context."** True at 0 and 4K context (+17–24% and +18–32%). At 16K, Qwen is only +5.3%.
+- **"SYCL draws ~10–30 W more."** That holds for prefill (+13–33 W) and for most Qwen and Muse decode. Gemma's decode on SYCL draws 4–12 W *less*, and Qwen at 32K draws 11 W less.
+- **"Gemma's long-context decode problem mostly closes."** Gemma is 25% faster at 32K and now above 15 tok/s, but its 0-to-32K falloff only eases from −33% to −28.5%. Meanwhile Qwen's falloff gets worse on SYCL (−15% to −36%).
+- **"SYCL best vs Vulkan" column.** It mixes both SYCL settings. Against the chosen default (flash attention on), Gemma pp512 is −0.9% rather than +13%.
+- **Output check.** The Qwen check had been run with SYCL flash attention off. It has now been rerun with flash attention on, and the output is identical.

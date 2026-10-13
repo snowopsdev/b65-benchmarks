@@ -369,12 +369,13 @@ function p2foot(d) {
   const cr = v(s.compute_runtime, /compute-runtime (\d+\.\d+)/), oa = v(s.oneapi, /dpcpp-cpp (\d{4}\.\d+)/);
   return `Arc Pro B65 32 GB · llama.cpp b${st.llama_build} · Vulkan (Mesa ${st.mesa}) vs SYCL (oneAPI${oa ? " " + oa : ""}${cr ? ", compute-runtime " + cr : ""}) · Linux ${st.kernel.split("-")[0]}`;
 }
-// best SYCL setting vs Vulkan for one model/test: { v, s, fa, delta } or { oom } / null
+// SYCL with flash attention on (the default Forge chose after Phase 2) vs Vulkan for one model/test: { v, s, delta } or { oom } / null
+const P2_SYCL = "sycl/fa1";
 function p2cmp(d, m, t) {
-  const v = p2c(d, m, "vulkan/fa0", t), s = ["sycl/fa0", "sycl/fa1"].map(r => p2c(d, m, r, t)).filter(c => c && c.status === "ok" && c.tok_s);
-  if (!v || v.status !== "ok" || !s.length) return v && (v.status === "oom" || ["sycl/fa0", "sycl/fa1"].every(r => (p2c(d, m, r, t) || {}).status === "oom")) ? { oom: true } : null;
-  const best = s.reduce((a, c) => c.tok_s > a.tok_s ? c : a);
-  return { v: v.tok_s, s: best.tok_s, fa: best.run.slice(-1), delta: 100 * (best.tok_s / v.tok_s - 1), vw: v.watts, sw: best.watts };
+  const v = p2c(d, m, "vulkan/fa0", t), s = p2c(d, m, P2_SYCL, t);
+  if (v && v.status === "oom" || s && s.status === "oom") return { oom: true };
+  if (!v || v.status !== "ok" || !s || s.status !== "ok" || !s.tok_s) return null;
+  return { v: v.tok_s, s: s.tok_s, delta: 100 * (s.tok_s / v.tok_s - 1), vw: v.watts, sw: s.watts };
 }
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 function facts2(d) {
@@ -387,15 +388,14 @@ function facts2(d) {
     return a && b && a.status === "ok" && b.status === "ok" ? 100 * (b.tok_s / a.tok_s - 1) : null; })).filter(v => v != null));
   const rng = (run, t) => { const v = ms.map(m => p2c(d, m, run, t)).filter(c => c && c.status === "ok").map(c => c.tok_s);
     return !v.length ? "–" : Math.min(...v).toFixed(1) === Math.max(...v).toFixed(1) ? Math.min(...v).toFixed(1) : `${Math.min(...v).toFixed(1)}–${Math.max(...v).toFixed(1)}`; };
-  const bestRun = t => { const by = ["sycl/fa0", "sycl/fa1"].map(r => ({ r, s: mean(ms.map(m => (p2c(d, m, r, t) || {}).tok_s).filter(v => v != null)) || 0 })); return by.reduce((a, c) => c.s > a.s ? c : a).r; };
   const decW = run => ms.flatMap(m => dec.map(t => p2c(d, m, run, t))).filter(c => c && c.status === "ok" && c.watts);
-  const sRun = mean(decW("sycl/fa0").map(c => c.tok_s)) >= mean(decW("sycl/fa1").map(c => c.tok_s)) ? "sycl/fa0" : "sycl/fa1";
+  const sRun = P2_SYCL;
   const wr = cs => { const w = cs.map(c => c.watts); return !w.length ? "–" : wRange(Math.min(...w), Math.max(...w)); };
   const tj = cs => { const v = mean(cs.map(c => c.tok_s / c.watts)); return v == null ? "–" : v.toFixed(3); };
   const oom = [...new Set(ms.flatMap(m => tests.flatMap(t => d.p2.runs.map(r => (p2c(d, m, r, t) || {}).status === "oom" ? `${short(m)} ${RUNLAB[r]} ${P2LAB[t].join(" ")}` : null))).filter(Boolean))];
-  const verdict = decMean == null ? "Decode comparison incomplete" : decMean >= 10 ? "SYCL clears the +10% decode bar" : decMean <= -10 ? "Vulkan is 10%+ faster on decode" : "A wash: within 10% on decode";
+  const verdict = decMean == null ? "Decode comparison incomplete" : decMean >= 10 ? "SYCL clears the +10% bar: new default" : decMean <= -10 ? "Vulkan is 10%+ faster on decode" : "A wash: within 10% on decode";
   return { ms, per, decMean, preMean, verdict, faDec: fa(dec), faPre: fa(pre), oom,
-    d0v: rng("vulkan/fa0", "tg128"), d0s: rng(bestRun("tg128"), "tg128"), d32v: rng("vulkan/fa0", "tg128@d32768"), d32s: rng(bestRun("tg128@d32768"), "tg128@d32768"),
+    d0v: rng("vulkan/fa0", "tg128"), d0s: rng(P2_SYCL, "tg128"), d32v: rng("vulkan/fa0", "tg128@d32768"), d32s: rng(P2_SYCL, "tg128@d32768"),
     wv: wr(decW("vulkan/fa0")), ws: wr(decW(sRun)), jv: tj(decW("vulkan/fa0")), js: tj(decW(sRun)) };
 }
 const RUNLAB = { "vulkan/fa0": "Vulkan", "sycl/fa0": "SYCL", "sycl/fa1": "SYCL+FA" };
@@ -429,7 +429,7 @@ function drawP2Grid(ctx, b, u, d, ms) {
   });
   text(ctx, "V = Vulkan, flash attention off · S = SYCL, off · S+ = SYCL, flash attention on", b.x + labW, b.y + headH + rh * ms.length + 20 * u, 13 * u, { color: C.muted, max: b.w - labW });
 }
-// diverging bars: best SYCL vs Vulkan (%), one group per test, one bar per model; ±10% band shaded
+// diverging bars: SYCL (FA on) vs Vulkan (%), one group per test, one bar per model; ±10% band shaded
 function drawP2Delta(ctx, b, u, d, ms, tests = d.p2.tests) {
   b = { ...b, y: b.y + 22 * u, h: b.h - 22 * u };   // strip for the direction labels
   const labW = Math.min(150 * u, b.w * 0.24), x0 = b.x + labW, x1 = b.x + b.w - 70 * u;
@@ -448,7 +448,7 @@ function drawP2Delta(ctx, b, u, d, ms, tests = d.p2.tests) {
       if (c.oom) { text(ctx, "out of VRAM", zx + 8 * u, y + barH * .8, 11 * u, { color: C.muted }); return; }
       const xa = Math.min(zx, X(c.delta)), w = Math.max(2 * u, Math.abs(X(c.delta) - zx));
       ctx.beginPath(); ctx.roundRect(xa, y, w, barH, 3 * u); ctx.fillStyle = mcolor(d.models.indexOf(m)); ctx.fill();
-      const lab = pct2(c.delta) + (c.fa === "1" ? " FA" : "");
+      const lab = pct2(c.delta);
       text(ctx, lab, c.delta >= 0 ? xa + w + 6 * u : xa - 6 * u, y + barH * .8, Math.min(14 * u, Math.max(10 * u, barH * 1.05)), { w: 700, align: c.delta >= 0 ? "left" : "right" });
     });
   });
@@ -1270,7 +1270,7 @@ const CARDS = [
         ["Flash attention, both ways", "Vulkan with it off (Phase 0.5's winner); SYCL off and on"],
         ["Prefill and decode", "512 to 16K-token prompts · decode with 0 to 32K tokens of context"],
         ["Power on every test", "GPU board watts over the timed runs, tokens per joule"]];
-      const expect = done ? [f.verdict, `Decode: ${pct2(f.decMean)} on average, best SYCL setting vs Vulkan`, `Prefill: ${pct2(f.preMean)} on average`, `${p.total} tests across 3 models and 3 setups`]
+      const expect = done ? [f.verdict, `Decode: ${pct2(f.decMean)} on average, SYCL (FA on) vs Vulkan`, `Prefill: ${pct2(f.preMean)} on average`, `${p.total} tests across 3 models and 3 setups`]
                           : ["Which engine the rest of the series runs on", "The rule: SYCL needs +10% on decode to win", "Prefill and decode, up to 32K context", "Watts and tokens per joule for each engine"];
       const barH = 70 * u, bodyH = b.h - barH - 20 * u, colW = wide ? (b.w - 48 * u) / 2 : b.w, secH = wide ? bodyH : (bodyH - 24 * u) / 2;
       const section = (x, y, w, h, head, rows, render) => {
@@ -1342,19 +1342,19 @@ const CARDS = [
         if (ans && ans.key === k) text(ctx, "ANSWER", x + ow - 18 * u, y + 24 * u, 13 * u, { w: 800, color: C.series[i], align: "right" });
         ctx.restore();
       });
-      text(ctx, ans ? `Answer: ${ans.key}. Best SYCL setting vs Vulkan, decode: ${pct2(ans.dec)} on average over ${ans.n} tests.`
+      text(ctx, ans ? `Answer: ${ans.key}. SYCL (flash attention on) vs Vulkan, decode: ${pct2(ans.dec)} on average over ${ans.n} tests.`
                     : p.complete ? "The run is done. Answer coming up." : p.total && !p.dry ? `The answer drops when Phase 2 finishes · ${p.done} of ${p.total} tests done` : "The answer drops when Phase 2 finishes",
         b.x, wide ? b.y + b.h - 6 * u : oy + 3 * (oh + gap) + 40 * u, wide ? 18 * u : 24 * u, { w: ans ? 700 : 400, color: ans ? C.ink : C.ink2, max: b.w });
     },
     caption: d => { const a = p2answer(d); return [
-      ...(a ? [["Answer reveal", `Answer: ${a.key}. On a 32 GB Intel Arc Pro B65, the best SYCL setting vs Vulkan on decode: ${pct2(a.dec)} on average across ${a.n} tests (3 models, 0 to 32K context, same llama.cpp commit).\n\nWho called it?`]] : []),
+      ...(a ? [["Answer reveal", `Answer: ${a.key}. On a 32 GB Intel Arc Pro B65, SYCL (flash attention on) vs Vulkan on decode: ${pct2(a.dec)} on average across ${a.n} tests (3 models, 0 to 32K context, same llama.cpp commit).\n\nWho called it?`]] : []),
       ["Post (attach as a poll)", `Same Intel Arc Pro B65, same three ~30B models, same llama.cpp commit.\n\nIntel's own SYCL backend vs Vulkan. Who generates text faster?\n\nA) SYCL, by 10%+\nB) A wash (within 10%)\nC) Vulkan, by 10%+`]]; } },
 
   { id: "p2-delta", name: "SYCL vs Vulkan, test by test", safe: false, group: "p2", ready: d => p2ready(d), lockMsg: d => p2lock(d),
     draw(ctx, W, H, u, d) {
       const ms = p2ms(d), f = facts2(d);
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 2", title: "SYCL vs Vulkan, test by test",
-        sub: "best SYCL setting (flash attention off or on) vs Vulkan (off) · right = SYCL faster · shaded = within ±10%", results: true, foot: p2foot(d) });
+        sub: "SYCL with flash attention on (the new default) vs Vulkan (off) · right = SYCL faster · shaded = within ±10%", results: true, foot: p2foot(d) });
       legend(ctx, b.x, b.y + 6 * u, u, ms, b.w);
       const ts = d.p2.tests, pre = ts.filter(t => t.startsWith("pp")), dec = ts.filter(t => t.startsWith("tg"));
       if (W > H) { const hw = (b.w - 40 * u) / 2;
@@ -1363,7 +1363,7 @@ const CARDS = [
       } else drawP2Delta(ctx, { x: b.x, y: b.y + 30 * u, w: b.w, h: b.h - 30 * u }, u, d, ms);
     },
     caption: d => { const f = facts2(d); return [
-      ["Post", `Vulkan vs Intel's SYCL backend on a 32 GB Arc Pro B65, same llama.cpp commit (best SYCL setting vs Vulkan):\n\n${f.per.map(x => `• ${short(x.m)}: decode ${pct2(x.dec)}, prefill ${pct2(x.pre)}`).join("\n")}\n\n${f.verdict}. Surprised?`]]; } },
+      ["Post", `Vulkan vs Intel's SYCL backend on a 32 GB Arc Pro B65, same llama.cpp commit (SYCL with flash attention on vs Vulkan):\n\n${f.per.map(x => `• ${short(x.m)}: decode ${pct2(x.dec)}, prefill ${pct2(x.pre)}`).join("\n")}\n\n${f.verdict}. Surprised?`]]; } },
 
   { id: "p2-findings", name: "Phase 2 key findings", safe: false, group: "p2", ready: d => p2ready(d), lockMsg: d => p2lock(d),
     draw(ctx, W, H, u, d) {
@@ -1371,7 +1371,7 @@ const CARDS = [
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 2", title: "What we found",
         sub: `${ms.length} models · Vulkan vs SYCL · same llama.cpp commit (b${d.stack.llama_build})`, results: true, foot: p2foot(d) });
       const items = [
-        [f.verdict, `decode ${pct2(f.decMean)} and prefill ${pct2(f.preMean)} on average, best SYCL setting vs Vulkan`],
+        [f.verdict, `decode ${pct2(f.decMean)} and prefill ${pct2(f.preMean)} on average, SYCL (FA on) vs Vulkan`],
         [`Decode @ 0: Vulkan ${f.d0v} · SYCL ${f.d0s} tok/s`, "range across the three models"],
         [`Decode @ 32K: Vulkan ${f.d32v} · SYCL ${f.d32s} tok/s`, f.oom.length ? `out of VRAM: ${f.oom.join(", ")}` : "every model fit on both engines"],
         [`Flash attention on SYCL: ${pct2(f.faDec)} decode, ${pct2(f.faPre)} prefill`, "SYCL with it on vs off, on average"],
@@ -1385,11 +1385,11 @@ const CARDS = [
         text(ctx, v, b.x + 42 * u, cy + 20 * u, 16 * u, { color: C.ink2, max: lw - 50 * u });
       });
       const cb = wide ? { x: b.x + lw + 36 * u, y: b.y, w: b.w - lw - 36 * u, h: b.h } : { x: b.x, y: b.y + lh + 24 * u, w: b.w, h: b.h - lh - 24 * u };
-      text(ctx, "Best SYCL vs Vulkan, decode", cb.x, cb.y + 16 * u, 16 * u, { w: 650, color: C.ink2 });
+      text(ctx, "SYCL (FA on) vs Vulkan, decode", cb.x, cb.y + 16 * u, 16 * u, { w: 650, color: C.ink2 });
       drawP2Delta(ctx, { x: cb.x, y: cb.y + 30 * u, w: cb.w, h: cb.h - 30 * u }, u, d, ms, d.p2.tests.filter(t => t.startsWith("tg")));
     },
     caption: d => { const f = facts2(d); return [
-      ["Post", `Phase 2 on the Arc Pro B65: Vulkan vs Intel's SYCL backend, same llama.cpp commit, three ~30B models.\n\n• ${f.verdict}\n• Decode: ${pct2(f.decMean)} on average (best SYCL setting)\n• Prefill: ${pct2(f.preMean)} on average\n• Flash attention on SYCL: ${pct2(f.faDec)} decode\n• Board power, decode: Vulkan ${f.wv}, SYCL ${f.ws}\n\nNext: what engine should we try after this?`]]; } },
+      ["Post", `Vulkan vs Intel's SYCL on a 32 GB Arc Pro B65, same llama.cpp commit, three ~30B models:\n\n• Decode: ${pct2(f.decMean)} on SYCL (flash attention on)\n• Prefill: ${pct2(f.preMean)}\n• Flash attention on SYCL: ${pct2(f.faDec)} decode\n• Tokens per joule: ${f.jv} → ${f.js}\n\nSYCL is the new default. What should we try next?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
