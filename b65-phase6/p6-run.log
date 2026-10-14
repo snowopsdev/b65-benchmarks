@@ -1,0 +1,239 @@
+run_id=p6-20261013-211819
+date=2026-10-13T21:18:19-04:00
+kernel=7.2.5-3-omarchy
+mesa=mesa 1:26.2.2-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+vk_bin=/home/snowdesk/Projects/b65-benchmarks/b65-phase6/../vendor/llama.cpp/build/bin vk_index=1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+parts_list=A B C
+parts=A B C dry=0 reps=5 energy_file=/sys/class/hwmon/hwmon6/energy1_input
+>> part A coding, thinking off
+>> coding qwen3.8-27b
+>> server sycl qwen3.8-27b nothink
+  qwen3.8-27b c01 try 0: PASS 38 tok 3s
+  qwen3.8-27b c01 try 1: PASS 38 tok 2s
+  qwen3.8-27b c01 try 2: PASS 38 tok 2s
+  qwen3.8-27b c02 try 0: PASS 124 tok 6s
+  qwen3.8-27b c02 try 1: PASS 130 tok 6s
+  qwen3.8-27b c02 try 2: PASS 127 tok 6s
+  qwen3.8-27b c03 try 0: PASS 299 tok 14s
+  qwen3.8-27b c03 try 1: PASS 115 tok 5s
+  qwen3.8-27b c03 try 2: PASS 373 tok 16s
+  qwen3.8-27b c04 try 0: PASS 206 tok 10s
+  qwen3.8-27b c04 try 1: PASS 191 tok 8s
+  qwen3.8-27b c04 try 2: PASS 221 tok 10s
+  qwen3.8-27b c05 try 0: PASS 148 tok 8s
+  qwen3.8-27b c05 try 1: PASS 139 tok 6s
+  qwen3.8-27b c05 try 2: PASS 143 tok 6s
+  qwen3.8-27b c06 try 0: PASS 122 tok 6s
+  qwen3.8-27b c06 try 1: PASS 94 tok 4s
+  qwen3.8-27b c06 try 2: PASS 93 tok 4s
+  qwen3.8-27b c07 try 0: PASS 81 tok 4s
+  qwen3.8-27b c07 try 1: PASS 89 tok 4s
+  qwen3.8-27b c07 try 2: PASS 95 tok 4s
+  qwen3.8-27b c08 try 0: PASS 254 tok 11s
+  qwen3.8-27b c08 try 1: PASS 257 tok 11s
+  qwen3.8-27b c08 try 2: PASS 280 tok 12s
+  qwen3.8-27b c09 try 0: PASS 94 tok 5s
+  qwen3.8-27b c09 try 1: PASS 94 tok 4s
+  qwen3.8-27b c09 try 2: PASS 94 tok 4s
+  qwen3.8-27b c10 try 0: PASS 152 tok 7s
+  qwen3.8-27b c10 try 1: PASS 152 tok 7s
+  qwen3.8-27b c10 try 2: PASS 143 tok 6s
+>> coding muse-glimmer
+>> server sycl muse-glimmer nothink
+  muse-glimmer c01 try 0: PASS 205 tok 9s
+  muse-glimmer c01 try 1: PASS 278 tok 11s
+  muse-glimmer c01 try 2: PASS 228 tok 9s
+  muse-glimmer c02 try 0: PASS 571 tok 23s
+  muse-glimmer c02 try 1: PASS 464 tok 18s
+  muse-glimmer c02 try 2: PASS 454 tok 18s
+  muse-glimmer c03 try 0: PASS 561 tok 23s
+  muse-glimmer c03 try 1: PASS 566 tok 22s
+  muse-glimmer c03 try 2: PASS 546 tok 22s
+  muse-glimmer c04 try 0: PASS 442 tok 18s
+  muse-glimmer c04 try 1: PASS 480 tok 19s
+  muse-glimmer c04 try 2: PASS 483 tok 19s
+  muse-glimmer c05 try 0: PASS 349 tok 14s
+  muse-glimmer c05 try 1: PASS 370 tok 15s
+  muse-glimmer c05 try 2: PASS 307 tok 12s
+  muse-glimmer c06 try 0: PASS 528 tok 21s
+  muse-glimmer c06 try 1: PASS 440 tok 17s
+  muse-glimmer c06 try 2: PASS 450 tok 18s
+  muse-glimmer c07 try 0: PASS 425 tok 17s
+  muse-glimmer c07 try 1: PASS 409 tok 16s
+  muse-glimmer c07 try 2: PASS 354 tok 14s
+  muse-glimmer c08 try 0: PASS 786 tok 32s
+  muse-glimmer c08 try 1: PASS 801 tok 32s
+  muse-glimmer c08 try 2: PASS 584 tok 23s
+  muse-glimmer c09 try 0: PASS 357 tok 15s
+  muse-glimmer c09 try 1: PASS 315 tok 12s
+  muse-glimmer c09 try 2: PASS 341 tok 14s
+  muse-glimmer c10 try 0: PASS 386 tok 16s
+  muse-glimmer c10 try 1: PASS 425 tok 17s
+  muse-glimmer c10 try 2: PASS 386 tok 15s
+>> part B regenerate/edit
+>> server sycl gemma-4-31b-qat ckpt-default
+  gemma-4-31b-qat,sycl,ckpt-default turn1: reprocessed=1549 ttft=5.76s
+  gemma-4-31b-qat,sycl,ckpt-default turn2: reprocessed=1570 ttft=4.97s
+  gemma-4-31b-qat,sycl,ckpt-default turn3: reprocessed=1571 ttft=5.73s
+  gemma-4-31b-qat,sycl,ckpt-default turn4: reprocessed=1572 ttft=5.93s
+  gemma-4-31b-qat,sycl,ckpt-default turn5: reprocessed=1573 ttft=6.07s
+  gemma-4-31b-qat,sycl,ckpt-default turn6: reprocessed=1571 ttft=5.83s
+  gemma-4-31b-qat,sycl,ckpt-default regen: reprocessed=1 ttft=0.41s
+  gemma-4-31b-qat,sycl,ckpt-default regen2: reprocessed=1 ttft=0.35s
+  gemma-4-31b-qat,sycl,ckpt-default edit-last: reprocessed=14 ttft=1.67s
+  gemma-4-31b-qat,sycl,ckpt-default edit-early: reprocessed=6236 ttft=15.34s
+  gemma-4-31b-qat,sycl,ckpt-default back-to-original: reprocessed=6236 ttft=18.48s
+>> server sycl gemma-4-31b-qat ckpt0
+  gemma-4-31b-qat,sycl,ckpt0 turn1: reprocessed=1549 ttft=3.39s
+  gemma-4-31b-qat,sycl,ckpt0 turn2: reprocessed=1568 ttft=3.10s
+  gemma-4-31b-qat,sycl,ckpt0 turn3: reprocessed=1566 ttft=3.14s
+  gemma-4-31b-qat,sycl,ckpt0 turn4: reprocessed=1567 ttft=3.10s
+  gemma-4-31b-qat,sycl,ckpt0 turn5: reprocessed=1566 ttft=3.24s
+  gemma-4-31b-qat,sycl,ckpt0 turn6: reprocessed=1566 ttft=3.28s
+  gemma-4-31b-qat,sycl,ckpt0 regen: reprocessed=1 ttft=0.09s
+  gemma-4-31b-qat,sycl,ckpt0 regen2: reprocessed=1 ttft=0.09s
+  gemma-4-31b-qat,sycl,ckpt0 edit-last: reprocessed=14 ttft=1.20s
+  gemma-4-31b-qat,sycl,ckpt0 edit-early: reprocessed=9362 ttft=17.99s
+  gemma-4-31b-qat,sycl,ckpt0 back-to-original: reprocessed=9362 ttft=18.27s
+>> server vulkan gemma-4-31b-qat ckpt-default
+  gemma-4-31b-qat,vulkan,ckpt-default turn1: reprocessed=1549 ttft=97.86s
+  gemma-4-31b-qat,vulkan,ckpt-default turn2: reprocessed=1568 ttft=123.92s
+  gemma-4-31b-qat,vulkan,ckpt-default turn3: reprocessed=1566 ttft=124.70s
+  gemma-4-31b-qat,vulkan,ckpt-default turn4: reprocessed=1567 ttft=124.83s
+  gemma-4-31b-qat,vulkan,ckpt-default turn5: reprocessed=1566 ttft=123.39s
+  gemma-4-31b-qat,vulkan,ckpt-default turn6: reprocessed=1566 ttft=125.86s
+  gemma-4-31b-qat,vulkan,ckpt-default regen: reprocessed=1 ttft=49.37s
+  gemma-4-31b-qat,vulkan,ckpt-default regen2: reprocessed=1 ttft=49.52s
+  gemma-4-31b-qat,vulkan,ckpt-default edit-last: reprocessed=14 ttft=99.07s
+  gemma-4-31b-qat,vulkan,ckpt-default edit-early: reprocessed=5204 ttft=135.50s
+  gemma-4-31b-qat,vulkan,ckpt-default back-to-original: reprocessed=5204 ttft=135.36s
+>> server vulkan gemma-4-31b-qat ckpt0
+  gemma-4-31b-qat,vulkan,ckpt0 turn1: reprocessed=1549 ttft=4.80s
+  gemma-4-31b-qat,vulkan,ckpt0 turn2: reprocessed=1568 ttft=5.06s
+  gemma-4-31b-qat,vulkan,ckpt0 turn3: reprocessed=1566 ttft=5.20s
+  gemma-4-31b-qat,vulkan,ckpt0 turn4: reprocessed=1567 ttft=5.33s
+  gemma-4-31b-qat,vulkan,ckpt0 turn5: reprocessed=1566 ttft=5.47s
+  gemma-4-31b-qat,vulkan,ckpt0 turn6: reprocessed=1566 ttft=5.61s
+  gemma-4-31b-qat,vulkan,ckpt0 regen: reprocessed=1 ttft=0.09s
+  gemma-4-31b-qat,vulkan,ckpt0 regen2: reprocessed=1 ttft=0.09s
+  gemma-4-31b-qat,vulkan,ckpt0 edit-last: reprocessed=14 ttft=0.84s
+  gemma-4-31b-qat,vulkan,ckpt0 edit-early: reprocessed=9362 ttft=78.35s
+  gemma-4-31b-qat,vulkan,ckpt0 back-to-original: reprocessed=9362 ttft=78.54s
+>> server sycl qwen3.8-27b ckpt-default
+  qwen3.8-27b,sycl,ckpt-default turn1: reprocessed=1548 ttft=2.88s
+  qwen3.8-27b,sycl,ckpt-default turn2: reprocessed=1533 ttft=2.11s
+  qwen3.8-27b,sycl,ckpt-default turn3: reprocessed=1533 ttft=2.14s
+  qwen3.8-27b,sycl,ckpt-default turn4: reprocessed=1533 ttft=2.18s
+  qwen3.8-27b,sycl,ckpt-default turn5: reprocessed=1533 ttft=2.24s
+  qwen3.8-27b,sycl,ckpt-default turn6: reprocessed=1533 ttft=2.28s
+  qwen3.8-27b,sycl,ckpt-default regen: reprocessed=4 ttft=0.17s
+  qwen3.8-27b,sycl,ckpt-default regen2: reprocessed=4 ttft=0.17s
+  qwen3.8-27b,sycl,ckpt-default edit-last: reprocessed=1531 ttft=2.21s
+  qwen3.8-27b,sycl,ckpt-default edit-early: reprocessed=6250 ttft=10.06s
+  qwen3.8-27b,sycl,ckpt-default back-to-original: reprocessed=1531 ttft=3.17s
+>> server sycl qwen3.8-27b ckpt0
+  qwen3.8-27b,sycl,ckpt0 turn1: reprocessed=1548 ttft=2.29s
+  qwen3.8-27b,sycl,ckpt0 turn2: reprocessed=1533 ttft=1.87s
+  qwen3.8-27b,sycl,ckpt0 turn3: reprocessed=1533 ttft=1.90s
+  qwen3.8-27b,sycl,ckpt0 turn4: reprocessed=1533 ttft=1.94s
+  qwen3.8-27b,sycl,ckpt0 turn5: reprocessed=1533 ttft=1.99s
+  qwen3.8-27b,sycl,ckpt0 turn6: reprocessed=1533 ttft=2.03s
+  qwen3.8-27b,sycl,ckpt0 regen: reprocessed=9413 ttft=11.34s
+  qwen3.8-27b,sycl,ckpt0 regen2: reprocessed=9413 ttft=11.32s
+  qwen3.8-27b,sycl,ckpt0 edit-last: reprocessed=9413 ttft=11.32s
+  qwen3.8-27b,sycl,ckpt0 edit-early: reprocessed=9413 ttft=11.52s
+  qwen3.8-27b,sycl,ckpt0 back-to-original: reprocessed=9413 ttft=11.66s
+>> server sycl muse-glimmer ckpt-default
+  muse-glimmer,sycl,ckpt-default turn1: reprocessed=1557 ttft=2.87s
+  muse-glimmer,sycl,ckpt-default turn2: reprocessed=1594 ttft=2.65s
+  muse-glimmer,sycl,ckpt-default turn3: reprocessed=1588 ttft=2.78s
+  muse-glimmer,sycl,ckpt-default turn4: reprocessed=1588 ttft=2.83s
+  muse-glimmer,sycl,ckpt-default turn5: reprocessed=1588 ttft=2.88s
+  muse-glimmer,sycl,ckpt-default turn6: reprocessed=1588 ttft=2.92s
+  muse-glimmer,sycl,ckpt-default regen: reprocessed=1 ttft=0.26s
+  muse-glimmer,sycl,ckpt-default regen2: reprocessed=1 ttft=0.26s
+  muse-glimmer,sycl,ckpt-default edit-last: reprocessed=8 ttft=0.40s
+  muse-glimmer,sycl,ckpt-default edit-early: reprocessed=6292 ttft=9.60s
+  muse-glimmer,sycl,ckpt-default back-to-original: reprocessed=9 ttft=0.72s
+>> server sycl muse-glimmer ckpt0
+  muse-glimmer,sycl,ckpt0 turn1: reprocessed=1557 ttft=2.35s
+  muse-glimmer,sycl,ckpt0 turn2: reprocessed=3146 ttft=3.78s
+  muse-glimmer,sycl,ckpt0 turn3: reprocessed=1588 ttft=2.13s
+  muse-glimmer,sycl,ckpt0 turn4: reprocessed=1588 ttft=2.17s
+  muse-glimmer,sycl,ckpt0 turn5: reprocessed=1588 ttft=2.21s
+  muse-glimmer,sycl,ckpt0 turn6: reprocessed=1588 ttft=2.27s
+  muse-glimmer,sycl,ckpt0 regen: reprocessed=1 ttft=0.20s
+  muse-glimmer,sycl,ckpt0 regen2: reprocessed=1 ttft=0.20s
+  muse-glimmer,sycl,ckpt0 edit-last: reprocessed=8 ttft=0.33s
+  muse-glimmer,sycl,ckpt0 edit-early: reprocessed=9502 ttft=11.66s
+  muse-glimmer,sycl,ckpt0 back-to-original: reprocessed=9502 ttft=11.69s
+>> part C canary ub2048
+>> bench qwen3.8-27b pp512
+  qwen3.8-27b pp512 640.0
+>> bench qwen3.8-27b pp16384
+  qwen3.8-27b pp16384 824.13
+>> bench qwen3.8-27b tg128
+  qwen3.8-27b tg128 23.69
+>> bench qwen3.8-27b tg128@d16384
+  qwen3.8-27b tg128@d16384 18.86
+>> bench muse-glimmer pp512
+  muse-glimmer pp512 690.87
+>> bench muse-glimmer pp16384
+  muse-glimmer pp16384 820.72
+>> bench muse-glimmer tg128
+  muse-glimmer tg128 25.64
+>> bench muse-glimmer tg128@d16384
+  muse-glimmer tg128@d16384 23.44
+# Phase 6 summary (p6-20261013-211819)
+
+```
+run_id=p6-20261013-211819
+date=2026-10-13T21:18:19-04:00
+kernel=7.2.5-3-omarchy
+mesa=mesa 1:26.2.2-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+vk_bin=/home/snowdesk/Projects/b65-benchmarks/b65-phase6/../vendor/llama.cpp/build/bin vk_index=1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+parts_list=A B C
+parts=A B C dry=0 reps=5 energy_file=/sys/class/hwmon/hwmon6/energy1_input
+```
+
+## A. Coding, thinking off (10 tasks x tries)
+
+| model | pass | greedy pass | failed tasks | median tokens | total s |
+|---|---|---|---|---|---|
+| qwen3.8-27b | 30/30 | 10/10 | - | 130 | 203 |
+| muse-glimmer | 30/30 | 10/10 | - | 440 | 531 |
+
+## B. Regenerate / edit: tokens reprocessed (ttft s)
+
+| model | backend | cfg | ctx | regen | regen2 | edit-last | edit-early | back-to-original |
+|---|---|---|---|---|---|---|---|---|
+| gemma-4-31b-qat | sycl | ckpt-default | 9386 | 1 (0.412) | 1 (0.354) | 14 (1.665) | 6236 (15.345) | 6236 (18.476) |
+| gemma-4-31b-qat | sycl | ckpt0 | 9362 | 1 (0.089) | 1 (0.089) | 14 (1.202) | 9362 (17.991) | 9362 (18.267) |
+| gemma-4-31b-qat | vulkan | ckpt-default | 9362 | 1 (49.375) | 1 (49.519) | 14 (99.071) | 5204 (135.502) | 5204 (135.364) |
+| gemma-4-31b-qat | vulkan | ckpt0 | 9362 | 1 (0.093) | 1 (0.093) | 14 (0.84) | 9362 (78.355) | 9362 (78.543) |
+| qwen3.8-27b | sycl | ckpt-default | 9413 | 4 (0.17) | 4 (0.168) | 1531 (2.215) | 6250 (10.062) | 1531 (3.172) |
+| qwen3.8-27b | sycl | ckpt0 | 9413 | 9413 (11.339) | 9413 (11.322) | 9413 (11.322) | 9413 (11.517) | 9413 (11.656) |
+| muse-glimmer | sycl | ckpt-default | 9502 | 1 (0.259) | 1 (0.259) | 8 (0.403) | 6292 (9.598) | 9 (0.723) |
+| muse-glimmer | sycl | ckpt0 | 9502 | 1 (0.203) | 1 (0.203) | 8 (0.326) | 9502 (11.662) | 9502 (11.691) |
+
+## C. Canary at ub 2048 vs Phase 5 baseline (flag > 5%)
+
+| model | test | baseline | now | drift | flag |
+|---|---|---|---|---|---|
+| qwen3.8-27b | pp512 | 639.98 | 640.0 | +0.0% | ok |
+| qwen3.8-27b | pp16384 | 824.33 | 824.13 | -0.0% | ok |
+| qwen3.8-27b | tg128 | 23.69 | 23.69 | +0.0% | ok |
+| qwen3.8-27b | tg128@d16384 | 18.86 | 18.86 | +0.0% | ok |
+| muse-glimmer | pp512 | 690.81 | 690.87 | +0.0% | ok |
+| muse-glimmer | pp16384 | 820.67 | 820.72 | +0.0% | ok |
+| muse-glimmer | tg128 | 25.64 | 25.64 | +0.0% | ok |
+| muse-glimmer | tg128@d16384 | 23.44 | 23.44 | +0.0% | ok |
+Done: raw/p6-20261013-211819  -> upload: tar czf p6-20261013-211819.tar.gz -C raw p6-20261013-211819

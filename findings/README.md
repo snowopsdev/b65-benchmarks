@@ -15,9 +15,10 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 | 4 | Canary vs Phase 2 baseline, plus the micro-batch check (SYCL and Vulkan) | `b65-phase4/raw/p4-20261013-150339` | [phase4.md](phase4.md) |
 | 4+ | llama-server at the new SYCL default -ub 2048 (Qwen, Muse) | `b65-ubserve/raw/us-20261013-161926` | [ubserve.md](ubserve.md) |
 | 5 | Open questions: ub 2048 canary baseline, Gemma short prompts, chat cache/checkpoints, Qwen thinking | `b65-phase5/raw/p5-20261013-171039` | [phase5.md](phase5.md) |
+| 6 | Qwen/Muse coding with thinking off; regenerate/edit with checkpoints on/off; canary at ub 2048 | `b65-phase6/raw/p6-20261013-211819` | [phase6.md](phase6.md) |
 | 1S diag | Gemma SYCL server prefill: micro-batch, checkpoints, ctx, swa-full, FA | `b65-gemmadiag/raw/gd-20261013-123933` | [gemma-sycl-diag.md](gemma-sycl-diag.md) |
 
-Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`) are kept for the record and aren't used in any findings.
+Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`; `p6-dry-20261013-205752`) are kept for the record and aren't used in any findings.
 
 ## Headlines so far
 
@@ -41,9 +42,13 @@ Release tarballs for each run (raw data, scripts as run, summaries, SHA256SUMS) 
     - Gemma on SYCL has a fixed ~1.1 s floor per request, so Vulkan answers tiny prompts 0.3–0.6 s sooner; SYCL is faster from 1K tokens up.
     - Every chat setup reuses its cache, and `--ctx-checkpoints 0` was faster in all 6 model and engine pairs (Gemma on Vulkan: 124 s per turn with checkpoints on vs 5.5 s off).
     - Qwen passes c08 5/5 with thinking off, in about 300 tokens and 13 s. With thinking on it needs up to 9,650 tokens; caps only cut it short, and the samplers don't help.
+13. **Phase 6:**
+    - Qwen with thinking off scores 10/10 greedy and 30/30 on the Phase 3 coding set (Phase 3: 9/10), about 4× faster. That makes thinking off the Qwen coding recipe. Muse ignores the thinking-off switches: it reasoned on all 30.
+    - `--ctx-checkpoints 0` makes Qwen re-read the whole chat on every regenerate or edit (9.4K tokens, 11.3 s against 0.17 s). Gemma and Muse handle regenerate and edit-last fine with checkpoints off, but every model re-reads the whole chat when an earlier turn is edited.
+    - The ub 2048 canary is within 0.03% of the Phase 5 baseline.
 
 ## Current defaults (Forge, 2026-10-13)
 - **Engine:** llama.cpp `8bb3cf0d2` SYCL, flash attention on, `-b 2048 -ub 2048`, for all three models.
 - **Gemma's llama-server:** `--ctx-checkpoints 0` is optional on SYCL.
-- **Canary:** stays at ub 512 against the Phase 2 baseline.
+- **Canary:** `b65-phase4/canary.sh` runs at ub 2048 against `baseline_ub2048.json` (Phase 5 part A); `UB=512` still checks against the Phase 2 baseline (Phase 6 handoff).
 - **Vulkan:** if used, flash attention off and ub 512.

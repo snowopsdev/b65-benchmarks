@@ -2040,7 +2040,7 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
         text(ctx, t, x + 66 * u, y + 47 * u, 21 * u, { w: 750, max: cw - 80 * u });
         ctx.font = `400 ${16 * u}px ${FONT}`; wrap(ctx, v, cw - 44 * u).slice(0, 6).forEach((l, j) => text(ctx, l, x + 22 * u, y + 92 * u + j * 22 * u, 16 * u, { color: C.ink2 })); });
     },
-    caption: d => (d.p6 || {}).complete ? [["Post", `Phase 6 on the Arc Pro B65:\n\n${p6answers(d).map((a, i) => `${"ABC"[i]}) ${a.split(". ")[0]}.`).join("\n")}\n\nWhat should Phase 7 test?`]]
+    caption: d => (d.p6 || {}).complete ? [["Post", `Phase 6 on the Arc Pro B65:\n\n${p6answers(d).map((a, i) => `${"ABC"[i]}) ${a.split(". ")[0].replace(/ over all tries$/, "")}.`).join("\n")}\n\nWhat should Phase 7 test?`]]
       : [["Post", `Phase 6 on the Arc Pro B65 puts two recipes to the test:\n\nA) Qwen coding with thinking off, all 10 tasks\nB) regenerate and edit with context checkpoints off\nC) the canary at the new -ub 2048 baseline\n\nWhich one do you expect to fail?`]] },
 
   { id: "p6-coding", name: "A: coding with thinking off", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.A || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
@@ -2070,7 +2070,7 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
     caption: d => { const p = d.p6, s = m => { const rs = p.A.filter(r => r.model === m.name), g = rs.filter(r => r.try === "0"); return `${g.filter(r => r.pass === "1").length}/${g.length} greedy, ${rs.filter(r => r.pass === "1").length}/${rs.length} over 3 tries`; };
       const ms = d.models.filter(m => p.A.some(r => r.model === m.name));
       const kept = ms.filter(m => p.A.some(r => r.model === m.name && +r.reasoning_chars > 0));
-      return [["Post", `Turning thinking off for coding on a local 27B: Phase 3's 10 Python tasks, Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: ${s(m)}${kept.includes(m) ? " (it kept thinking anyway)" : ""}`).join("\n")}\n\nWith thinking on, Qwen scored 9/10 and Muse 10/10. Do you code with thinking on?`]]; } },
+      return [["Post", `Thinking off for coding, Phase 3's 10 Python tasks, Intel Arc Pro B65:\n\n${ms.map(m => `• ${short(m)}: ${s(m)}${kept.includes(m) ? " (it kept thinking anyway)" : ""}`).join("\n")}\n\nWith thinking on, Qwen scored 9/10 and Muse 10/10. Do you code with thinking on?`]]; } },
 
   { id: "p6-regen", name: "B: regenerate and edit", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.B || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
     draw(ctx, W, H, u, d) {
@@ -2092,9 +2092,8 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
           text(ctx, `${t >= 100 ? Math.round(t) : t.toFixed(1)} s`, x + cw / 2, y + rh / 2 + Math.min(18 * u, rh * 0.36), Math.min(13 * u, rh * 0.28), { align: "center", color: C.ink2 }); }); });
       text(ctx, "Tokens reprocessed (big) and seconds to first token (small). ckpt = context checkpoints. Editing turn 3 has to redo everything after the edit, by design.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
-    caption: d => { const p = d.p6, ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = ks.filter(k => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && ["regen", "edit-last", "back-to-original"].includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens));
-      const off = bad.filter(k => k.endsWith("|ckpt0")).length;
-      return [["Post", `Regenerate and edit in llama-server on Intel Arc, context checkpoints on vs off, ${ks.length} setups:\n\n${bad.length ? `${bad.length} re-read most of a ~9.5K chat to regenerate, edit the last message or go back${off ? `, ${off} of them with checkpoints off` : ""}.` : "None re-read the whole ~9.5K chat to regenerate, edit the last message or go back."}\n\nDo you regenerate replies often?`]]; } },
+    caption: d => { const g = p6regen(d.p6), off = g.ks.filter(k => k.endsWith("|ckpt0")).length, offE = g.early.filter(k => k.endsWith("|ckpt0")).length;
+      return [["Post", `Context checkpoints off in llama-server on Intel Arc, ~9.5K-token chat:\n\n• Regenerate or edit the last message: ${g.late.length ? `${g.late.map(g.nm).join(", ")} re-read the whole chat` : "nothing re-read the whole chat"}.\n• Edit an earlier turn: ${offE === off ? "every" : `${offE} of ${off}`} checkpoints-off setup${offE === off ? "" : "s"} re-read all of it.\n\nDo you regenerate replies often?`]]; } },
 
   { id: "p6-canary", name: "C: canary at ub 2048", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.C || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
     draw(ctx, W, H, u, d) {
@@ -2117,13 +2116,18 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
+function p6regen(p) {  // which setups re-read most of the chat: on regen/edit-last (cache should survive) vs on the early edit
+  const ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], full = (k, steps) => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && steps.includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens);
+  const nm = k => { const [m, be, cfg] = k.split("|"); return `${m.startsWith("gemma") ? "Gemma" : m.startsWith("qwen") ? "Qwen" : "Muse"} ${be === "sycl" ? "SYCL" : "Vulkan"} ckpt ${cfg === "ckpt0" ? "off" : "on"}`; };
+  return { ks, late: ks.filter(k => full(k, ["regen", "regen2", "edit-last"])), early: ks.filter(k => full(k, ["edit-early"])), nm };
+}
 function p6answers(d) {  // one-line results for the Phase 6 preview card, computed from the data
   const p = d.p6, ref = p.ref.baseline_ub2048 || {}, q = p.A.filter(r => r.model.startsWith("qwen")), qg = q.filter(r => r.try === "0"), mu = p.A.filter(r => r.model.startsWith("muse"));
-  const ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = ks.filter(k => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && ["regen", "edit-last", "back-to-original"].includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens));
+  const g = p6regen(p), offEarly = g.early.filter(k => k.endsWith("|ckpt0")).length, offAll = g.ks.filter(k => k.endsWith("|ckpt0")).length;
   const cc = p.C.filter(r => r.tok_s !== "FAIL" && (ref[r.model] || {})[r.test]), mx = cc.length ? Math.max(...cc.map(r => Math.abs(100 * (r.tok_s / ref[r.model][r.test] - 1)))) : 0;
-  const pass = rs => rs.filter(r => r.pass === "1").length;
-  return [`Qwen ${pass(qg)}/${qg.length} greedy, ${pass(q)}/${q.length} over all tries; Muse ${pass(mu)}/${mu.length}.`,
-    bad.length ? `${bad.length} of ${ks.length} setups re-read most of the chat to regenerate, edit the last message or go back: ${bad.map(k => k.split("|").slice(0, 3).join(" ").replace("gemma-4-31b-qat", "Gemma").replace("qwen3.8-27b", "Qwen").replace("muse-glimmer", "Muse").replace("ckpt0", "ckpt off").replace("ckpt-default", "ckpt on")).join(", ")}.` : `No setup re-read the whole chat to regenerate, edit the last message or go back.`,
+  const pass = rs => rs.filter(r => r.pass === "1").length, muThought = mu.filter(r => +r.reasoning_chars > 0).length;
+  return [`Qwen ${pass(qg)}/${qg.length} greedy, ${pass(q)}/${q.length} over all tries. Muse ${pass(mu)}/${mu.length}${muThought ? `, but it kept thinking on ${muThought} of ${mu.length}` : ""}.`,
+    `${g.late.length ? `${g.late.map(g.nm).join(", ")} re-read the whole chat to regenerate or edit the last message` : "Regenerating or editing the last message never re-read the whole chat"}. Editing turn 3: ${offEarly} of ${offAll} checkpoints-off setups re-read all of it.`,
     `All ${cc.length} tests within ${Math.max(0.1, Math.ceil(mx * 10) / 10).toFixed(1)}% of the Phase 5 baseline.`];
 }
 function p5answers(d) {  // one-line results for the preview card, computed from the data

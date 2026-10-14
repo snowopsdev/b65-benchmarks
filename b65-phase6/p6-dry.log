@@ -1,0 +1,139 @@
+run_id=p6-dry-20261013-205752
+date=2026-10-13T20:57:52-04:00
+kernel=7.2.5-3-omarchy
+mesa=mesa 1:26.2.2-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+vk_bin=/home/snowdesk/Projects/b65-benchmarks/b65-phase6/../vendor/llama.cpp/build/bin vk_index=1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+parts_list=A B C
+parts=A B C dry=1 reps=1 energy_file=/sys/class/hwmon/hwmon6/energy1_input
+>> part A coding, thinking off
+>> coding qwen3.8-27b
+>> server sycl qwen3.8-27b nothink
+  qwen3.8-27b c01 try 0: PASS 38 tok 3s
+  qwen3.8-27b c02 try 0: PASS 124 tok 6s
+>> coding muse-glimmer
+>> server sycl muse-glimmer nothink
+  muse-glimmer c01 try 0: PASS 205 tok 9s
+  muse-glimmer c02 try 0: PASS 571 tok 23s
+>> part B regenerate/edit
+>> server sycl gemma-4-31b-qat ckpt-default
+  gemma-4-31b-qat,sycl,ckpt-default turn1: reprocessed=1549 ttft=5.75s
+  gemma-4-31b-qat,sycl,ckpt-default turn2: reprocessed=1570 ttft=5.00s
+  gemma-4-31b-qat,sycl,ckpt-default regen: reprocessed=1 ttft=0.59s
+  gemma-4-31b-qat,sycl,ckpt-default regen2: reprocessed=1 ttft=0.65s
+  gemma-4-31b-qat,sycl,ckpt-default edit-last: reprocessed=14 ttft=1.79s
+  gemma-4-31b-qat,sycl,ckpt-default edit-early: reprocessed=15 ttft=1.87s
+  gemma-4-31b-qat,sycl,ckpt-default back-to-original: reprocessed=15 ttft=1.92s
+>> server sycl gemma-4-31b-qat ckpt0
+  gemma-4-31b-qat,sycl,ckpt0 turn1: reprocessed=1549 ttft=3.39s
+  gemma-4-31b-qat,sycl,ckpt0 turn2: reprocessed=1568 ttft=3.10s
+  gemma-4-31b-qat,sycl,ckpt0 regen: reprocessed=1 ttft=0.07s
+  gemma-4-31b-qat,sycl,ckpt0 regen2: reprocessed=1 ttft=0.06s
+  gemma-4-31b-qat,sycl,ckpt0 edit-last: reprocessed=14 ttft=1.16s
+  gemma-4-31b-qat,sycl,ckpt0 edit-early: reprocessed=15 ttft=1.09s
+  gemma-4-31b-qat,sycl,ckpt0 back-to-original: reprocessed=15 ttft=1.09s
+>> server vulkan gemma-4-31b-qat ckpt-default
+  gemma-4-31b-qat,vulkan,ckpt-default turn1: reprocessed=1549 ttft=97.78s
+  gemma-4-31b-qat,vulkan,ckpt-default turn2: reprocessed=1568 ttft=122.76s
+  gemma-4-31b-qat,vulkan,ckpt-default regen: reprocessed=1 ttft=49.02s
+  gemma-4-31b-qat,vulkan,ckpt-default regen2: reprocessed=1 ttft=49.41s
+  gemma-4-31b-qat,vulkan,ckpt-default edit-last: reprocessed=14 ttft=98.89s
+  gemma-4-31b-qat,vulkan,ckpt-default edit-early: reprocessed=15 ttft=98.58s
+  gemma-4-31b-qat,vulkan,ckpt-default back-to-original: reprocessed=15 ttft=97.12s
+>> server vulkan gemma-4-31b-qat ckpt0
+  gemma-4-31b-qat,vulkan,ckpt0 turn1: reprocessed=1549 ttft=4.80s
+  gemma-4-31b-qat,vulkan,ckpt0 turn2: reprocessed=1568 ttft=5.06s
+  gemma-4-31b-qat,vulkan,ckpt0 regen: reprocessed=1 ttft=0.07s
+  gemma-4-31b-qat,vulkan,ckpt0 regen2: reprocessed=1 ttft=0.07s
+  gemma-4-31b-qat,vulkan,ckpt0 edit-last: reprocessed=14 ttft=0.78s
+  gemma-4-31b-qat,vulkan,ckpt0 edit-early: reprocessed=15 ttft=0.77s
+  gemma-4-31b-qat,vulkan,ckpt0 back-to-original: reprocessed=15 ttft=0.78s
+>> server sycl qwen3.8-27b ckpt-default
+  qwen3.8-27b,sycl,ckpt-default turn1: reprocessed=1548 ttft=2.88s
+  qwen3.8-27b,sycl,ckpt-default turn2: reprocessed=1533 ttft=2.17s
+  qwen3.8-27b,sycl,ckpt-default regen: reprocessed=4 ttft=0.22s
+  qwen3.8-27b,sycl,ckpt-default regen2: reprocessed=4 ttft=0.22s
+  qwen3.8-27b,sycl,ckpt-default edit-last: reprocessed=1531 ttft=2.12s
+  qwen3.8-27b,sycl,ckpt-default edit-early: reprocessed=1531 ttft=2.12s
+  qwen3.8-27b,sycl,ckpt-default back-to-original: reprocessed=1531 ttft=2.12s
+>> server sycl qwen3.8-27b ckpt0
+  qwen3.8-27b,sycl,ckpt0 turn1: reprocessed=1548 ttft=2.29s
+  qwen3.8-27b,sycl,ckpt0 turn2: reprocessed=1533 ttft=1.86s
+  qwen3.8-27b,sycl,ckpt0 regen: reprocessed=3121 ttft=3.83s
+  qwen3.8-27b,sycl,ckpt0 regen2: reprocessed=3121 ttft=3.81s
+  qwen3.8-27b,sycl,ckpt0 edit-last: reprocessed=3121 ttft=3.81s
+  qwen3.8-27b,sycl,ckpt0 edit-early: reprocessed=3121 ttft=3.81s
+  qwen3.8-27b,sycl,ckpt0 back-to-original: reprocessed=3121 ttft=3.81s
+>> server sycl muse-glimmer ckpt-default
+  muse-glimmer,sycl,ckpt-default turn1: reprocessed=1557 ttft=3.00s
+  muse-glimmer,sycl,ckpt-default turn2: reprocessed=1594 ttft=2.66s
+  muse-glimmer,sycl,ckpt-default regen: reprocessed=1 ttft=0.20s
+  muse-glimmer,sycl,ckpt-default regen2: reprocessed=1 ttft=0.20s
+  muse-glimmer,sycl,ckpt-default edit-last: reprocessed=8 ttft=0.34s
+  muse-glimmer,sycl,ckpt-default edit-early: reprocessed=9 ttft=0.36s
+  muse-glimmer,sycl,ckpt-default back-to-original: reprocessed=9 ttft=0.36s
+>> server sycl muse-glimmer ckpt0
+  muse-glimmer,sycl,ckpt0 turn1: reprocessed=1557 ttft=2.35s
+  muse-glimmer,sycl,ckpt0 turn2: reprocessed=3146 ttft=3.78s
+  muse-glimmer,sycl,ckpt0 regen: reprocessed=1 ttft=0.18s
+  muse-glimmer,sycl,ckpt0 regen2: reprocessed=1 ttft=0.18s
+  muse-glimmer,sycl,ckpt0 edit-last: reprocessed=8 ttft=0.30s
+  muse-glimmer,sycl,ckpt0 edit-early: reprocessed=9 ttft=0.58s
+  muse-glimmer,sycl,ckpt0 back-to-original: reprocessed=9 ttft=0.57s
+>> part C canary ub2048
+>> bench qwen3.8-27b pp512
+  qwen3.8-27b pp512 639.27
+>> bench qwen3.8-27b tg128
+  qwen3.8-27b tg128 23.67
+>> bench muse-glimmer pp512
+  muse-glimmer pp512 689.71
+>> bench muse-glimmer tg128
+  muse-glimmer tg128 25.7
+# Phase 6 summary (p6-dry-20261013-205752)
+
+```
+run_id=p6-dry-20261013-205752
+date=2026-10-13T20:57:52-04:00
+kernel=7.2.5-3-omarchy
+mesa=mesa 1:26.2.2-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+vk_bin=/home/snowdesk/Projects/b65-benchmarks/b65-phase6/../vendor/llama.cpp/build/bin vk_index=1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+parts_list=A B C
+parts=A B C dry=1 reps=1 energy_file=/sys/class/hwmon/hwmon6/energy1_input
+```
+
+## A. Coding, thinking off (10 tasks x tries)
+
+| model | pass | greedy pass | failed tasks | median tokens | total s |
+|---|---|---|---|---|---|
+| qwen3.8-27b | 2/2 | 2/2 | - | 124 | 9 |
+| muse-glimmer | 2/2 | 2/2 | - | 571 | 32 |
+
+## B. Regenerate / edit: tokens reprocessed (ttft s)
+
+| model | backend | cfg | ctx | regen | regen2 | edit-last | edit-early | back-to-original |
+|---|---|---|---|---|---|---|---|---|
+| gemma-4-31b-qat | sycl | ckpt-default | 3115 | 1 (0.593) | 1 (0.653) | 14 (1.795) | 15 (1.874) | 15 (1.924) |
+| gemma-4-31b-qat | sycl | ckpt0 | 3113 | 1 (0.065) | 1 (0.065) | 14 (1.164) | 15 (1.088) | 15 (1.088) |
+| gemma-4-31b-qat | vulkan | ckpt-default | 3113 | 1 (49.015) | 1 (49.409) | 14 (98.887) | 15 (98.579) | 15 (97.117) |
+| gemma-4-31b-qat | vulkan | ckpt0 | 3113 | 1 (0.07) | 1 (0.069) | 14 (0.784) | 15 (0.772) | 15 (0.776) |
+| qwen3.8-27b | sycl | ckpt-default | 3121 | 4 (0.219) | 4 (0.217) | 1531 (2.12) | 1531 (2.121) | 1531 (2.12) |
+| qwen3.8-27b | sycl | ckpt0 | 3121 | 3121 (3.833) | 3121 (3.812) | 3121 (3.814) | 3121 (3.814) | 3121 (3.814) |
+| muse-glimmer | sycl | ckpt-default | 3146 | 1 (0.204) | 1 (0.204) | 8 (0.34) | 9 (0.361) | 9 (0.361) |
+| muse-glimmer | sycl | ckpt0 | 3146 | 1 (0.177) | 1 (0.176) | 8 (0.296) | 9 (0.578) | 9 (0.574) |
+
+## C. Canary at ub 2048 vs Phase 5 baseline (flag > 5%)
+
+| model | test | baseline | now | drift | flag |
+|---|---|---|---|---|---|
+| qwen3.8-27b | pp512 | 639.98 | 639.27 | -0.1% | ok |
+| qwen3.8-27b | tg128 | 23.69 | 23.67 | -0.1% | ok |
+| muse-glimmer | pp512 | 690.81 | 689.71 | -0.2% | ok |
+| muse-glimmer | tg128 | 25.64 | 25.7 | +0.2% | ok |
+Done: raw/p6-dry-20261013-205752  -> upload: tar czf p6-dry-20261013-205752.tar.gz -C raw p6-dry-20261013-205752

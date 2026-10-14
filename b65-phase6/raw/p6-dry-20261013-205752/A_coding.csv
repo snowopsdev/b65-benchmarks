@@ -1,0 +1,5 @@
+model,task,try,pass,finish_reason,completion_tokens,seconds,err
+qwen3.8-27b,c01,0,1,stop,38,3.0,
+qwen3.8-27b,c02,0,1,stop,124,6.0,
+muse-glimmer,c01,0,1,stop,205,9.4,
+muse-glimmer,c02,0,1,stop,571,22.9,

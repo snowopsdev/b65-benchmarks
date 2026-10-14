@@ -1,0 +1,5 @@
+model,test,tok_s
+qwen3.8-27b,pp512,639.27
+qwen3.8-27b,tg128,23.67
+muse-glimmer,pp512,689.71
+muse-glimmer,tg128,25.7
