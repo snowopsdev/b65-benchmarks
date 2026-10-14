@@ -1044,8 +1044,10 @@ def p15_setup():
     sock = os.access("/var/run/docker.sock", os.W_OK)
     image = None
     if sock: image = sh("docker", "image", "inspect", "--format", "{{.Size}}", P15_IMAGE)[0] == 0
-    elif in_group and act == "active":   # this process predates the group change; sg picks it up without a password
-        image = sh("sg", "docker", "-c", f"docker image inspect --format '{{{{.Size}}}}' {P15_IMAGE}")[0] == 0
+    elif in_group and act == "active":   # this process predates the group change; newgrp picks it up without a password
+        try: image = subprocess.run(["newgrp", "docker"], input=f"docker image inspect --format '{{{{.Size}}}}' {P15_IMAGE} >/dev/null && echo yes\n",
+                                    capture_output=True, text=True, timeout=8).stdout.strip() == "yes"   # no sg here; newgrp reads stdin
+        except Exception: image = None
     branch = sh("git", "-C", P15_REG, "branch", "--show-current")[1] if os.path.isdir(P15_REG) else None
     launches = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(P15_REG, "registry", "launches", "*arc-pro-b65*.json")))
     recipes = []

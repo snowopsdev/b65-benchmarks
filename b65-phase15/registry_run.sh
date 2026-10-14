@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 : "${REG:?set REG to the registry clone}"; MODELS="${MODELS:-qwen3.8-27b gemma-4-31b muse-glimmer-30b}"
 GPU_DESC="${GPU_DESC:-Intel Arc Pro B65 32 GB (ASRock Creator; owner: Ryzen 7 5700X, PCIe 4.0 x4)}"
 if ! docker info >/dev/null 2>&1; then   # in the docker group but this session predates it: re-run under the group
-  if [ -z "${P15_SG:-}" ] && getent group docker | grep -qw "$(id -un)"; then P15_SG=1 exec sg docker -c "P15_SG=1 REG='$REG' MODELS='$MODELS' $0"; fi
+  if [ -z "${P15_SG:-}" ] && getent group docker | grep -qw "$(id -un)"; then exec newgrp docker <<< "P15_SG=1 REG='$REG' MODELS='$MODELS' '$0'"; fi   # no sg here; newgrp reads the command from stdin
   echo "!! docker is not reachable: run setup-docker.sh first"; exit 2; fi
 RUN_ID="p15reg-$(date +%Y%m%d-%H%M%S)"; OUT="raw/$RUN_ID"; mkdir -p "$OUT"; PORT=8098; NAME=b65-p15-server; echo $$ > "$OUT/pid"
 { echo "run_id=$RUN_ID"; echo "date=$(date -Iseconds)"; echo "kernel=$(uname -r)"; echo "docker=$(docker version --format '{{.Server.Version}}')"
@@ -24,7 +24,7 @@ l = json.load(open(f"{reg}/registry/launches/{launch_id(mo)}.json")); w = l["wei
 print(l["id"], l["image"], w["repo"], w["revision"], w["files"])
 PY
 )
-  DIR=$(find ~/.lmstudio/models ~/.cache/lm-studio -path "*/$REPO/$FILE" 2>/dev/null | head -n1 | xargs -r dirname)
+  DIR=$(find ~/.lmstudio/models ~/.cache/lm-studio -path "*/$REPO/$FILE" 2>/dev/null | head -n1 | xargs -r dirname || true)   # one of the roots may not exist
   [ -n "$DIR" ] || { echo "!! $MO: $REPO/$FILE not found locally"; continue; }
   WANT=$(curl -sf "https://huggingface.co/api/models/$REPO/tree/$REV" | python3 -I -c "import json,sys;print(next(f['lfs']['oid'] for f in json.load(sys.stdin) if f['path']==sys.argv[1]))" "$FILE")
   HAVE=$(sha256sum "$DIR/$FILE" | cut -d' ' -f1); echo "$HAVE  $DIR/$FILE  want=$WANT" >> "$OUT/models.sha256"

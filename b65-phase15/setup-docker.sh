@@ -4,5 +4,5 @@
 set -euo pipefail
 sudo systemctl enable --now docker.service
 sudo usermod -aG docker "$USER"
-echo "Docker is running and $USER is in the docker group (log out and back in for new shells; registry_run.sh handles it itself)."
+echo "Docker is running and $USER is in the docker group (log out and back in for new shells; registry_run.sh re-runs itself under newgrp)."
 docker --version
