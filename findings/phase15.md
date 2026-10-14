@@ -1,10 +1,10 @@
 # Arc Pro B65: Phase 1.5 findings (registry recipes)
 
-Runs on 2026-10-14. All three models pass the six lab gates of [local-ai-registry](https://github.com/sybil-solutions/local-ai-registry), both on our native SYCL build and in the pinned official image, so the B65 has three 32K recipes, now in [PR #260](https://github.com/sybil-solutions/local-ai-registry/pull/260) with the card and its hardware photo. The same three also pass at 64K and 128K (six more recipes, on a local branch).
+Runs on 2026-10-14. All three models pass the six lab gates of [local-ai-registry](https://github.com/sybil-solutions/local-ai-registry), both on our native SYCL build and in the pinned official image, and at 64K and 128K too: nine B65 recipes, in [PR #260](https://github.com/sybil-solutions/local-ai-registry/pull/260) with the card and its hardware photo.
 
 - **Unblocked by the registry itself:** Phase 1.5 waited on @0xSero about llama.cpp recipes. The registry merged a llama.cpp SYCL recipe for the Arc B390 on 2026-10-10 (`a8e64af`), so llama.cpp counts.
 - **Not the recipe kit's own target:** the kit's first target (Qwen3.8-Flash-Next, experts in RAM) needs 68 GB free RAM and an NVMe table; this machine has 48 GB.
-- **Kit:** `b65-phase15/` (see its README). Registry clone `~/src/ext/local-ai-registry-20261014`: branch `b65-arc-pro-recipes` (`77e44e5` recipes, `473e8f7` photo; pushed to the `snowopsdev` fork for PR #260) and `b65-arc-pro-longctx` (`6458604`, 64K/128K, on top of it, not pushed).
+- **Kit:** `b65-phase15/` (see its README). Registry clone `~/src/ext/local-ai-registry-20261014`: branch `b65-arc-pro-recipes` (`77e44e5` 32K recipes, `473e8f7` photo, `6458604` 64K/128K), pushed to the `snowopsdev` fork for PR #260.
 
 ## The gates
 load · chat · reasoning (thinking returned separately, 17 × 23 = 391) · tools (calls `get_weather` for Paris, then uses the result) · context (finds a code planted at 85% of the window) · speed (decode ≥ 15 tok/s over the first 30 s of an uncapped answer, empty context, one user).
@@ -58,5 +58,4 @@ Same image, flags and weights; only `--ctx-size` changes (launch ids `…-64k-�
 ASRock's own render of the Arc Pro B65 Creator 32GB (`(L2).png` from the product page's gallery), 1100×578 on the site's #141414 matte, credited to ASRock with the product page as source. asrock.com blocks scripted downloads (Incapsula); the same files are served by `www.asrock.com.tw`. Not marked representative: the B65 ships only as partner cards, so this is the exact SKU.
 
 ## Open, for AJ
-- **PR #260** (card, 32K recipes, photo) is open against sybil-solutions/local-ai-registry.
-- **64K/128K recipes:** committed on `b65-arc-pro-longctx`, not pushed. They would go in a second PR (the org asks for one change per PR); it depends on #260 for the card.
+- **PR #260** (card, photo, nine recipes) is open against sybil-solutions/local-ai-registry, waiting on maintainer review. AJ chose one PR over a separate long-context PR, although the org's rules ask for one change per PR.
