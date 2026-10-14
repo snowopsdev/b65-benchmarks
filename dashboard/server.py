@@ -1107,6 +1107,8 @@ def p15_runs(kind):
         m = re.match(r"^(\S*)\s+models=(.+)$", v)
         if m: env[k], env["models"] = m.group(1), m.group(2)
     names = env.get("models", "").split()
+    ks = [int(c) // 1024 for c in env.get("ctxs", "").split()]   # multi-context runs name files <model>.<ctx>k.*
+    items = [(m, k, f"{m}.{k}k") for k in ks for m in names] if ks else [(m, None, m) for m in names]
     t0 = None
     try:
         from datetime import datetime
@@ -1114,8 +1116,8 @@ def p15_runs(kind):
         t1 = max([os.path.getmtime(f) for f in glob.glob(f"{out}/*")] or [t0]) if res["state"] != "running" else time.time()
         res["elapsed_s"] = round(t1 - t0)
     except (KeyError, ValueError): pass
-    for m in names:
-        row = dict(model=m, status="pending", ok={}, tps=None, prefill=None, context_tokens=None, context_s=None, error=None, live=None, recipe=None)
+    for m, k, tag in items:
+        row = dict(model=m, ctx_k=k, status="pending", ok={}, tps=None, prefill=None, context_tokens=None, context_s=None, error=None, live=None, recipe=None)
         if kind == "pre":
             try:
                 g = json.load(open(f"{out}/{m}.gates.json")); ev = g.get("evidence") or {}
@@ -1124,7 +1126,7 @@ def p15_runs(kind):
                            speed_tokens=(ev.get("speed") or {}).get("tokens_total"), speed_s=(ev.get("speed") or {}).get("seconds_total"))
             except (OSError, ValueError, KeyError): pass
         else:
-            evs = sorted(glob.glob(os.path.join(P15_REG, "lab", "runs", f"{P15_CARD}.{m}.*.json")), key=os.path.getmtime)
+            evs = sorted(glob.glob(os.path.join(P15_REG, "lab", "runs", f"{P15_CARD}.{m}.*.{k}k.*.json" if k else f"{P15_CARD}.{m}.*.json")), key=os.path.getmtime)
             evs = [f for f in evs if not t0 or os.path.getmtime(f) >= t0]
             if evs:
                 try:
@@ -1134,9 +1136,9 @@ def p15_runs(kind):
                                speed_tokens=(ev.get("speed") or {}).get("tokens_total"), speed_s=(ev.get("speed") or {}).get("seconds_total"),
                                evidence=os.path.relpath(evs[-1], P15_REG))
                 except (OSError, ValueError, KeyError): pass
-            if row["status"] == "pending" and any(l.startswith(f"!! {m}") for l in log):
-                row.update(status="fail", error=next(l[3:] for l in log if l.startswith(f"!! {m}")))
-        sl = f"{out}/{m}.server.log"
+            if row["status"] == "pending" and any(l.startswith(f"!! {tag}:") for l in log):
+                row.update(status="fail", error=next(l[3:] for l in log if l.startswith(f"!! {tag}:")))
+        sl = f"{out}/{tag}.server.log"
         if row["status"] == "pending" and os.path.exists(sl):
             row["status"] = "running" if res["state"] == "running" else "stopped"
             if res["state"] == "running": row["live"] = p15_live(sl)

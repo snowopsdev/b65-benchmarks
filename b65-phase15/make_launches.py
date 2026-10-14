@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Write the B65 llama.cpp SYCL launches into a local-ai-registry clone (registry/launches/), one per model.
 Same official image as the registry's B390 SYCL recipe (server-intel b11515); flags = findings/recommended-settings.md.
-Usage: make_launches.py <registry clone> [model ...]"""
+Usage: [P15_CTX=131072] make_launches.py <registry clone> [model ...]   (default 32K)"""
 import json, os, sys
 
 IMAGE = "ghcr.io/ggml-org/llama.cpp@sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5"  # server-intel-b11515
-CARD, CTX = "intel-arc-pro-b65-32gb", 32768
+CARD, CTX = "intel-arc-pro-b65-32gb", int(os.environ.get("P15_CTX", 32768))
 # weights pinned to the Hugging Face commits whose files match our local sha256 byte for byte (checked 2026-10-14)
 MODELS = {
     "qwen3.8-27b": dict(repo="lmstudio-community/Qwen3.8-27B-GGUF", rev="5a7da681f60570ab5b439a587e912d2e5eddb582",
@@ -43,7 +43,7 @@ def launch(model):
                    "capabilities": {"chat": True, "reasoning": True, "tools": True, "video": False, "vision": False},
                    "serving": {"ctxTokens": CTX, "kvTokens": 0},
                    "weights": [{"dir": "", "files": m["file"], "layout": "dir", "mountPath": "/models", "sizeGb": gb}], "asset": None},
-        "ids": {CARD: f"{m['short']}-arcprob65-llamacpp-sycl"},
+        "ids": {CARD: f"{m['short']}{'' if CTX == 32768 else f'-{CTX // 1024}k'}-arcprob65-llamacpp-sycl"},  # the 32K ids came first
     }
 
 if __name__ == "__main__":

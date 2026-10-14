@@ -146,7 +146,7 @@ function liveText(r) {
 function table(id, run, gates, reg) {
   if (!run.run_id) { $(id).innerHTML = `<tbody><tr><td class="sub">${reg ? "Not started. Waits on Docker and the image (see Setup)." : "Not started."}</td></tr></tbody>`; return; }
   $(id).innerHTML = `<thead><tr><th>Model</th><th>Result</th>${gates.map(g => `<th class="g">${g}</th>`).join("")}<th class="num">Decode</th><th class="num">Prefill</th><th class="num">Context prompt</th><th class="num">Speed answer</th></tr></thead><tbody>` +
-    run.models.map(r => `<tr><td><b>${esc(DISPLAY[r.model] || r.model)}</b><div class="meta">${QUANT[r.model] || ""}</div>${r.status === "running" ? liveText(r) : ""}${r.error ? `<div class="err" style="font-size:12px">${esc(r.error)}</div>` : ""}${r.evidence ? `<div class="meta"><code>${esc(r.evidence)}</code></div>` : ""}</td>
+    run.models.map(r => `<tr><td><b>${esc(DISPLAY[r.model] || r.model)}</b>${r.ctx_k ? ` · ${r.ctx_k}K` : ""}<div class="meta">${QUANT[r.model] || ""}</div>${r.status === "running" ? liveText(r) : ""}${r.error ? `<div class="err" style="font-size:12px">${esc(r.error)}</div>` : ""}${r.evidence ? `<div class="meta"><code>${esc(r.evidence)}</code></div>` : ""}</td>
       <td><span class="pill ${r.status}">${{ pass: "✓ pass", fail: "✗ fail", running: "running", pending: "pending", stopped: "stopped" }[r.status] || r.status}</span></td>
       ${gates.map(g => `<td class="g">${gateCell(r, g, gates)}</td>`).join("")}
       <td class="num"><span class="big">${fmt(r.tps, 1)}</span><div class="meta">tok/s · need ≥ 15</div></td>
