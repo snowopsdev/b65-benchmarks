@@ -20,6 +20,8 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 
 Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`; `p6-dry-20261013-205752`) are kept for the record and aren't used in any findings.
 
+**Conclusion:** [recommended-settings.md](recommended-settings.md) collects the best settings for the B65 from all phases.
+
 ## Headlines so far
 
 1. **Turn flash attention off on this build.** `-fa 0` is faster or tied on every test. Gemma's 16K prefill went from 38 to 335 tok/s (8.8×), and Muse's decode at 16K went from 11.3 to 16.8 tok/s (Phase 0.5).
