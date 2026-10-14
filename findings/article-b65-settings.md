@@ -2,7 +2,7 @@
 Article version of recommended-settings.md, for X Articles and LinkedIn articles.
 - Neither editor renders Markdown tables, so there are none. Paste the text section by section.
 - Insert each [IMAGE] from charts/conclusion/ (use the -wide.png versions) where it appears, and delete the marker line.
-- Cover image: b65-sum-banner.png on X (3000×1200, exactly 5:2). LinkedIn's cover is 1.91:1, so use b65-sum-recipe-wide.png there and check the crop.
+- Cover image: b65-sum-banner.png on X (3000×1200, exactly 5:2; it shows the ASRock card, from ASRock's product photo). LinkedIn's cover is 1.91:1, so use b65-sum-recipe-wide.png there and check the crop.
 - If an editor doesn't offer code blocks, paste the command as its own paragraph.
 - The sources are in recommended-settings.md and the phase findings. Every number here comes from them.
 -->
@@ -40,7 +40,7 @@ For Qwen on coding work, add `--reasoning-budget 0`. For Gemma in agent loops th
 
 ## What I tested
 
-- **Card:** Intel Arc Pro B65, 32 GB, with a 200 W board power cap.
+- **Card:** ASRock Arc Pro B65 Creator, 32 GB, a blower-cooled card with a 200 W board power cap.
 - **Host:** Ryzen 7 5700X, 48 GB RAM, Arch Linux (Omarchy), kernel 7.2.5.
 - **Models:** Qwen 3.8 27B, Gemma 4 31B QAT and Muse Glimmer 28B, all 4-bit GGUFs from lmstudio-community.
 - **Engines:** llama.cpp build 11574, built twice from the same commit: Vulkan (Mesa 26.2.2) and SYCL (oneAPI 2026.0).

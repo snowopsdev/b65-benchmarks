@@ -2228,38 +2228,33 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
   // 5:2 header for the X article; one fixed size whatever the wide/tall toggle says
   { id: "sum-banner", name: "Article banner (5:2)", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock, size: [1500, 600],
     draw(ctx, W, H, u, d) {
-      const f = sumFacts(d), P = 64 * u, L = W * 0.58;
+      const f = sumFacts(d), P = 64 * u, my = H - P - 42 * u, top = P - 6 * u, bot = my - 16 * u;
       ctx.fillStyle = C.page; ctx.fillRect(0, 0, W, H);
-      const g = ctx.createRadialGradient(W * 0.85, -H * 0.1, 0, W * 0.85, -H * 0.1, W * 0.9);
-      g.addColorStop(0, "rgba(57,135,229,0.20)"); g.addColorStop(1, "rgba(57,135,229,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      const top = P - 6 * u, bot = H - P - 46 * u, chH = 44 * u, chGap = 12 * u;
-      // the recipe as chips: lay out first so the left block can be centred vertically
-      font(ctx, 19 * u, 700); let cx = P, row = 0;
-      const chips = SUM_SETTINGS.map(([k, v]) => { const s = k === "Qwen for coding" ? "Qwen: thinking off" : k === "Context checkpoints" ? "Checkpoints on" : k === "Flash attention" ? "Flash attention on" : v === "32K" ? "32K context" : v;
-        const cw = ctx.measureText(s).width + 34 * u; if (cx + cw > L - 20 * u) { cx = P; row++; } const c = { s, x: cx, row, cw }; cx += cw + chGap; return c; });
-      const blockH = 262 * u + (row + 1) * chH + row * chGap, oy = top + Math.max(0, (bot - top - blockH) / 2);
+      // the card itself on the right, on a soft blue glow
+      const ph = bot - top + 24 * u, pw = PHOTO.naturalWidth ? ph * PHOTO.naturalWidth / PHOTO.naturalHeight : 0, px = W - P - pw + 14 * u, py = top - 12 * u;
+      const g = ctx.createRadialGradient(px + pw * 0.55, py + ph * 0.5, 0, px + pw * 0.55, py + ph * 0.5, pw * 0.75);
+      g.addColorStop(0, "rgba(57,135,229,0.30)"); g.addColorStop(1, "rgba(57,135,229,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      if (pw) { ctx.imageSmoothingQuality = "high"; ctx.drawImage(PHOTO, px, py, pw, ph); }
+      // title and the three measured headlines on the left, centred vertically
+      const L = (pw ? px : W * 0.55) - 10 * u, lw = L - P, blockH = 352 * u, oy = top + Math.max(0, (bot - top - blockH) / 2);
       text(ctx, "INTEL ARC PRO B65 · 32 GB · LLAMA.CPP", P, oy + 20 * u, 18 * u, { w: 700, color: C.series[0] });
-      ["The best llama.cpp settings", "for Intel's Arc Pro B65"].forEach((s, i) => text(ctx, s, P, oy + 96 * u + i * 70 * u, 62 * u, { w: 800, max: L - P - 20 * u }));
-      text(ctx, "7 rounds of benchmarks · 3 models of ~30B · SYCL vs Vulkan", P, oy + 216 * u, 23 * u, { color: C.ink2, max: L - P - 20 * u });
-      chips.forEach(c => { const cy = oy + 262 * u + c.row * (chH + chGap);
-        rr(ctx, c.x, cy, c.cw, chH, chH / 2, C.surf, "rgba(57,135,229,0.55)", 1.5 * u);
-        text(ctx, c.s, c.x + 17 * u, cy + chH / 2 + 7 * u, 19 * u, { w: 700 }); });
-      // three measured headlines on the right
-      const ratio = Math.max(...f.ttftModels.map(r => r.vulkan / r.ub2048)), rx = L + 10 * u, rw = W - P - rx, rh = (bot - top) / 3;
-      [[`${f.dec >= 0 ? "+" : "−"}${Math.abs(f.dec).toFixed(1)}%`, "faster decode on SYCL than Vulkan", "average of 3 models, same llama.cpp commit"],
-       [`${ratio.toFixed(1)}×`, "sooner first token on a 16K prompt", "SYCL with -ub 2048, against Vulkan"],
-       [`≥${f.min32.toFixed(1)}`, "tok/s decode at 32K context", "all three models"]].forEach(([big, lab, note], i) => {
-        const y = top + rh * i;
-        rr(ctx, rx, y + 5 * u, rw, rh - 10 * u, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = C.good; ctx.fillRect(rx, y + 17 * u, 4 * u, rh - 34 * u);
-        const bw = text(ctx, big, rx + 26 * u, y + rh / 2 + 17 * u, 50 * u, { w: 800 });
-        text(ctx, lab, rx + 46 * u + bw, y + rh / 2 - 2 * u, 19 * u, { w: 650, max: rw - bw - 64 * u });
-        text(ctx, note, rx + 46 * u + bw, y + rh / 2 + 22 * u, 15 * u, { color: C.muted, max: rw - bw - 64 * u }); });
+      ["The best llama.cpp settings", "for Intel's Arc Pro B65"].forEach((s, i) => text(ctx, s, P, oy + 94 * u + i * 68 * u, 60 * u, { w: 800, max: lw }));
+      text(ctx, "7 rounds of benchmarks · 3 models of ~30B · SYCL vs Vulkan", P, oy + 210 * u, 22 * u, { color: C.ink2, max: lw });
+      const ratio = Math.max(...f.ttftModels.map(r => r.vulkan / r.ub2048)), gap = 14 * u, tw = (lw - 2 * gap) / 3, ty = oy + 240 * u, th = 112 * u;
+      [[`${f.dec >= 0 ? "+" : "−"}${Math.abs(f.dec).toFixed(1)}%`, "decode on SYCL", "vs Vulkan, 3-model average"],
+       [`${ratio.toFixed(1)}×`, "sooner first token", "16K prompt, -ub 2048 vs Vulkan"],
+       [`≥${f.min32.toFixed(1)}`, "tok/s at 32K context", "all three models"]].forEach(([big, lab, note], i) => {
+        const x = P + (tw + gap) * i;
+        rr(ctx, x, ty, tw, th, 12 * u, "rgba(26,26,25,0.85)", "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = C.good; ctx.fillRect(x + 12 * u, ty, tw - 24 * u, 3 * u);
+        text(ctx, big, x + 18 * u, ty + 50 * u, 40 * u, { w: 800, max: tw - 36 * u });
+        text(ctx, lab, x + 18 * u, ty + 78 * u, 17 * u, { w: 650, max: tw - 36 * u });
+        text(ctx, note, x + 18 * u, ty + 99 * u, 14 * u, { color: C.muted, max: tw - 36 * u }); });
       // command line, full width
-      const cmdH = 46 * u, my = H - P - 46 * u + 4 * u, handle = $("handle").value.trim();
+      const handle = $("handle").value.trim(), by = my + 34 * u;
       ctx.fillStyle = C.grid; ctx.fillRect(P, my, W - 2 * P, 1.5 * u);
       ctx.font = `600 ${18 * u}px ui-monospace, SFMono-Regular, Menlo, monospace`; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-      ctx.fillText("llama-server -m model.gguf -ngl 99 -c 32768 --jinja -fa on -b 2048 -ub 2048", P, my + cmdH / 2 + 12 * u);
-      text(ctx, handle || `llama.cpp b${d.stack.llama_build} · SYCL / oneAPI`, W - P, my + cmdH / 2 + 12 * u, 16 * u, { w: handle ? 700 : 400, color: handle ? C.ink2 : C.muted, align: "right" });
+      ctx.fillText("llama-server -m model.gguf -ngl 99 -c 32768 --jinja -fa on -b 2048 -ub 2048", P, by);
+      text(ctx, handle || `ASRock Arc Pro B65 Creator · llama.cpp b${d.stack.llama_build}`, W - P, by, 16 * u, { w: handle ? 700 : 400, color: handle ? C.ink2 : C.muted, align: "right" });
     },
     caption: () => [["Post", "I benchmarked local AI on Intel's 32 GB Arc Pro B65 for two days: 3 models, 2 llama.cpp backends, 7 rounds.\n\nThe setup I'd run, and the five settings that cost the most speed:\n\n[link]\n\nWhat's on your local AI rig?"]] },
 ];
@@ -2286,6 +2281,9 @@ function drawTiles(ctx, b, u, wide, tiles) {
     text(ctx, v, x + 18 * u, y + 66 * u * s, 30 * u * Math.max(s, 0.8), { w: 800, max: cw - 36 * u });
     ctx.font = `400 ${15 * u}px ${FONT}`; wrap(ctx, why, cw - 36 * u).slice(0, 3).forEach((l, j) => text(ctx, l, x + 18 * u, y + 94 * u * s + j * 20 * u, 15 * u, { color: C.ink2 })); });
 }
+// ASRock's product photo of the card under test (Amazon listing B0H4WQCMNL), background and dimension marks removed
+const PHOTO = new Image(), photoReady = new Promise(r => { PHOTO.onload = PHOTO.onerror = r; });
+PHOTO.src = "files/charts/assets/b65-card-asrock-creator.png";
 const tsec = v => v == null ? "–" : v < 1 ? `${v.toFixed(2)} s` : secs(v);
 function sumFacts(d) {
   const by = pre => d.models.find(m => m.name.startsWith(pre)), q = by("qwen"), g = by("gemma"), mu = by("muse");
@@ -2688,8 +2686,8 @@ if (Q.get("solo")) {
   const card = CARDS.find(c => c.id === Q.get("card")), [W, H] = (card && card.size) || SIZES[fmt];
   const cv = document.createElement("canvas"); cv.style.cssText = `width:${W}px;height:${H}px;display:block`;
   document.querySelector(".viz-root").appendChild(cv);
-  fetch("api/share", { cache: "no-store" }).then(r => r.json()).then(j => {
-    D = j.run;
+  fetch("api/share", { cache: "no-store" }).then(r => r.json()).then(async j => {
+    D = j.run; await photoReady;
     if (!card || !D) { document.title = "error: no such card or run"; return; }
     if (!gate(card)) { document.title = "locked"; return; }  // results stay locked here too
     if (Q.get("model")) pick[card.id] = Q.get("model");
@@ -2703,7 +2701,7 @@ if (Q.get("solo")) {
   const saved = localStorage.getItem("b65sharetab");
   selectTab(keys.includes(fromHash) ? fromHash : keys.includes(saved) ? saved : keys[keys.length - 1], keys.includes(fromHash));
   window.addEventListener("hashchange", () => { const k = location.hash.slice(1); if (keys.includes(k) && k !== tab) selectTab(k, true); });
-  poll();
+  poll(); photoReady.then(() => { if (D) refresh(); });
 }
 </script>
 </body>
