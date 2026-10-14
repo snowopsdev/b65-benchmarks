@@ -107,6 +107,9 @@ The dry run (1 try and 2 turns) was summarized to AJ before the full run. Three 
 - **"Gemma on Vulkan with checkpoints shows the old re-read penalty":** the 124 s per turn is real, but it isn't a re-read. Only the new ~1,566 tokens are processed.
 
 ## Open, for Forge
+
+The canary, C and D were settled in Phase 6 ([phase6.md](phase6.md)): the canary is wired, `--ctx-checkpoints 0` is withdrawn as a default for every model, and thinking off holds for Qwen across all 10 coding tasks.
+
 - **The canary:** wire `baseline_ub2048.json` into `compare4.py` for the ub 2048 rows (A passed the 3% rule).
 - **C, checkpoint setting:** whether to make `--ctx-checkpoints 0` the default for all three models on SYCL. It was faster in every pair here, but only append-only chats were tested.
 - **D, Qwen recipe:** thinking off for coding; a rerun of Phase 3 coding with thinking off would show whether quality holds.

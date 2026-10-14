@@ -46,9 +46,11 @@ Release tarballs for each run (raw data, scripts as run, summaries, SHA256SUMS) 
     - Qwen with thinking off scores 10/10 greedy and 30/30 on the Phase 3 coding set (Phase 3: 9/10), about 4× faster. That makes thinking off the Qwen coding recipe. Muse ignores the thinking-off switches: it reasoned on all 30.
     - `--ctx-checkpoints 0` makes Qwen re-read the whole chat on every regenerate or edit (9.4K tokens, 11.3 s against 0.17 s). Gemma and Muse handle regenerate and edit-last fine with checkpoints off, but every model re-reads the whole chat when an earlier turn is edited.
     - The ub 2048 canary is within 0.03% of the Phase 5 baseline.
+    - Forge's decision: checkpoints stay at the default except for Gemma on Vulkan and Gemma agent loops. The Phase 5 idea of `--ctx-checkpoints 0` everywhere is withdrawn.
 
-## Current defaults (Forge, 2026-10-13)
+## Current defaults (Forge, 2026-10-13; checkpoints and thinking updated after Phase 6)
 - **Engine:** llama.cpp `8bb3cf0d2` SYCL, flash attention on, `-b 2048 -ub 2048`, for all three models.
-- **Gemma's llama-server:** `--ctx-checkpoints 0` is optional on SYCL.
+- **Context checkpoints (llama-server):** leave at the default (on) for Qwen, Muse, and Gemma in chat UIs. `--ctx-checkpoints 0` only for Gemma on Vulkan, and for Gemma append-only agent loops on SYCL (3.2 s against 6.0 s per turn in Phase 5).
+- **Qwen for coding:** thinking off (`--reasoning-budget 0`). Muse has no working thinking-off switch; it runs with thinking on.
 - **Canary:** `b65-phase4/canary.sh` runs at ub 2048 against `baseline_ub2048.json` (Phase 5 part A); `UB=512` still checks against the Phase 2 baseline (Phase 6 handoff).
 - **Vulkan:** if used, flash attention off and ub 512.

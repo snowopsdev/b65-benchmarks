@@ -83,3 +83,21 @@ All 8 tests (Qwen and Muse; prefill 512 and 16K; decode at 0 and at 16K) are wit
 ## Open, for Forge
 - **Checkpoint defaults per model.** Qwen keeps them on. Gemma on Vulkan wants them off. Gemma on SYCL and Muse depend on whether early edits matter (off costs a full re-read there).
 - **Muse thinking off.** Its template doesn't respond to `enable_thinking` or `--reasoning-budget 0`. If a no-thinking Muse is wanted, it needs a different switch (for example a system-prompt convention, if the model has one). That would be a new test.
+
+---
+## Forge review (checked against the raw CSVs)
+
+The summary tables match `A_coding.csv`, `B_regen.csv` and `C_canary.csv`. I re-counted part A: Qwen passes 30/30 with 0 reasoning characters, and Muse passes 30/30 with reasoning on all 30 tries (44,887 characters). The local fix that adds Phase 3's system message is correct, since my kit had left it out.
+
+**Final decisions**
+1. **Qwen recipe:** thinking off for coding (`--reasoning-budget 0`). It scores 10/10 greedy and 30/30 overall, with a median of 130 tokens and about 4× less time than Phase 3. This is confirmed across 10 tasks, not just one.
+2. **Muse:** no thinking-off switch was found. Its 30/30 is with thinking on and a 4K cap, and it already uses a similar number of tokens to its Phase 3 run. A Muse thinking-off test isn't worth a phase unless the model card documents a switch.
+3. **Checkpoint defaults, per model:**
+   - **Qwen:** checkpoints **on** (the default). With them off, every regenerate and edit re-reads the whole chat (9.4K tokens, 11.3 s, against 0.17 s with them on). My best guess is that Qwen 3.8 keeps a recurrent or hybrid state that can't rewind even one token without a checkpoint, but the log doesn't confirm that.
+   - **Muse:** checkpoints **on**. Turning them off gains under 0.1 s, and loses fast edits to early turns and the fast return to the original chat (0.7 s against 11.7 s).
+   - **Gemma on SYCL:** checkpoints **on** for chat UIs, where edits to early turns are cheaper (15.3 s against 18.0 s). Use `--ctx-checkpoints 0` for append-only agent loops, which Phase 5 measured at 3.2 s against 6.0 s per turn.
+   - **Gemma on Vulkan:** checkpoints **off**, which is faster at every step (49–135 s with them on).
+   - **Rule:** leave checkpoints at the default, except for Gemma on Vulkan and Gemma agent loops. The Phase 5 suggestion that `--ctx-checkpoints 0` could be a default everywhere is withdrawn.
+4. **Canary:** all 8 tests are within 0.03% of the baseline. `b65-phase4/canary.sh` with `UB=2048` is now the routine check, and the fix your agent made to the Vulkan loop (it now uses `VUB`) is right.
+
+The B65 benchmark plan is complete. Phase 1.5, which re-checks the registry recipes, is still blocked on @0xSero. The round 2 blind writing ranks are still waiting on AJ.
