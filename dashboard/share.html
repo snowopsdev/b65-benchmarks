@@ -2113,7 +2113,191 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
     },
     caption: d => { const p = d.p6, ref = p.ref.baseline_ub2048 || {}, rs = p.C.filter(r => r.tok_s !== "FAIL" && (ref[r.model] || {})[r.test]), dd = rs.map(r => Math.abs(100 * (r.tok_s / ref[r.model][r.test] - 1))), mx = dd.length ? Math.max(...dd) : 0;
       return [["Post", `New canary for the Arc Pro B65 at -ub 2048: ${rs.length} llama-bench tests against the Phase 5 baseline, every one within ${Math.max(0.1, Math.ceil(mx * 10) / 10).toFixed(1)}%.\n\nIt reruns after every driver, kernel or llama.cpp update. What should it watch for next?`]]; } },
+  // ---------- Conclusion: best settings across Phases 0-6 (every number read from the runs) ----------
+  { id: "sum-preview", name: "The B65 recipe (no numbers)", safe: true, group: "sum",
+    draw(ctx, W, H, u, d) {
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: "One recipe for the Arc Pro B65",
+        sub: "7 phases, 3 models of ~30B, one llama.cpp setup we'd actually run", foot: sumFoot(d) });
+      drawTiles(ctx, b, u, W > H, SUM_SETTINGS.map(([k, v, why]) => [k, v, why]));
+    },
+    caption: () => [["Post", `After 7 phases on the Intel Arc Pro B65 32 GB, the llama.cpp recipe:\n\n• SYCL, not Vulkan\n• flash attention on\n• -b 2048 -ub 2048\n• 32K context, all layers on the GPU\n• context checkpoints left on\n• Qwen thinking off for coding\n\nWhat would you change?`]] },
+
+  { id: "sum-recipe", name: "The recipe, with the evidence", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock,
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: "The Arc Pro B65 recipe",
+        sub: "llama.cpp, Qwen 3.8 27B · Gemma 4 31B · Muse Glimmer 28B, all Q4 · each setting with its measured reason", results: true, foot: sumFoot(d) });
+      const cmdH = 46 * u, body = { ...b, h: b.h - cmdH - 14 * u };
+      drawTiles(ctx, body, u, wide, f.recipe);
+      const y = b.y + b.h - cmdH; rr(ctx, b.x, y, b.w, cmdH, 10 * u, C.surf, "rgba(255,255,255,0.10)", 1.5 * u);
+      ctx.font = `600 ${17 * u}px ui-monospace, SFMono-Regular, Menlo, monospace`; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      const cmd = wide ? "llama-server -m model.gguf -ngl 99 -c 32768 --jinja -fa on -b 2048 -ub 2048" : "llama-server -ngl 99 -c 32768 -fa on -b 2048 -ub 2048";
+      let px = 17 * u; while (px > 9 && ctx.measureText(cmd).width > b.w - 36 * u) { px--; ctx.font = `600 ${px}px ui-monospace, SFMono-Regular, Menlo, monospace`; }
+      ctx.fillText(cmd, b.x + 18 * u, y + cmdH / 2 + 6 * u);
+    },
+    caption: d => { const f = sumFacts(d);
+      return [["Post", `The Intel Arc Pro B65 llama.cpp recipe, measured:\n\n• SYCL: ${pct(f.dec)} decode, ${pct(f.pre)} prefill vs Vulkan\n• -ub 2048: 16K prompt to first token ${secs(f.q512)} → ${secs(f.q2048)}\n• all 3 models ≥${f.min32.toFixed(1)} tok/s at 32K\n• Qwen thinking off: ${f.qPass}/${f.qN} coding\n\nWhat's your Arc setup?`]]; } },
+
+  { id: "sum-ttft", name: "First token on a 16K prompt", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock,
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), wide = W > H, stages = [["vulkan", "Vulkan, best settings"], ["ub512", "SYCL, flash attention on"], ["ub2048", "SYCL + -b 2048 -ub 2048"]];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: `A 16K prompt: up to ${Math.max(...f.ttftModels.map(r => r.vulkan / r.ub2048)).toFixed(1)}× sooner than Vulkan`,
+        sub: "llama-server, seconds to first token on a 16,384-token prompt (median of 3)", results: true, foot: sumFoot(d) });
+      const ms = f.ttftModels, labW = wide ? 230 * u : 200 * u, valW = 90 * u, gh = (b.h - 30 * u) / ms.length, bh = Math.min(wide ? 26 * u : 46 * u, (gh - 26 * u) / 3 - 8 * u);
+      const max = Math.max(...ms.flatMap(r => stages.map(([k]) => r[k] || 0)));
+      ms.forEach((r, i) => { const y = b.y + gh * i, col = mcolor(d.models.indexOf(r.m));
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, y + 18 * u, 12 * u, 12 * u, 3 * u, col); text(ctx, r.m.display, b.x + 20 * u, y + 30 * u, 19 * u, { w: 700, max: labW - 24 * u });
+        stages.forEach(([k, lab], j) => { const v = r[k], by = y + 14 * u + j * (bh + 8 * u), x0 = b.x + labW, bw = (b.w - labW - valW) * (v || 0) / max;
+          rr(ctx, x0, by, Math.max(bw, 3 * u), bh, 4 * u, j === 2 ? col : j === 1 ? "#5d5d58" : "#3d3d3a");
+          const tx = bw > 260 * u ? x0 + 10 * u : x0 + bw + 10 * u;
+          text(ctx, lab, tx, by + bh / 2 + 5 * u, Math.min(wide ? 14 * u : 17 * u, bh * 0.6), { color: bw > 260 * u ? C.ink : C.ink2, w: j === 2 ? 700 : 400 });
+          text(ctx, secs(v), b.x + b.w, by + bh / 2 + 6 * u, Math.min(wide ? 18 * u : 22 * u, bh * 0.75), { w: j === 2 ? 800 : 600, align: "right", color: j === 2 ? C.ink : C.ink2 }); }); });
+      text(ctx, `Vulkan = flash attention off (and --ctx-checkpoints 0 for Gemma; with llama-server's default checkpoints it took ${secs(f.gemmaVkDefault16)}).`, b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const f = sumFacts(d);
+      return [["Post", `Time to first token on a 16K prompt, Intel Arc Pro B65 32 GB:\n\n${f.ttftModels.map(r => `• ${short(r.m)}: ${secs(r.vulkan)} → ${secs(r.ub2048)}`).join("\n")}\n\nVulkan → llama.cpp SYCL with flash attention on and -b 2048 -ub 2048. How long do you wait for long prompts?`]]; } },
+
+  { id: "sum-decode", name: "Decode speed out to 32K", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock,
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), wide = W > H, tests = ["tg128", "tg128@d4096", "tg128@d8192", "tg128@d16384", "tg128@d32768"];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: "Generation speed holds to 32K on SYCL",
+        sub: "llama-bench tok/s by context depth · grey dashed = Vulkan (FA off) · colour = SYCL (FA on)", results: true, foot: sumFoot(d) });
+      const ms = d.models.filter(m => d.p1s.bench.some(x => x.model === m.name)), n = ms.length, gap = 26 * u;
+      const pw = wide ? (b.w - gap * (n - 1)) / n : b.w, ph = wide ? b.h - 10 * u : (b.h - gap * (n - 1)) / n;
+      const all = d.p1s.bench.flatMap(x => [x.tok_s, x.vk]).filter(v => v != null), lo = Math.floor(Math.min(...all, 15) - 1), hi = Math.ceil(Math.max(...all) + 1);
+      ms.forEach((m, i) => { const px = b.x + (wide ? (pw + gap) * i : 0), py = b.y + (wide ? 0 : (ph + gap) * i), col = mcolor(d.models.indexOf(m));
+        const pt = { l: 6 * u, r: 70 * u, t: 40 * u, b: 30 * u }, x0 = px + pt.l, x1 = px + pw - pt.r, X = k => x0 + (x1 - x0) * k / (tests.length - 1), Y = v => py + pt.t + (ph - pt.t - pt.b) * (1 - (v - lo) / (hi - lo));
+        const rows = tests.map(t => d.p1s.bench.find(x => x.model === m.name && x.test === t) || {});
+        text(ctx, m.display, px, py + 18 * u, 19 * u, { w: 700, max: pw - 120 * u });
+        const s32 = rows[4].tok_s, v32 = rows[4].vk, dd = 100 * (s32 / v32 - 1);
+        text(ctx, `${pct(dd)} @32K`, px + pw, py + 18 * u, 16 * u, { w: 800, align: "right", color: dd >= 0 ? C.good : C.critical });
+        tests.forEach((t, k) => { ctx.fillStyle = C.grid; ctx.fillRect(X(k) - 0.6 * u, py + pt.t - 4 * u, 1.2 * u, ph - pt.t - pt.b + 4 * u);
+          text(ctx, DEPTH[t], X(k), py + ph - 8 * u, 13 * u, { color: C.muted, align: "center" }); });
+        ctx.setLineDash([6 * u, 6 * u]); ctx.strokeStyle = C.axis; ctx.lineWidth = 1.2 * u; ctx.beginPath(); ctx.moveTo(x0, Y(15)); ctx.lineTo(x1, Y(15)); ctx.stroke();
+        text(ctx, "15", x0 + 2 * u, Y(15) - 5 * u, 11 * u, { color: C.muted });
+        const line = (key, color, dash, w) => { ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = "round"; ctx.beginPath();
+          rows.forEach((r, k) => k ? ctx.lineTo(X(k), Y(r[key])) : ctx.moveTo(X(k), Y(r[key]))); ctx.stroke(); ctx.setLineDash([]);
+          rows.forEach((r, k) => { ctx.beginPath(); ctx.arc(X(k), Y(r[key]), 4.5 * u, 0, 7); ctx.fillStyle = color; ctx.fill(); }); };
+        line("vk", "#77776f", [7 * u, 6 * u], 2.4 * u); line("tok_s", col, [], 3.2 * u);
+        let ys = Y(s32), yv = Y(v32); if (Math.abs(ys - yv) < 20 * u) { if (ys <= yv) yv = ys + 20 * u; else ys = yv + 20 * u; }
+        text(ctx, s32.toFixed(1), x1 + 10 * u, ys + 6 * u, 17 * u, { w: 800, color: col });
+        text(ctx, v32.toFixed(1), x1 + 10 * u, yv + 6 * u, 15 * u, { color: "#a3a39b" }); });
+    },
+    caption: d => { const ms = d.models.filter(m => d.p1s.bench.some(x => x.model === m.name)), r = m => d.p1s.bench.find(x => x.model === m.name && x.test === "tg128@d32768");
+      const rows = ms.map(m => ({ m, s: r(m).tok_s, v: r(m).vk })).sort((a, c) => c.s - a.s);
+      return [["Post", `Generation speed at 32K context on the Intel Arc Pro B65, Vulkan → SYCL (flash attention on):\n\n${rows.map(x => `• ${short(x.m)}: ${x.v.toFixed(1)} → ${x.s.toFixed(1)} tok/s${x.s < x.v ? " (the one loss)" : ""}`).join("\n")}\n\nWhich model do you run at long context?`]]; } },
+
+  { id: "sum-traps", name: "Settings that cost you", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock,
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), wide = W > H, rows = f.traps;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: `${["Zero", "One", "Two", "Three", "Four", "Five", "Six"][rows.length]} settings that cost you`,
+        sub: "each one measured on this card: the right setting → the wrong one", results: true, foot: sumFoot(d) });
+      const rh = b.h / rows.length, labW = b.w * (wide ? 0.44 : 0.5), k = wide ? 1 : 1.2;
+      rows.forEach((r, i) => { const y = b.y + rh * i, cy = y + rh / 2;
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        text(ctx, r.what, b.x, cy - 2 * u, Math.min(21 * u * k, rh * 0.3), { w: 750, max: labW - 16 * u });
+        text(ctx, r.where, b.x, cy + Math.min(20 * u, rh * 0.3), Math.min(15 * u * k, rh * 0.22), { color: C.ink2, max: labW - 16 * u });
+        const chipW = wide ? 150 * u : 140 * u;
+        text(ctx, `${r.good} → ${r.bad}`, b.x + labW, cy + 8 * u, Math.min(24 * u * k, rh * 0.36), { w: 700, max: b.w - labW - chipW - 16 * u });
+        rr(ctx, b.x + b.w - chipW, cy - 17 * u, chipW, 34 * u, 17 * u, "rgba(208,59,59,0.18)", "rgba(208,59,59,0.55)", 1.5 * u);
+        text(ctx, r.cost, b.x + b.w - chipW / 2, cy + 6 * u, 17 * u, { w: 800, align: "center", color: "#ff8a80", max: chipW - 16 * u }); });
+    },
+    caption: d => { const f = sumFacts(d);
+      return [["Post", `llama.cpp settings that cost you on an Arc Pro B65:\n\n${f.traps.map(r => `• ${r.short} ${r.cost}`).join("\n")}\n\nHit any?`]]; } },
+
+  { id: "sum-models", name: "Which model for what", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock,
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), wide = W > H, ms = f.models, n = ms.length, gap = 20 * u;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · CONCLUSION", title: "Which model for what",
+        sub: "all three on the recipe (SYCL, flash attention on, -ub 2048) · ★ = best of the three", results: true, foot: sumFoot(d) });
+      const bh = b.h - (f.vramNote ? 22 * u : 0), cw = wide ? (b.w - gap * (n - 1)) / n : b.w, ch = wide ? bh : (bh - gap * (n - 1)) / n;
+      ms.forEach((r, i) => { const x = b.x + (wide ? (cw + gap) * i : 0), y = b.y + (wide ? 0 : (ch + gap) * i), col = mcolor(d.models.indexOf(r.m));
+        rr(ctx, x, y, cw, ch, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = col; ctx.fillRect(x + 14 * u, y, cw - 28 * u, 4 * u);
+        text(ctx, r.m.display, x + 20 * u, y + 40 * u, 22 * u, { w: 750, max: cw - 40 * u });
+        text(ctx, r.best, x + 20 * u, y + 68 * u, 17 * u, { w: 700, color: col, max: cw - 40 * u });
+        const stats = r.stats, sx = wide ? x + 20 * u : x + 20 * u, top = y + (wide ? 104 * u : 90 * u), cols = wide ? 1 : 3, sw = (cw - 40 * u) / cols, rowH = wide ? (ch - (top - y) - 14 * u) / stats.length : (ch - (top - y) - 10 * u) / Math.ceil(stats.length / cols);
+        stats.forEach(([lab, val, star], k) => { const xx = sx + sw * (k % cols), yy = top + rowH * Math.floor(k / cols);
+          text(ctx, lab, xx, yy + Math.min(14 * u, rowH * 0.35), Math.min(13 * u, rowH * 0.3), { color: C.muted, max: sw - 10 * u });
+          text(ctx, (star ? "★ " : "") + val, xx, yy + Math.min(38 * u, rowH * 0.85), Math.min(21 * u, rowH * 0.45), { w: star ? 800 : 600, color: star ? C.ink : C.ink2, max: sw - 10 * u }); }); });
+      if (f.vramNote) text(ctx, f.vramNote, b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const f = sumFacts(d);
+      return [["Post", `Which ~30B model on a 32 GB Intel Arc Pro B65?\n\n${f.models.map(r => `• ${r.m.display}: ${r.cap}`).join("\n")}\n\nWhich would you pick?`]]; } },
 ];
+// ---------- Conclusion helpers ----------
+function sumReady(d) { return !!(d.p05 && d.p05.complete && d.p1 && d.p1.rerun && d.p1.rerun.complete && d.p2 && d.p2.complete && d.p1s && d.p1s.complete
+  && d.us && d.us.complete && d.p3 && d.p3.complete && d.p4 && d.p4.complete && d.p6 && d.p6.complete && (d.p6.A || []).length && (d.p6.B || []).length); }
+function sumLock() { return "Unlocks when every phase (0.5–6) has finished"; }
+function sumFoot(d) { return `${p1foot(viewP1S(d)) || ""} · Vulkan: Mesa ${d.stack.mesa}`; }
+const SUM_SETTINGS = [["Engine", "SYCL", "llama.cpp on oneAPI / Level Zero, not Vulkan"], ["Flash attention", "On", "-fa on (on Vulkan it's the opposite: off)"],
+  ["Micro-batch", "-ub 2048", "with -b 2048; Vulkan stays at the default 512"], ["Context", "32K", "every layer on the GPU (-ngl 99)"],
+  ["Context checkpoints", "Leave on", "off only for Gemma agent loops, or Gemma on Vulkan"], ["Qwen for coding", "Thinking off", "--reasoning-budget 0"]];
+function drawTiles(ctx, b, u, wide, tiles) {
+  const cols = wide ? 3 : 1, rows = Math.ceil(tiles.length / cols), gap = 16 * u, cw = (b.w - gap * (cols - 1)) / cols, ch = (b.h - gap * (rows - 1)) / rows;
+  tiles.forEach(([k, v, why], i) => { const x = b.x + (cw + gap) * (i % cols), y = b.y + (ch + gap) * Math.floor(i / cols);
+    rr(ctx, x, y, cw, ch, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = C.series[0]; ctx.fillRect(x + 12 * u, y, cw - 24 * u, 3 * u);
+    if (!wide) {   // tall: one row per setting, value on the left, reason on the right
+      const lw = cw * 0.42, cy = y + ch / 2;
+      text(ctx, k.toUpperCase(), x + 20 * u, cy - 14 * u, 13 * u, { w: 700, color: C.muted, max: lw - 30 * u });
+      text(ctx, v, x + 20 * u, cy + 20 * u, 28 * u, { w: 800, max: lw - 30 * u });
+      ctx.font = `400 ${17 * u}px ${FONT}`; const ls = wrap(ctx, why, cw - lw - 24 * u).slice(0, 3);
+      ls.forEach((l, j) => text(ctx, l, x + lw, cy - (ls.length - 1) * 12 * u + j * 24 * u + 6 * u, 17 * u, { color: C.ink2 })); return; }
+    const s = Math.min(1, ch / (150 * u));
+    text(ctx, k.toUpperCase(), x + 18 * u, y + 30 * u * s, 13 * u, { w: 700, color: C.muted, max: cw - 36 * u });
+    text(ctx, v, x + 18 * u, y + 66 * u * s, 30 * u * Math.max(s, 0.8), { w: 800, max: cw - 36 * u });
+    ctx.font = `400 ${15 * u}px ${FONT}`; wrap(ctx, why, cw - 36 * u).slice(0, 3).forEach((l, j) => text(ctx, l, x + 18 * u, y + 94 * u * s + j * 20 * u, 15 * u, { color: C.ink2 })); });
+}
+const tsec = v => v == null ? "–" : v < 1 ? `${v.toFixed(2)} s` : secs(v);
+function sumFacts(d) {
+  const by = pre => d.models.find(m => m.name.startsWith(pre)), q = by("qwen"), g = by("gemma"), mu = by("muse");
+  const f2 = facts2(d), usM = m => (d.us.models || []).find(x => x.model === m.name) || {}, usT = (m, k, n) => ((usM(m)[k] || []).find(x => x.size === n) || {}).ttft;
+  const p2v = (m, run, t) => (p2c(d, m, run, t) || {}).tok_s;
+  const p05 = (m, fa, t) => { const c = (d.p05.cells || []).find(x => x.model === m.name && x.test === t && x.fa === fa); return c ? (c.status === "ok" ? c.tok_s : (c.ref || {}).tok_s) : null; };
+  const p4v = (m, ub, t) => ((d.p4.rows || []).find(r => r.model === m.name && r.backend === "vulkan" && r.ub === ub && r.test === t && r.status === "ok") || {}).tok_s;
+  const b6 = (m, cfg, step) => +((d.p6.B || []).find(r => r.model === m.name && r.backend === "sycl" && r.cfg === cfg && r.step === step) || {}).ttft_s;
+  const med = a => { a = a.filter(x => !isNaN(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const qa = d.p6.A.filter(r => r.model === q.name), qPass = qa.filter(r => r.pass === "1").length, qMed = Math.round(med(qa.map(r => +r.completion_tokens)));
+  const d32 = m => (d.p1s.bench.find(x => x.model === m.name && x.test === "tg128@d32768") || {}).tok_s, min32 = Math.min(...d.models.map(d32));
+  const ckOn = b6(q, "ckpt-default", "regen"), ckOff = b6(q, "ckpt0", "regen");
+  const q512 = usT(q, "ub512", 16384), q2048 = usT(q, "ub2048", 16384);
+  const recipe = [["Engine", "SYCL", `${pct(f2.decMean)} decode and ${pct(f2.preMean)} prefill vs Vulkan, averaged over 3 models`],
+    ["Flash attention", "On", `Gemma decode at 32K: ${p2v(g, "sycl/fa0", "tg128@d32768").toFixed(1)} → ${p2v(g, "sycl/fa1", "tg128@d32768").toFixed(1)} tok/s with it on`],
+    ["Micro-batch", "-b 2048 -ub 2048", `Qwen, 16K prompt to first token: ${secs(q512)} → ${secs(q2048)}`],
+    ["Context", "32K", `all three fit; the slowest still decodes ${min32.toFixed(1)} tok/s at 32K`],
+    ["Context checkpoints", "Leave on", `off, Qwen re-reads the whole chat: regenerate ${tsec(ckOn)} → ${tsec(ckOff)}`],
+    ["Qwen for coding", "Thinking off", `${qPass}/${qa.length} tries passed, median ${qMed} tokens per answer`]];
+  const ttftModels = (d.us.models || []).map(x => { const m = d.models.find(y => y.name === x.model), t = k => ((x[k] || []).find(s => s.size === 16384) || {}).ttft;
+    return { m, vulkan: t("vulkan"), ub512: t("ub512"), ub2048: t("ub2048") }; });
+  const gemmaVkDefault16 = ((((d.p1.rerun.variants || []).find(v => v.name === "default") || {}).serve || []).find(s => s.size === 16384) || {}).ttft;
+  const ck = n => ((((d.p1.rerun.variants || []).find(v => v.name === n) || {}).serve || []).find(s => s.size === 512) || {}).ttft;
+  const tps = (a, b2) => ({ good: `${a.toFixed(0)}`, bad: `${b2.toFixed(0)} tok/s`, cost: pct(100 * (b2 / a - 1)) });
+  const tpd = (a, b2) => ({ good: `${a.toFixed(1)}`, bad: `${b2.toFixed(1)} tok/s`, cost: pct(100 * (b2 / a - 1)) });
+  const tms = (a, b2) => ({ good: tsec(a), bad: tsec(b2), cost: `${Math.round(b2 / a)}× slower` });
+  const traps = [
+    { what: "Flash attention on, Vulkan", where: "Gemma, prefill of a 16K prompt", short: "Vulkan + FA on: Gemma prefill", ...tps(p05(g, "0", "pp16384"), p05(g, "1", "pp16384")) },
+    { what: "Default checkpoints, Vulkan", where: "Gemma, first token on a 512-token prompt", short: "Vulkan, default checkpoints: Gemma 1st token", ...tms(ck("ckpt-off"), ck("default")) },
+    { what: "Flash attention off, SYCL", where: "Gemma, decode at 32K context", short: "SYCL + FA off: Gemma 32K decode", ...tpd(p2v(g, "sycl/fa1", "tg128@d32768"), p2v(g, "sycl/fa0", "tg128@d32768")) },
+    { what: "-ub 2048 on Vulkan", where: "Muse, prefill of a 16K prompt", short: "Vulkan + -ub 2048: Muse prefill", ...tps(p4v(mu, "512", "pp16384"), p4v(mu, "2048", "pp16384")) },
+    { what: "Context checkpoints off", where: "Qwen, regenerate a reply in a 9.4K chat", short: "checkpoints off: Qwen regen", ...tms(ckOn, ckOff) }];
+  const wr = (d.p3.writing || {}).totals || {}, sec = m => (d.p3.models[m.name] || {}).seconds;
+  const vram = m => { const x = usM(m); return x.vram_mib ? { v: x.vram_mib, note: "" } : x.vram512_mib ? { v: x.vram512_mib, note: "*" } : { v: null, note: "" }; };
+  const code = m => { const c = (d.p3.models[m.name] || {}).sections.coding; return m === q ? { v: d.p6.A.filter(r => r.model === q.name && r.try === "0" && r.pass === "1").length, n: 10, lab: " (thinking off)" } : { v: c.passed, n: c.n, lab: "" }; };
+  const ms = [mu, q, g].filter(Boolean), best = (fn, hi) => { const v = ms.map(fn).filter(x => x != null); return hi ? Math.max(...v) : Math.min(...v); };
+  const BEST = { muse: "All-round: speed and long context", qwen: "Quick coding, with thinking off", gemma: "Writing" };
+  const models = ms.map(m => { const vr = vram(m), c = code(m), rk = (wr[m.name] || {}).mean_rank, key = m.name.split(/[-.\d]/)[0];
+    const stats = [["Decode at 32K context", `${d32(m).toFixed(1)} tok/s`, d32(m) === best(d32, true)],
+      ["16K prompt, first token", secs(usT(m, "ub2048", 16384)), usT(m, "ub2048", 16384) === best(x => usT(x, "ub2048", 16384))],
+      ["VRAM at 32K context", vr.v ? `${(vr.v / 1024).toFixed(1)} GiB${vr.note}` : "–", vr.v === best(x => vram(x).v)],
+      ["Coding, 10 tasks", `${c.v}/${c.n}${c.lab}`, c.v === best(x => code(x).v, true)],
+      ["Writing, blind rank (1 = best)", rk != null ? rk.toFixed(1) : "–", rk === best(x => (wr[x.name] || {}).mean_rank)],
+      ["30 quality tasks, total time", sec(m) ? fmtT(sec(m)) : "–", sec(m) === best(sec)]];
+    const cap = key === "muse" ? `all-round, ${d32(m).toFixed(1)} tok/s at 32K, ${c.v}/${c.n} coding` : key === "qwen" ? `coding with thinking off, ${c.v}/${c.n} at a median ${qMed} tokens`
+      : `writing (best blind rank, ${rk != null ? rk.toFixed(1) : "–"})`;
+    return { m, best: BEST[key] || "", stats, cap }; });
+  const vramNote = ms.some(m => vram(m).note) ? `* ${ms.filter(m => vram(m).note).map(short).join(", ")}: VRAM measured at the default micro-batch (512); at 2048 it wasn't recorded. Quality: Phase 3, greedy; Qwen's coding from Phase 6.` : "";
+  return { dec: f2.decMean, pre: f2.preMean, q512, q2048, min32, qPass, qN: qa.length, recipe, ttftModels, gemmaVkDefault16, traps, models, vramNote };
+}
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
 function p6regen(p) {  // which setups re-read most of the chat: on regen/edit-last (cache should survive) vs on the early edit
@@ -2321,6 +2505,7 @@ const SHARE_PHASES = [
   { key: "us", label: "Phase 4+", name: "Server at ub 2048", href: "us", st: d => d.us || {} },
   { key: "p5", label: "Phase 5", name: "Open questions", href: "p5", st: d => d.p5 || {} },
   { key: "p6", label: "Phase 6", name: "Confirming the recipes", href: "p6", st: d => d.p6 || {} },
+  { key: "sum", label: "Conclusion", name: "Best settings", href: "files/findings/recommended-settings.md", st: d => ({ run_id: "Phases 0–6", state: "finished", complete: sumReady(d) }) },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;

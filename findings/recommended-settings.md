@@ -5,6 +5,15 @@ This is the conclusion of Phases 0–6 (2026-10-12 to 2026-10-13). Each line nam
 - **Versions:** llama.cpp build 11574 (`8bb3cf0d2`), oneAPI 2026.0, compute-runtime 26.31.39395.13, Mesa 26.2.2, kernel 7.2.5-3-omarchy.
 - **After an update:** these settings are measured on these versions only. After any update, run the canary (`b65-phase4/canary.sh`, about 10 minutes) before trusting them.
 
+**Share cards:** the Conclusion tab on the share page (`/share#sum`) has six cards, each in wide (X) and tall format, with captions. The cards are drawn from the run data:
+- the recipe without numbers, and the recipe with its evidence
+- time to first token on a 16K prompt
+- generation speed out to 32K
+- five settings that cost you
+- which model for what
+
+PNG exports are in `charts/conclusion/`.
+
 ## The short answer
 
 **llama.cpp SYCL, flash attention on, `-b 2048 -ub 2048`, all layers on the GPU, 32K context.** Leave context checkpoints at their default, and turn Qwen's thinking off for coding.
