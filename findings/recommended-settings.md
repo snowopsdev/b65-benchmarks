@@ -70,7 +70,7 @@ Use flash attention off, ub 512, and `--ctx-checkpoints 0` for Gemma.
 - All figures are board power, not wall power.
 
 ## In the registry
-All three models pass local-ai-registry's six lab gates on these settings at 32K, in the official server-intel image (21.4–25.2 tok/s); the recipes are on a local branch, not yet submitted ([Phase 1.5](phase15.md)).
+All three models pass local-ai-registry's six lab gates on these settings at 32K, 64K and 128K, in the official server-intel image (21.4–25.3 tok/s; decode doesn't change with the window, and all three fit 128K in 32 GB). Submitted as [PR #260](https://github.com/sybil-solutions/local-ai-registry/pull/260), with the card photo in [PR #264](https://github.com/sybil-solutions/local-ai-registry/pull/264) ([Phase 1.5](phase15.md)).
 
 ## Not covered
 - **Muse with thinking off:** no working switch was found.
