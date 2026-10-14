@@ -2054,7 +2054,8 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
       ms.forEach((m, i) => { const y = b.y + rh * i, rs = p.A.filter(r => r.model === m.name), g = rs.filter(r => r.try === "0"), ref = p3[m.name] || {};
         ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
         rr(ctx, b.x, y + 24 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m))); text(ctx, m.display, b.x + 20 * u, y + 36 * u, 20 * u, { w: 700, max: labW - 24 * u });
-        text(ctx, "thinking off", b.x + 20 * u, y + 60 * u, 15 * u, { color: C.ink2 });
+        const thought = rs.filter(r => +r.reasoning_chars > 0).length;   // thinking requested off; reasoning_chars shows whether it really was
+        text(ctx, thought ? `still thought on ${thought}/${rs.length}` : "thinking off", b.x + 20 * u, y + 60 * u, 15 * u, { color: thought ? "#e0a526" : C.ink2, w: thought ? 700 : 400 });
         tasks.forEach((t, j) => { const x = b.x + labW + j * (gridW / tasks.length), cy = y + 22 * u, x2 = rs.filter(r => r.task === t), ps = x2.filter(r => r.pass === "1").length;
           rr(ctx, x, cy, cell, cell, 6 * u, ps === x2.length ? C.good : ps ? "#b8860b" : C.critical);
           text(ctx, `${ps}/${x2.length}`, x + cell / 2, cy + cell / 2 + 6 * u, 15 * u, { w: 800, align: "center", color: C.page });
@@ -2062,12 +2063,14 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
           if (ref[t]) text(ctx, ref[t].passed ? "P3 ✓" : "P3 ✗", x + cell / 2, cy + cell + 34 * u, 12 * u, { color: ref[t].passed ? C.ink2 : C.critical, align: "center", w: ref[t].passed ? 400 : 700 }); });
         const sx = wide ? b.x + labW + gridW + 20 * u : b.x + labW, sy = wide ? y + 40 * u : y + cell + 92 * u, refPass = Object.values(ref).filter(x => x.passed).length;
         text(ctx, `greedy ${g.filter(r => r.pass === "1").length}/${g.length} · all ${rs.filter(r => r.pass === "1").length}/${rs.length}`, sx, sy, 20 * u, { w: 750 });
-        text(ctx, `median ${Math.round(med(rs.map(r => +r.completion_tokens)))} tokens · Phase 3 (thinking on): ${refPass}/${Object.keys(ref).length}, median ${Math.round(med(Object.values(ref).map(x => +x.tokens)))}`, sx, sy + 24 * u, 14 * u, { color: C.ink2, max: wide ? statW - 20 * u : gridW }); });
+        text(ctx, `median ${Math.round(med(rs.map(r => +r.completion_tokens)))} tokens per answer`, sx, sy + 26 * u, 15 * u, { color: C.ink2, max: wide ? statW - 20 * u : gridW });
+        text(ctx, `Phase 3, thinking on: ${refPass}/${Object.keys(ref).length}, median ${Math.round(med(Object.values(ref).map(x => +x.tokens)))}`, sx, sy + 48 * u, 15 * u, { color: C.ink2, max: wide ? statW - 20 * u : gridW }); });
       text(ctx, "Green = passed every try, amber = some, red = none. P3 = Phase 3's single greedy try with thinking on and a 2K cap.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const p = d.p6, s = m => { const rs = p.A.filter(r => r.model === m.name), g = rs.filter(r => r.try === "0"); return `${g.filter(r => r.pass === "1").length}/${g.length} greedy, ${rs.filter(r => r.pass === "1").length}/${rs.length} over 3 tries`; };
       const ms = d.models.filter(m => p.A.some(r => r.model === m.name));
-      return [["Post", `Turning thinking off for coding on a local 27B: Phase 3's 10 Python tasks, Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: ${s(m)}`).join("\n")}\n\nWith thinking on, Qwen scored 9/10 and Muse 10/10. Do you code with thinking on?`]]; } },
+      const kept = ms.filter(m => p.A.some(r => r.model === m.name && +r.reasoning_chars > 0));
+      return [["Post", `Turning thinking off for coding on a local 27B: Phase 3's 10 Python tasks, Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: ${s(m)}${kept.includes(m) ? " (it kept thinking anyway)" : ""}`).join("\n")}\n\nWith thinking on, Qwen scored 9/10 and Muse 10/10. Do you code with thinking on?`]]; } },
 
   { id: "p6-regen", name: "B: regenerate and edit", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.B || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
     draw(ctx, W, H, u, d) {
@@ -2078,14 +2081,16 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
       steps.forEach((s2, j) => text(ctx, sl[s2], b.x + labW + cw * j + cw / 2, b.y + 20 * u, 15 * u, { w: 700, color: C.ink2, align: "center", max: cw - 8 * u }));
       ks.forEach((k, i) => { const [m, be, cfg] = k.split("|"), mm = d.models.find(x => x.name === m), y = b.y + headH + rh * i, by = Object.fromEntries(p.B.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k).map(r => [r.step, r]));
         ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
-        text(ctx, `${short(mm)} · ${be === "sycl" ? "SYCL" : "Vulkan"}`, b.x, y + rh / 2 - 2 * u, 17 * u, { w: 700, max: labW - 10 * u });
-        text(ctx, cfg === "ckpt0" ? "checkpoints off" : "checkpoints on", b.x, y + rh / 2 + 16 * u, 13 * u, { color: C.ink2 });
+        if (wide) { const lw = text(ctx, `${short(mm)} · ${be === "sycl" ? "SYCL" : "Vulkan"}`, b.x, y + rh / 2 + 6 * u, 16 * u, { w: 700, max: labW * 0.58 });
+          text(ctx, cfg === "ckpt0" ? "ckpt off" : "ckpt on", b.x + lw + 10 * u, y + rh / 2 + 6 * u, 14 * u, { color: cfg === "ckpt0" ? C.series[0] : C.ink2, w: 650 }); }
+        else { text(ctx, `${short(mm)} · ${be === "sycl" ? "SYCL" : "Vulkan"}`, b.x, y + rh / 2 - 2 * u, 17 * u, { w: 700, max: labW - 10 * u });
+          text(ctx, cfg === "ckpt0" ? "checkpoints off" : "checkpoints on", b.x, y + rh / 2 + 16 * u, 13 * u, { color: C.ink2 }); }
         steps.forEach((s2, j) => { const r = by[s2], x = b.x + labW + cw * j; if (!r) { text(ctx, "–", x + cw / 2, y + rh / 2 + 6 * u, 16 * u, { color: C.muted, align: "center" }); return; }
           const n = +r.prompt_n_processed, full = n >= 0.8 * +r.ctx_tokens, t = +r.ttft_s;
           rr(ctx, x + 6 * u, y + 5 * u, cw - 12 * u, rh - 10 * u, 6 * u, full ? "rgba(208,59,59,0.22)" : "rgba(255,255,255,0.04)");
           text(ctx, n.toLocaleString(), x + cw / 2, y + rh / 2 + 1 * u, Math.min(20 * u, rh * 0.42), { w: 800, align: "center", color: full ? C.critical : C.ink });
           text(ctx, `${t >= 100 ? Math.round(t) : t.toFixed(1)} s`, x + cw / 2, y + rh / 2 + Math.min(18 * u, rh * 0.36), Math.min(13 * u, rh * 0.28), { align: "center", color: C.ink2 }); }); });
-      text(ctx, "Tokens reprocessed (big) and seconds to first token (small). Edit turn 3 has to redo turns 3–6 (~6K) by design.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+      text(ctx, "Tokens reprocessed (big) and seconds to first token (small). ckpt = context checkpoints. Editing turn 3 has to redo everything after the edit, by design.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
     },
     caption: d => { const p = d.p6, ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = ks.filter(k => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && ["regen", "edit-last", "back-to-original"].includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens));
       const off = bad.filter(k => k.endsWith("|ckpt0")).length;
