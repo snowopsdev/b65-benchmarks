@@ -2224,6 +2224,44 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
     },
     caption: d => { const f = sumFacts(d);
       return [["Post", `Which ~30B model on a 32 GB Intel Arc Pro B65?\n\n${f.models.map(r => `• ${r.m.display}: ${r.cap}`).join("\n")}\n\nWhich would you pick?`]]; } },
+
+  // 5:2 header for the X article; one fixed size whatever the wide/tall toggle says
+  { id: "sum-banner", name: "Article banner (5:2)", safe: false, group: "sum", ready: sumReady, lockMsg: sumLock, size: [1500, 600],
+    draw(ctx, W, H, u, d) {
+      const f = sumFacts(d), P = 64 * u, L = W * 0.58;
+      ctx.fillStyle = C.page; ctx.fillRect(0, 0, W, H);
+      const g = ctx.createRadialGradient(W * 0.85, -H * 0.1, 0, W * 0.85, -H * 0.1, W * 0.9);
+      g.addColorStop(0, "rgba(57,135,229,0.20)"); g.addColorStop(1, "rgba(57,135,229,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      const top = P - 6 * u, bot = H - P - 46 * u, chH = 44 * u, chGap = 12 * u;
+      // the recipe as chips: lay out first so the left block can be centred vertically
+      font(ctx, 19 * u, 700); let cx = P, row = 0;
+      const chips = SUM_SETTINGS.map(([k, v]) => { const s = k === "Qwen for coding" ? "Qwen: thinking off" : k === "Context checkpoints" ? "Checkpoints on" : k === "Flash attention" ? "Flash attention on" : v === "32K" ? "32K context" : v;
+        const cw = ctx.measureText(s).width + 34 * u; if (cx + cw > L - 20 * u) { cx = P; row++; } const c = { s, x: cx, row, cw }; cx += cw + chGap; return c; });
+      const blockH = 262 * u + (row + 1) * chH + row * chGap, oy = top + Math.max(0, (bot - top - blockH) / 2);
+      text(ctx, "INTEL ARC PRO B65 · 32 GB · LLAMA.CPP", P, oy + 20 * u, 18 * u, { w: 700, color: C.series[0] });
+      ["The best llama.cpp settings", "for Intel's Arc Pro B65"].forEach((s, i) => text(ctx, s, P, oy + 96 * u + i * 70 * u, 62 * u, { w: 800, max: L - P - 20 * u }));
+      text(ctx, "7 rounds of benchmarks · 3 models of ~30B · SYCL vs Vulkan", P, oy + 216 * u, 23 * u, { color: C.ink2, max: L - P - 20 * u });
+      chips.forEach(c => { const cy = oy + 262 * u + c.row * (chH + chGap);
+        rr(ctx, c.x, cy, c.cw, chH, chH / 2, C.surf, "rgba(57,135,229,0.55)", 1.5 * u);
+        text(ctx, c.s, c.x + 17 * u, cy + chH / 2 + 7 * u, 19 * u, { w: 700 }); });
+      // three measured headlines on the right
+      const ratio = Math.max(...f.ttftModels.map(r => r.vulkan / r.ub2048)), rx = L + 10 * u, rw = W - P - rx, rh = (bot - top) / 3;
+      [[`${f.dec >= 0 ? "+" : "−"}${Math.abs(f.dec).toFixed(1)}%`, "faster decode on SYCL than Vulkan", "average of 3 models, same llama.cpp commit"],
+       [`${ratio.toFixed(1)}×`, "sooner first token on a 16K prompt", "SYCL with -ub 2048, against Vulkan"],
+       [`≥${f.min32.toFixed(1)}`, "tok/s decode at 32K context", "all three models"]].forEach(([big, lab, note], i) => {
+        const y = top + rh * i;
+        rr(ctx, rx, y + 5 * u, rw, rh - 10 * u, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = C.good; ctx.fillRect(rx, y + 17 * u, 4 * u, rh - 34 * u);
+        const bw = text(ctx, big, rx + 26 * u, y + rh / 2 + 17 * u, 50 * u, { w: 800 });
+        text(ctx, lab, rx + 46 * u + bw, y + rh / 2 - 2 * u, 19 * u, { w: 650, max: rw - bw - 64 * u });
+        text(ctx, note, rx + 46 * u + bw, y + rh / 2 + 22 * u, 15 * u, { color: C.muted, max: rw - bw - 64 * u }); });
+      // command line, full width
+      const cmdH = 46 * u, my = H - P - 46 * u + 4 * u, handle = $("handle").value.trim();
+      ctx.fillStyle = C.grid; ctx.fillRect(P, my, W - 2 * P, 1.5 * u);
+      ctx.font = `600 ${18 * u}px ui-monospace, SFMono-Regular, Menlo, monospace`; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      ctx.fillText("llama-server -m model.gguf -ngl 99 -c 32768 --jinja -fa on -b 2048 -ub 2048", P, my + cmdH / 2 + 12 * u);
+      text(ctx, handle || `llama.cpp b${d.stack.llama_build} · SYCL / oneAPI`, W - P, my + cmdH / 2 + 12 * u, 16 * u, { w: handle ? 700 : 400, color: handle ? C.ink2 : C.muted, align: "right" });
+    },
+    caption: () => [["Post", "I benchmarked local AI on Intel's 32 GB Arc Pro B65 for two days: 3 models, 2 llama.cpp backends, 7 rounds.\n\nThe setup I'd run, and the five settings that cost the most speed:\n\n[link]\n\nWhat's on your local AI rig?"]] },
 ];
 // ---------- Conclusion helpers ----------
 function sumReady(d) { return !!(d.p05 && d.p05.complete && d.p1 && d.p1.rerun && d.p1.rerun.complete && d.p2 && d.p2.complete && d.p1s && d.p1s.complete
@@ -2515,14 +2553,14 @@ function lockText(card) { return card.lockMsg ? card.lockMsg(D) : `Unlocks when 
 function eligible(card) { return card.models ? card.models(D) : null; }
 function chosen(card) { const ms = eligible(card); return ms ? (ms.find(m => m.name === pick[card.id]) || ms[0]) : null; }
 function render(card, canvas, m) {
-  const [W, H] = SIZES[fmt], u = Math.min(W / 1200, H / 675) * (fmt === "tall" ? 1.15 : 1);
+  const [W, H] = card.size || SIZES[fmt], u = Math.min(W / 1200, H / 675) * (fmt === "tall" && !card.size ? 1.15 : 1);
   canvas.width = W * SCALE; canvas.height = H * SCALE;
   const ctx = canvas.getContext("2d"); ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
   card.draw(ctx, W, H, u, D, m);
 }
 const toast = m => { const t = $("toast"); t.textContent = m; t.style.opacity = 1; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.opacity = 0, 1800); };
 const blob = c => new Promise(r => c.toBlob(r, "image/png"));
-const fname = (card, m) => `b65-${card.id}${m ? "-" + m.name : ""}-${fmt}-${D.run_id}${card.safe && !D.complete ? `-${D.done}of${D.total}` : ""}.png`;
+const fname = (card, m) => `b65-${card.id}${m ? "-" + m.name : ""}-${card.size ? "banner" : fmt}-${D.run_id}${card.safe && !D.complete ? `-${D.done}of${D.total}` : ""}.png`;
 function counter(el) {
   const ta = el.querySelector("textarea"), cc = el.querySelector(".cc"), n = [...ta.value].length;
   cc.textContent = ta.value ? `${n} / 280` : ""; cc.className = "note cc" + (n > 280 ? " over" : "");
@@ -2603,7 +2641,7 @@ function refresh(forceCaption) {
     if (locked) {
       if (!lock) { lock = document.createElement("div"); lock.className = "lock"; el.querySelector(".prev").appendChild(lock); }
       lock.textContent = !D ? "Waiting for a run" : runLocked ? lockText(card) : "Appears once a model finishes its tests";
-      const [W, H] = SIZES[fmt]; cv.width = W; cv.height = H;
+      const [W, H] = card.size || SIZES[fmt]; cv.width = W; cv.height = H;
       const ctx = cv.getContext("2d"); ctx.fillStyle = C.page; ctx.fillRect(0, 0, W, H);
       ta.value = ""; ta.placeholder = runLocked ? "Caption appears with the results." : "Caption appears with the card."; ta.disabled = true;
       vsel.innerHTML = ""; sel.disabled = true; counter(el);
@@ -2647,7 +2685,7 @@ if (Q.get("solo")) {
   if (Q.get("price") !== null) $("price").value = Q.get("price");
   document.querySelector(".viz-root").style.cssText = "padding:0;min-height:0;background:#0d0d0d";
   document.querySelector(".wrap").style.display = "none";
-  const card = CARDS.find(c => c.id === Q.get("card")), [W, H] = SIZES[fmt];
+  const card = CARDS.find(c => c.id === Q.get("card")), [W, H] = (card && card.size) || SIZES[fmt];
   const cv = document.createElement("canvas"); cv.style.cssText = `width:${W}px;height:${H}px;display:block`;
   document.querySelector(".viz-root").appendChild(cv);
   fetch("api/share", { cache: "no-store" }).then(r => r.json()).then(j => {

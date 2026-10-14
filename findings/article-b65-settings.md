@@ -2,7 +2,7 @@
 Article version of recommended-settings.md, for X Articles and LinkedIn articles.
 - Neither editor renders Markdown tables, so there are none. Paste the text section by section.
 - Insert each [IMAGE] from charts/conclusion/ (use the -wide.png versions) where it appears, and delete the marker line.
-- Cover image: b65-sum-recipe-wide.png (X wants 5:2 for an article header; LinkedIn uses 1.91:1, so check the crop).
+- Cover image: b65-sum-banner.png on X (3000×1200, exactly 5:2). LinkedIn's cover is 1.91:1, so use b65-sum-recipe-wide.png there and check the crop.
 - If an editor doesn't offer code blocks, paste the command as its own paragraph.
 - The sources are in recommended-settings.md and the phase findings. Every number here comes from them.
 -->

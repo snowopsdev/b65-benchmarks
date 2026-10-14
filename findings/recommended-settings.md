@@ -12,7 +12,7 @@ This is the conclusion of Phases 0–6 (2026-10-12 to 2026-10-13). Each line nam
 - five settings that cost you
 - which model for what
 
-PNG exports are in `charts/conclusion/`. An article version for X and LinkedIn is in [article-b65-settings.md](article-b65-settings.md).
+A seventh card, `sum-banner`, is a fixed 5:2 header for the X article. PNG exports are in `charts/conclusion/`. An article version for X and LinkedIn is in [article-b65-settings.md](article-b65-settings.md).
 
 ## The short answer
 
