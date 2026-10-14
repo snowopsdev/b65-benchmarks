@@ -645,7 +645,7 @@ def nav_status():
                 p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")),
                 us=state(latest(os.path.join(ROOT, "b65-ubserve", "raw"), r"^us-\d{8}-\d{6}$")),
                 p5=state(latest(os.path.join(ROOT, "b65-phase5", "raw"), r"^p5-\d{8}-\d{6}$")),
-                p6=p6_nav())
+                p6=p6_nav(), p15=p15_nav())
 
 def p6_nav():
     """Phase 6 sidebar dot: the full run if there is one, else the dry run (shown as running/dry)."""
@@ -1024,6 +1024,132 @@ def p6_full():
     except (KeyError, ValueError, OSError): pass
     return res
 
+# --- Phase 1.5: registry lab gates (b65-phase15): native pre-check (p15pre-*) and registry runs in the pinned image (p15reg-*) ---
+P15_REG = os.path.expanduser("~/src/ext/local-ai-registry-20261014")
+P15_CARD = "intel-arc-pro-b65-32gb"
+P15_IMAGE = "ghcr.io/ggml-org/llama.cpp@sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5"
+P15_GATES = ["load", "chat", "reasoning", "tools", "context", "speed"]
+_p15_setup = {"t": 0, "v": None}
+
+def p15_setup():
+    """Docker, group, image, registry branch: cached for 30 s (it shells out)."""
+    import subprocess, grp, getpass
+    if _p15_setup["v"] and time.time() - _p15_setup["t"] < 30: return _p15_setup["v"]
+    def sh(*a):
+        try: r = subprocess.run(a, capture_output=True, text=True, timeout=8); return r.returncode, r.stdout.strip()
+        except Exception as e: return 1, str(e)
+    rc, act = sh("systemctl", "is-active", "docker")
+    try: in_group = getpass.getuser() in grp.getgrnam("docker").gr_mem
+    except KeyError: in_group = False
+    sock = os.access("/var/run/docker.sock", os.W_OK)
+    image = None
+    if sock: image = sh("docker", "image", "inspect", "--format", "{{.Size}}", P15_IMAGE)[0] == 0
+    elif in_group and act == "active":   # this process predates the group change; sg picks it up without a password
+        image = sh("sg", "docker", "-c", f"docker image inspect --format '{{{{.Size}}}}' {P15_IMAGE}")[0] == 0
+    branch = sh("git", "-C", P15_REG, "branch", "--show-current")[1] if os.path.isdir(P15_REG) else None
+    launches = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(P15_REG, "registry", "launches", "*arc-pro-b65*.json")))
+    recipes = []
+    for f in sorted(glob.glob(os.path.join(P15_REG, "registry", "recipes", "intel", P15_CARD, "*.json"))):
+        try: r = json.load(open(f)); pr = r["proof"][0]; recipes.append(dict(file=os.path.basename(f), model=r["model"], at=pr.get("at"), tps=pr.get("tps"), prefill=pr.get("prefill"), gates=pr.get("gates")))
+        except (OSError, ValueError, KeyError, IndexError): pass
+    v = dict(docker=act, in_group=in_group, socket=sock, image=image, image_ref=P15_IMAGE, registry=P15_REG if os.path.isdir(P15_REG) else None, branch=branch,
+             card=os.path.exists(os.path.join(P15_REG, "registry", "cards", "intel", P15_CARD + ".json")), launches=launches, recipes=recipes)
+    _p15_setup.update(t=time.time(), v=v); return v
+
+def p15_live(log_path):
+    """Which lab gate a llama-server is on, from its log: completed requests, the long context prompt, the streamed speed answer."""
+    ln = read_lines(log_path); done, cur, big_done = [], None, False
+    for l in ln:
+        if "launch_slot_" in l: cur = dict(prompt=None, prog=None, n_gen=None, tg=None)
+        elif cur is not None and "prompt processing, n_tokens" in l:
+            m = re.search(r"n_tokens =\s*(\d+), progress = ([\d.]+)", l)
+            if m: cur.update(prompt_n=int(m.group(1)), prog=float(m.group(2)))
+        elif cur is not None and "prompt eval time" in l:
+            m = re.search(r"/\s*(\d+) tokens", l); cur["prompt"] = int(m.group(1)) if m else None
+        elif cur is not None and "n_gen =" in l:
+            m = re.search(r"n_gen =\s*(\d+), tg =\s*([\d.]+)", l)
+            if m: cur.update(n_gen=int(m.group(1)), tg=float(m.group(2)))
+        elif cur is not None and "stop processing" in l:
+            m = re.search(r"n_tokens = (\d+)", l); cur["total"] = int(m.group(1)) if m else None; done.append(cur); cur = None
+    big = lambda r: (r.get("prompt") or r.get("prompt_n") or 0) > 4096
+    big_done = any(big(r) for r in done)
+    loaded = bool(done) or cur is not None or any("model loaded" in l or "listening on" in l for l in ln)
+    if not loaded: stage = "load"
+    elif big_done: stage = "speed"
+    elif cur and (cur.get("prog") is not None and (cur.get("prompt_n") or 0) > 4096): stage = "context"
+    else: stage = ["chat", "reasoning", "tools", "tools", "context"][min(len(done), 4)]
+    live = dict(stage=stage, requests=len(done))
+    if cur:
+        live.update(prog=cur.get("prog") if stage == "context" else None, n_gen=cur.get("n_gen"), tg=cur.get("tg"))
+    if big_done:
+        b = next(r for r in done if big(r)); live["context_tokens"] = b.get("prompt")
+    try: live["age_s"] = round(time.time() - os.path.getmtime(log_path))
+    except OSError: pass
+    return live
+
+def p15_runs(kind):
+    kit = os.path.join(ROOT, "b65-phase15"); base = os.path.join(kit, "raw")
+    pat = r"^p15pre-\d{8}-\d{6}$" if kind == "pre" else r"^p15reg-\d{8}-\d{6}$"
+    runs = sorted(d for d in os.listdir(base) if re.match(pat, d)) if os.path.isdir(base) else []
+    res = dict(kind=kind, state="not started", run_id=None, env={}, models=[], recent=[], elapsed_s=None)
+    if not runs: return res
+    out = os.path.join(base, runs[-1]); res["run_id"] = runs[-1]
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    logf = os.path.join(kit, "precheck.log" if kind == "pre" else "registry_run.log"); log = read_lines(logf)
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and (".sh" in open(f"/proc/{pid}/cmdline").read() or "sg" in open(f"/proc/{pid}/cmdline").read())
+    except OSError: pass
+    finished = os.path.exists(f"{out}/done") or any(l.strip() == f">> done {runs[-1]}" for l in log)
+    res["state"] = "finished" if finished else "running" if alive else "stopped"
+    for k, v in list(env.items()):   # the pre-check wrote "ctx=… models=…" on one line
+        m = re.match(r"^(\S*)\s+models=(.+)$", v)
+        if m: env[k], env["models"] = m.group(1), m.group(2)
+    names = env.get("models", "").split()
+    t0 = None
+    try:
+        from datetime import datetime
+        t0 = datetime.fromisoformat(env["date"]).timestamp()
+        t1 = max([os.path.getmtime(f) for f in glob.glob(f"{out}/*")] or [t0]) if res["state"] != "running" else time.time()
+        res["elapsed_s"] = round(t1 - t0)
+    except (KeyError, ValueError): pass
+    for m in names:
+        row = dict(model=m, status="pending", ok={}, tps=None, prefill=None, context_tokens=None, context_s=None, error=None, live=None, recipe=None)
+        if kind == "pre":
+            try:
+                g = json.load(open(f"{out}/{m}.gates.json")); ev = g.get("evidence") or {}
+                row.update(status="pass" if g["passed"] else "fail", ok=ev.get("ok", {}), tps=(g.get("proof") or {}).get("tps"), prefill=(g.get("proof") or {}).get("prefill"),
+                           context_tokens=(ev.get("context") or {}).get("prompt_tokens"), context_s=(ev.get("context") or {}).get("seconds"), error=g.get("error"),
+                           speed_tokens=(ev.get("speed") or {}).get("tokens_total"), speed_s=(ev.get("speed") or {}).get("seconds_total"))
+            except (OSError, ValueError, KeyError): pass
+        else:
+            evs = sorted(glob.glob(os.path.join(P15_REG, "lab", "runs", f"{P15_CARD}.{m}.*.json")), key=os.path.getmtime)
+            evs = [f for f in evs if not t0 or os.path.getmtime(f) >= t0]
+            if evs:
+                try:
+                    g = json.load(open(evs[-1])); ev = g.get("evidence") or {}; pr = g.get("proof") or {}
+                    row.update(status="pass" if g["passed"] else "fail", ok=ev.get("ok", {}), tps=pr.get("tps"), prefill=pr.get("prefill"),
+                               context_tokens=(ev.get("context") or {}).get("prompt_tokens"), context_s=(ev.get("context") or {}).get("seconds"),
+                               speed_tokens=(ev.get("speed") or {}).get("tokens_total"), speed_s=(ev.get("speed") or {}).get("seconds_total"),
+                               evidence=os.path.relpath(evs[-1], P15_REG))
+                except (OSError, ValueError, KeyError): pass
+            if row["status"] == "pending" and any(l.startswith(f"!! {m}") for l in log):
+                row.update(status="fail", error=next(l[3:] for l in log if l.startswith(f"!! {m}")))
+        sl = f"{out}/{m}.server.log"
+        if row["status"] == "pending" and os.path.exists(sl):
+            row["status"] = "running" if res["state"] == "running" else "stopped"
+            if res["state"] == "running": row["live"] = p15_live(sl)
+        res["models"].append(row)
+    res["recent"] = [l.rstrip()[:220] for l in log if l.strip()][-12:]
+    return res
+
+def p15_full():
+    return dict(setup=p15_setup(), pre=p15_runs("pre"), reg=p15_runs("reg"), gates=P15_GATES)
+
+def p15_nav():
+    f = p15_full(); r = f["reg"] if f["reg"]["run_id"] else f["pre"]
+    if f["reg"]["state"] == "running" or f["pre"]["state"] == "running": return dict(state="running", run_id=(f["reg"] if f["reg"]["state"] == "running" else f["pre"])["run_id"])
+    return dict(state=r["state"], run_id=r["run_id"])
+
 def p6_share():
     f = p6_full(); complete = f["state"] == "finished" and not f["dry"]
     return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], parts=f["parts"], progress=f["progress"],
@@ -1073,7 +1199,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "b65-ubserve", "b65-phase5", "b65-phase6", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "b65-ubserve", "b65-phase5", "b65-phase6", "b65-phase15", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -1154,6 +1280,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p15", "/p15.html"):
+            return self.send(200, open(os.path.join(HERE, "p15.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p15":
+            return self.send(200, json.dumps(dict(p15=p15_full(), now=time.time())).encode(), "application/json")
         if path in ("/p6", "/p6.html"):
             return self.send(200, open(os.path.join(HERE, "p6.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p6":

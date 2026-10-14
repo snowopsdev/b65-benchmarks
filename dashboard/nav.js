@@ -15,6 +15,7 @@
     { key: "us", href: "us", num: "4+", name: "Server at ub 2048", sub: "TTFT at the new default" },
     { key: "p5", href: "p5", num: "5", name: "Open questions", sub: "baseline, short TTFT, cache, Qwen loops" },
     { key: "p6", href: "p6", num: "6", name: "Confirming the recipes", sub: "thinking off, regen/edit, ub 2048 canary" },
+    { key: "p15", href: "p15", num: "1.5", name: "Registry recipes", sub: "local-ai-registry lab gates" },
   ];
   const LINKS = [
     { href: "share", name: "Share cards" },

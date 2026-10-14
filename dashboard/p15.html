@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B65 Bench · Phase 1.5</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --series-1: #2a78d6; --series-1-fill: rgba(42,120,214,0.10);
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --good-text: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --series-1: #3987e5; --series-1-fill: rgba(57,135,229,0.14); --good-text: #0ca30c;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root { min-height: 100vh; background: var(--page); color: var(--text-primary);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+h1 { font-size: 20px; margin: 0; font-weight: 650; }
+.sub { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); font-weight: 600; font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.running .dot { background: var(--good); animation: pulse 1.6s infinite; }
+.finished .dot { background: var(--good); } .stopped .dot { background: var(--warning); }
+@keyframes pulse { 50% { opacity: .3; } }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .04em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile .unit { font-size: 15px; color: var(--text-secondary); font-weight: 500; margin-left: 3px; }
+.tile .note { color: var(--muted); font-size: 12px; }
+.now { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: center; }
+.now .what { font-size: 18px; font-weight: 600; }
+.bar { height: 6px; border-radius: 3px; background: var(--wash); overflow: hidden; grid-column: 1 / -1; }
+.bar > div { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .4s; }
+#chart { position: relative; }
+#chart svg { display: block; width: 100%; height: 240px; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  white-space: nowrap; display: none; font-variant-numeric: tabular-nums; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 13px; }
+td.test { color: var(--text-secondary); white-space: nowrap; width: 1%; }
+.big { font-weight: 650; font-size: 15px; }
+.sd, .meta { color: var(--muted); font-size: 12px; }
+.st { font-size: 12px; display: inline-flex; gap: 4px; align-items: center; color: var(--text-secondary); }
+.st.failed { color: var(--critical); font-weight: 600; }
+.st.running { color: var(--text-primary); font-weight: 600; }
+.cellbar { height: 3px; background: var(--series-1); border-radius: 2px; margin-top: 4px; opacity: .8; }
+details { border-top: 1px solid var(--grid); padding: 8px 0; }
+summary { cursor: pointer; font-weight: 600; }
+pre { white-space: pre-wrap; font: 12px/1.5 ui-monospace, monospace; color: var(--text-secondary); margin: 8px 0 0; }
+.env { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; font-size: 12px; }
+.env div:nth-child(odd) { color: var(--muted); } .env div:nth-child(even) { word-break: break-word; }
+.err { color: var(--critical); }
+a { color: var(--series-1); }
+.charts img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+.foot { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .viz-root { padding: 12px; } th, td { padding: 6px; } .tile .value { font-size: 24px; } }
+</style>
+<style>
+code { font: 12px ui-monospace, monospace; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+td.g, th.g { text-align: center; width: 1%; white-space: nowrap; }
+.gate { display: inline-flex; width: 26px; height: 26px; border-radius: 7px; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  border: 1px solid var(--border); color: var(--muted); }
+.gate.pass { background: rgba(12,163,12,.14); border-color: rgba(12,163,12,.45); color: var(--good-text); }
+.gate.fail { background: rgba(208,59,59,.12); border-color: rgba(208,59,59,.5); color: var(--critical); }
+.gate.done { color: var(--text-secondary); }
+.gate.now { border-color: var(--series-1); color: var(--series-1); animation: pulse 1.6s infinite; }
+.pill { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.pill.pass { color: var(--good-text); border-color: rgba(12,163,12,.45); } .pill.fail { color: var(--critical); border-color: rgba(208,59,59,.5); }
+.pill.running { color: var(--series-1); border-color: var(--series-1); }
+.checks { display: grid; grid-template-columns: 22px 1fr; gap: 6px 8px; align-items: baseline; }
+.checks .i { font-weight: 700; text-align: center; } .checks .ok { color: var(--good-text); } .checks .no { color: var(--critical); } .checks .wait { color: var(--muted); }
+.livebar { height: 4px; border-radius: 2px; background: var(--wash); overflow: hidden; margin-top: 5px; max-width: 220px; }
+.livebar > div { height: 100%; background: var(--series-1); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: 8px; align-items: center; }
+.legend .gate { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; margin-right: 4px; }
+</style>
+<script src="nav.js"></script>
+</head>
+<body>
+<div class="viz-root"><div class="wrap">
+  <header>
+    <h1>Phase 1.5 · registry recipes</h1>
+    <span id="badge" class="badge"><span class="dot"></span><span id="state">connecting…</span></span>
+    <span class="sub" id="runinfo"></span>
+  </header>
+  <div class="card"><h2>What this is</h2><p class="sub" style="margin:0">The <a href="https://github.com/sybil-solutions/local-ai-registry">local-ai-registry</a> lists a recipe for a card only if a run passes six lab gates:
+    <b>load</b>, <b>chat</b>, <b>reasoning</b> (thinking returned separately, 17 × 23 right), <b>tools</b> (calls the tool and uses the result), <b>context</b> (finds a code planted at 85% of the window)
+    and <b>speed</b> (decode ≥ 15 tok/s over the first 30 s of an uncapped answer). The pre-check runs those gates against our native SYCL build; the registry runs use the pinned official image and write the recipe.</p></div>
+  <div class="card"><h2>Setup</h2><div class="checks" id="setup"></div></div>
+  <div class="card" id="pre-card"><h2>Pre-check · native SYCL llama-server (b11574), 32K, recommended settings, thinking on</h2>
+    <div class="sub" id="pre-info" style="margin-bottom:8px"></div><div style="overflow-x:auto"><table id="pre"></table></div></div>
+  <div class="card" id="reg-card"><h2>Registry runs · pinned server-intel image (b11515) · <code>lab.py try --on endpoint</code></h2>
+    <div class="sub" id="reg-info" style="margin-bottom:8px"></div><div style="overflow-x:auto"><table id="reg"></table></div></div>
+  <div class="legend"><span><span class="gate pass">✓</span>passed</span><span><span class="gate fail">✗</span>failed</span>
+    <span><span class="gate now">●</span>running now</span><span><span class="gate done">·</span>answered, scored when the model finishes</span></div>
+  <div class="card"><h2>Recipes written (registry branch, not pushed)</h2><div style="overflow-x:auto"><table id="recipes"></table></div></div>
+  <div class="card"><h2>Logs</h2>
+    <details><summary>Pre-check log</summary><pre id="pre-log"></pre></details>
+    <details><summary>Registry run log</summary><pre id="reg-log"></pre></details>
+    <details><summary>Environment</summary><div class="env" id="env"></div></details>
+    <div class="sub" style="margin-top:8px">Files: <a href="files/b65-phase15/">b65-phase15/</a> · kit README: <a href="files/b65-phase15/README.md">README.md</a></div></div>
+  <div class="foot" id="foot"></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (v, d=1) => v == null || v === "" || isNaN(v) ? "–" : Number(v).toFixed(d);
+const DISPLAY = { "qwen3.8-27b": "Qwen3.8 27B", "gemma-4-31b-qat": "Gemma 4 31B QAT", "gemma-4-31b": "Gemma 4 31B QAT", "muse-glimmer": "Muse Glimmer 28B", "muse-glimmer-30b": "Muse Glimmer 28B" };
+const QUANT = { "qwen3.8-27b": "Q4_K_M", "gemma-4-31b-qat": "Q4_0", "gemma-4-31b": "Q4_0", "muse-glimmer": "Q4_K_M", "muse-glimmer-30b": "Q4_K_M" };
+const STAGE = { load: "loading the model", chat: "chat", reasoning: "reasoning", tools: "tool call", context: "context recall", speed: "speed (uncapped answer)" };
+const hm = s => s == null ? "–" : s < 3600 ? `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s` : `${Math.floor(s / 3600)} h ${String(Math.floor(s % 3600 / 60)).padStart(2, "0")} min`;
+let pollMs = 5000;
+function gateCell(r, g, gates) {
+  if (r.status === "pass" || r.status === "fail") { const ok = (r.ok || {})[g]; return `<span class="gate ${ok ? "pass" : "fail"}" title="${g}: ${ok ? "passed" : "failed"}">${ok ? "✓" : "✗"}</span>`; }
+  if (r.status === "running" && r.live) { const i = gates.indexOf(r.live.stage), j = gates.indexOf(g);
+    if (j < i) return `<span class="gate done" title="${g}: answered">·</span>`;
+    if (j === i) return `<span class="gate now" title="${g}: running now">●</span>`; }
+  return `<span class="gate" title="${g}: pending">–</span>`;
+}
+function liveText(r) {
+  const L = r.live; if (!L) return "";
+  let t = `<b>${STAGE[L.stage] || L.stage}</b>`;
+  if (L.stage === "context" && L.prog != null && L.prog < 1) t += ` · reading the prompt, ${Math.round(L.prog * 100)}%<div class="livebar"><div style="width:${L.prog * 100}%"></div></div>`;
+  else if (L.n_gen != null) t += ` · ${L.n_gen.toLocaleString()} tokens at ${fmt(L.tg, 1)} tok/s${L.stage === "context" ? " (thinking about the code)" : ""}`;
+  if (L.age_s != null && L.age_s > 120) t += ` <span class="err">· no log output for ${hm(L.age_s)}</span>`;
+  return `<div class="meta" style="font-size:12px;color:var(--text-secondary)">${t}</div>`;
+}
+function table(id, run, gates, reg) {
+  if (!run.run_id) { $(id).innerHTML = `<tbody><tr><td class="sub">${reg ? "Not started. Waits on Docker and the image (see Setup)." : "Not started."}</td></tr></tbody>`; return; }
+  $(id).innerHTML = `<thead><tr><th>Model</th><th>Result</th>${gates.map(g => `<th class="g">${g}</th>`).join("")}<th class="num">Decode</th><th class="num">Prefill</th><th class="num">Context prompt</th><th class="num">Speed answer</th></tr></thead><tbody>` +
+    run.models.map(r => `<tr><td><b>${esc(DISPLAY[r.model] || r.model)}</b><div class="meta">${QUANT[r.model] || ""}</div>${r.status === "running" ? liveText(r) : ""}${r.error ? `<div class="err" style="font-size:12px">${esc(r.error)}</div>` : ""}${r.evidence ? `<div class="meta"><code>${esc(r.evidence)}</code></div>` : ""}</td>
+      <td><span class="pill ${r.status}">${{ pass: "✓ pass", fail: "✗ fail", running: "running", pending: "pending", stopped: "stopped" }[r.status] || r.status}</span></td>
+      ${gates.map(g => `<td class="g">${gateCell(r, g, gates)}</td>`).join("")}
+      <td class="num"><span class="big">${fmt(r.tps, 1)}</span><div class="meta">tok/s · need ≥ 15</div></td>
+      <td class="num">${r.prefill != null ? r.prefill.toLocaleString() : "–"}<div class="meta">tok/s</div></td>
+      <td class="num">${r.context_tokens != null ? r.context_tokens.toLocaleString() : "–"}<div class="meta">${r.context_s != null ? fmt(r.context_s, 1) + " s" : "tokens"}</div></td>
+      <td class="num">${r.speed_tokens != null ? r.speed_tokens.toLocaleString() : "–"}<div class="meta">${r.speed_s != null ? hm(Math.round(r.speed_s)) : "tokens"}</div></td></tr>`).join("") + "</tbody>";
+}
+function info(run) {
+  if (!run.run_id) return "";
+  const st = { running: "running", finished: "finished", stopped: "stopped (incomplete)" }[run.state] || run.state, n = run.models.filter(r => r.status === "pass").length, f = run.models.filter(r => r.status === "fail").length;
+  return `<code>${esc(run.run_id)}</code> · ${st} · ${hm(run.elapsed_s)} · ${n} passed${f ? `, ${f} failed` : ""} of ${run.models.length}`;
+}
+function render(j) {
+  const d = j.p15, S = d.setup, run = d.reg.state === "running" ? d.reg : d.pre.state === "running" ? d.pre : d.reg.run_id ? d.reg : d.pre, st = run.state;
+  $("badge").className = "badge " + (st === "not started" ? "stopped" : st);
+  $("state").textContent = (run === d.reg ? "Registry run · " : "Pre-check · ") + ({ running: "running", finished: "finished", stopped: "stopped", "not started": "not started" }[st] || st);
+  $("runinfo").textContent = run.run_id ? `run ${run.run_id}` : "";
+  pollMs = st === "running" ? 5000 : 20000;
+  const c = (ok, label, note) => `<div class="i ${ok === true ? "ok" : ok === false ? "no" : "wait"}">${ok === true ? "✓" : ok === false ? "✗" : "?"}</div><div>${label}${note ? ` <span class="sub" style="font-size:12px">· ${note}</span>` : ""}</div>`;
+  $("setup").innerHTML = [
+    c(!!S.registry, "Registry clone", S.registry ? `<code>${esc(S.registry)}</code>, branch <code>${esc(S.branch)}</code>` : "missing"),
+    c(S.card, "B65 card entry", "<code>intel-arc-pro-b65-32gb</code>: 32 GB, 608 GB/s"),
+    c(S.launches.length === 3, `B65 launches (${S.launches.length} of 3)`, S.launches.map(l => `<code>${esc(l)}</code>`).join(", ")),
+    c(S.docker === "active", "Docker service running", S.docker === "active" ? "" : `${esc(S.docker)}: AJ runs <code>b65-phase15/setup-docker.sh</code> (needs sudo)`),
+    c(S.in_group, "snowdesk in the docker group", S.in_group ? "" : "added by setup-docker.sh"),
+    c(S.image == null ? null : S.image, "Image pulled", S.image == null ? "checked once Docker is running and you're in the docker group" : `<code>server-intel-b11515</code> ${S.image ? "" : "not pulled yet"}`),
+  ].join("");
+  table("pre", d.pre, d.gates, false); table("reg", d.reg, d.gates, true);
+  $("pre-info").innerHTML = info(d.pre); $("reg-info").innerHTML = info(d.reg);
+  $("recipes").innerHTML = S.recipes.length ? `<thead><tr><th>Recipe</th><th>Date</th><th>Gates</th><th class="num">Decode</th><th class="num">Prefill</th></tr></thead><tbody>` +
+    S.recipes.map(r => `<tr><td><code>intel/intel-arc-pro-b65-32gb/${esc(r.file)}</code></td><td>${esc(r.at)}</td><td>${esc(r.gates)}</td><td class="num">${fmt(r.tps, 1)}</td><td class="num">${r.prefill ?? "–"}</td></tr>`).join("") + "</tbody>"
+    : `<tbody><tr><td class="sub">None yet. A registry run writes one per model only when all six gates pass.</td></tr></tbody>`;
+  $("pre-log").textContent = (d.pre.recent || []).join("\n"); $("reg-log").textContent = (d.reg.recent || []).join("\n");
+  $("env").innerHTML = Object.entries(run.env || {}).map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("");
+  $("foot").textContent = `Updated ${new Date(j.now * 1000).toLocaleTimeString()} · refreshes every ${pollMs / 1000} s`;
+}
+async function poll() { try { render(await (await fetch("api/p15", { cache: "no-store" })).json()); } catch (e) { $("state").textContent = "dashboard offline"; } setTimeout(poll, pollMs); }
+poll();
+</script>
+</body>
+</html>
