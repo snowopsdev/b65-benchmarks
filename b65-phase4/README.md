@@ -27,3 +27,9 @@ pp512, pp16384, tg128 and tg128@d16384 were all within 0.1% of the baseline. 0 f
 - **Finalized by hand:** `canary.sh` was edited while running (the `vk_index` line), which broke its last lines after the tests were done. The summary and `done` were then written by hand; see `NOTE-finalized-by-hand.txt`.
 - `compare4.py` now leaves tests without a baseline (pp4096) out of the drift table.
 - `raw/p4-recheck-20261013-154203`: Muse Vulkan pp16384 at ub 2048 vs 512, rerun in a fresh process. It reproduced (272.0 vs 429.7 tok/s).
+
+## Phase 6 update: the canary at ub 2048
+- `./canary.sh` now runs its main rows at `UB=2048` (the SYCL default since Phase 4) and compares them with `baseline_ub2048.json`. That file comes from Phase 5 part A, run `p5-20261013-171039`. `UB=512 ./canary.sh` compares with the original `baseline.json`.
+- `compare4.py` is Forge's Phase 6 version, which picks the baseline by each row's ub. Local change: the micro-batch table only appears when there's something to compare.
+- Fix: the Vulkan loop in `UBCHECK` used `UB` as its loop variable, which overwrote the main ub for the next model. It's now `VUB`.
+- The `/p4` page and its card follow the run's ub (`ub=` in env.txt; runs without it ran at 512).

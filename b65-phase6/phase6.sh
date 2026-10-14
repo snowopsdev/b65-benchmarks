@@ -37,7 +37,7 @@ stop() { kill $SPID 2>/dev/null || true; wait $SPID 2>/dev/null || true; sleep 3
 # A: Phase 3 coding set (10 tasks), thinking off, 3 tries each (greedy + 2 seeded at temp 0.3). Qwen and Muse.
 if [[ " $PARTS " == *" A "* ]]; then echo ">> part A coding, thinking off"
   for M in qwen3.8-27b muse-glimmer; do
-    server sycl $M nothink -fa on -b 2048 -ub 2048 --reasoning-budget 0 || continue
+    echo ">> coding $M"; server sycl $M nothink -fa on -b 2048 -ub 2048 --reasoning-budget 0 || continue
     python3 p6tools.py coding --port $PORT --model $M --out "$OUT/A_coding.csv" --tries $([ "$DRY" = 1 ] && echo 1 || echo 3) $([ "$DRY" = 1 ] && echo --limit 2) || true
     stop; done; fi
 
@@ -56,10 +56,12 @@ if [[ " $PARTS " == *" B "* ]]; then echo ">> part B regenerate/edit"
 if [[ " $PARTS " == *" C "* ]]; then echo ">> part C canary ub2048"; echo "model,test,tok_s" > "$OUT/C_canary.csv"
   for M in qwen3.8-27b muse-glimmer; do F=$(mfile $M); [ -n "$F" ] || continue
     for T in "pp512|-p 512 -n 0" "pp16384|-p 16384 -n 0" "tg128|-p 0 -n 128" "tg128@d16384|-p 0 -n 128 -d 16384"; do
-      lab=${T%%|*}; a=${T#*|}; [ "$DRY" = 1 ] && [[ $lab == *16384* ]] && continue
+      lab=${T%%|*}; a=${T#*|}; [ "$DRY" = 1 ] && [[ $lab == *16384* ]] && continue; echo ">> bench $M $lab"
       "$SYCL_BIN/llama-bench" -m "$F" -ngl 99 -fa 1 -r $REPS -b 2048 -ub 2048 $a -o jsonl > "$OUT/C.$M.$lab.jsonl" 2> "$OUT/C.$M.$lab.log" || { echo "$M,$lab,FAIL" >> "$OUT/C_canary.csv"; continue; }
-      ts=$(python3 -c "import json,sys;print(round([json.loads(l) for l in open(sys.argv[1]) if l.startswith('{')][-1]['avg_ts'],2))" "$OUT/C.$M.$lab.jsonl")
+      # local: strict device check (gpu_info names the B65), and a bad jsonl is a FAIL row instead of killing the run under set -e
+      grep -qiE '"gpu_info": *"[^"]*(B65|BMG|Arc)' "$OUT/C.$M.$lab.jsonl" && ! grep -qi nvidia "$OUT/C.$M.$lab.jsonl" || { echo "!! C $M $lab did not run on the B65, aborting"; exit 2; }
+      ts=$(python3 -c "import json,sys;print(round([json.loads(l) for l in open(sys.argv[1]) if l.startswith('{')][-1]['avg_ts'],2))" "$OUT/C.$M.$lab.jsonl") || ts=FAIL
       echo "$M,$lab,$ts" >> "$OUT/C_canary.csv"; echo "  $M $lab $ts"; done; done; fi
 
-python3 p6tools.py summary "$OUT" > "$OUT/phase6_summary.md"; cat "$OUT/phase6_summary.md"; touch "$OUT/done"
+python3 p6tools.py summary "$OUT" > "$OUT/phase6_summary.md"; cat "$OUT/phase6_summary.md"; date -Iseconds > "$OUT/done"
 echo "Done: $OUT  -> upload: tar czf $RUN_ID.tar.gz -C raw $RUN_ID"

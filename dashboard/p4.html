@@ -113,7 +113,7 @@ code { font: 12px ui-monospace, monospace; }
   </div>
 
   <div class="card">
-    <h2>Drift vs baseline (SYCL, flash attention on, ub 512 · 5 reps · board W over the timed reps)</h2>
+    <h2>Drift vs baseline (SYCL, flash attention on · ub 512 vs the Phase 2 baseline, ub 2048 vs the Phase 5 baseline · 5 reps · board W over the timed reps)</h2>
     <div style="overflow-x:auto"><table id="drift"></table></div>
     <p class="sub" id="flags" style="margin:10px 0 0"></p>
   </div>
@@ -151,9 +151,9 @@ function render(j) {
   $("now-card").style.display = st === "running" ? "" : "none"; pollMs = st === "running" ? 5000 : 30000;
   $("now-count").textContent = d.total ? `${d.done} of ${d.total} tests done` : ""; $("now-bar").style.width = (d.total ? 100 * d.done / d.total : 0) + "%";
   const c = d.current; $("now-what").textContent = c ? `${DISPLAY[c.model] || c.model} · ${c.backend} · ${TL[c.test] || c.test} · ub ${c.ub}` : "Between tests"; $("now-phase").textContent = "";
-  const dr = d.rows.filter(r => r.backend === "sycl" && r.ub === "512" && r.baseline != null);
-  $("drift").innerHTML = `<thead><tr><th>Model</th><th>Test</th><th class="num">Baseline</th><th class="num">Now</th><th class="num">Drift</th><th class="num">Board W</th><th>Flag</th></tr></thead><tbody>` +
-    dr.map(r => `<tr><td>${esc(DISPLAY[r.model] || r.model)}</td><td class="test">${TL[r.test] || r.test}</td><td class="num">${fmt(r.baseline, 2)}</td>
+  const dr = d.rows.filter(r => r.backend === "sycl" && r.baseline != null);
+  $("drift").innerHTML = `<thead><tr><th>Model</th><th>Test</th><th class="num">ub</th><th class="num">Baseline</th><th class="num">Now</th><th class="num">Drift</th><th class="num">Board W</th><th>Flag</th></tr></thead><tbody>` +
+    dr.map(r => `<tr><td>${esc(DISPLAY[r.model] || r.model)}</td><td class="test">${TL[r.test] || r.test}</td><td class="num">${r.ub}</td><td class="num">${fmt(r.baseline, 2)}</td>
       <td class="num">${r.status === "ok" ? `<span class="big">${fmt(r.tok_s, 2)}</span>` : stat(r)}</td><td class="num">${r.drift != null ? (r.drift >= 0 ? "+" : "") + fmt(r.drift, 1) + "%" : "–"}</td>
       <td class="num">${fmt(r.watts)}</td><td>${r.status === "ok" ? (r.flag ? `<span class="flag">!! more than 5%</span>` : `<span class="okk">ok</span>`) : r.status === "fail" ? `<span class="flag">!! failed</span>` : ""}</td></tr>`).join("") + "</tbody>";
   const done = dr.filter(r => r.status === "ok" || r.status === "fail").length;
@@ -167,7 +167,7 @@ function render(j) {
         <td class="num">${a ? (a.status === "ok" ? fmt(a.tok_s, a.tok_s > 100 ? 1 : 2) : stat(a)) : "–"}</td><td class="num">${z.status === "ok" ? `<span class="big">${fmt(z.tok_s, z.tok_s > 100 ? 1 : 2)}</span>` : stat(z)}</td>
         <td class="num">${ch == null ? "–" : `<span class="delta ${ch >= 0 ? "up" : "down"}">${ch >= 0 ? "+" : ""}${fmt(ch, 1)}%</span>`}</td></tr>`; }).join("") + "</tbody>";
   $("env").innerHTML = Object.entries(d.env).map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("");
-  $("baseline").textContent = d.baseline_src ? `Baseline: ${d.baseline_src}` : "";
+  $("baseline").textContent = [d.baseline_src && `ub 512 baseline: ${d.baseline_src}`, d.baseline2_src && `ub 2048 baseline: ${d.baseline2_src}`].filter(Boolean).join(" · ");
   $("foot").textContent = `Updated ${new Date(j.now * 1000).toLocaleTimeString()} · refreshes every ${pollMs / 1000} s`;
 }
 async function poll() {

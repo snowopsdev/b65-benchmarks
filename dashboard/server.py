@@ -644,7 +644,24 @@ def nav_status():
                 p3=state(latest(os.path.join(ROOT, "b65-phase3", "raw"), r"^p3-\d{8}-\d{6}$")),
                 p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")),
                 us=state(latest(os.path.join(ROOT, "b65-ubserve", "raw"), r"^us-\d{8}-\d{6}$")),
-                p5=state(latest(os.path.join(ROOT, "b65-phase5", "raw"), r"^p5-\d{8}-\d{6}$")))
+                p5=state(latest(os.path.join(ROOT, "b65-phase5", "raw"), r"^p5-\d{8}-\d{6}$")),
+                p6=p6_nav())
+
+def p6_nav():
+    """Phase 6 sidebar dot: the full run if there is one, else the dry run (shown as running/dry)."""
+    base = os.path.join(ROOT, "b65-phase6", "raw")
+    full = sorted(d for d in os.listdir(base) if re.match(r"^p6-\d{8}-\d{6}$", d)) if os.path.isdir(base) else []
+    if full: out = os.path.join(base, full[-1])
+    else:
+        dry = sorted(d for d in os.listdir(base) if re.match(r"^p6-dry-\d{8}-\d{6}$", d)) if os.path.isdir(base) else []
+        if not dry: return dict(state="not started")
+        out = os.path.join(base, dry[-1])
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip()
+    try: alive = bool(pid) and ".sh" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: alive = False
+    st = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    if not full and st != "running": st = "dry"
+    return dict(state=st, run_id=os.path.basename(out))
 
 def p1s_full():
     return p1_full("b65-phase1s", r"^p1s-(dry-)?\d{8}-\d{6}$", "p1s-run.log", sycl=True)
@@ -781,22 +798,24 @@ def p3_share():
     return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], done=f["done"], total=f["total"], models=models, sections=f["sections"],
                 ids={k: len(v) for k, v in f["ids"].items()}, writing=writing)
 
-def p4_plan(models, ubcheck, vk):
+def p4_plan(models, ubcheck, vk, main_ub="512"):
     plan = []
     for m in models:
-        plan += [("sycl", m, t, "512") for t in ("pp512", "pp16384", "tg128", "tg128@d16384")]
+        plan += [("sycl", m, t, main_ub) for t in ("pp512", "pp16384", "tg128", "tg128@d16384")]
         if ubcheck:
-            plan += [("sycl", m, "pp4096", "512"), ("sycl", m, "pp4096", "2048"), ("sycl", m, "pp16384", "2048"), ("sycl", m, "tg128@d16384", "2048")]
+            plan += [k for k in [("sycl", m, "pp4096", "512"), ("sycl", m, "pp4096", "2048"), ("sycl", m, "pp16384", "2048"), ("sycl", m, "tg128@d16384", "2048")] if k not in plan]
             if vk: plan += [("vulkan", m, "pp16384", "512"), ("vulkan", m, "pp16384", "2048")]
     return plan
 
 def p4_full():
-    """Phase 4 canary (b65-phase4/raw/p4-*): SYCL fa1 ub512 drift vs baseline.json, plus the optional micro-batch check."""
+    """Canary (b65-phase4/raw/p4-*): SYCL fa1 drift, ub 512 rows vs baseline.json and ub 2048 rows vs baseline_ub2048.json (Phase 6), plus the optional micro-batch check."""
     kit = os.path.join(ROOT, "b65-phase4"); base = os.path.join(kit, "raw")
     runs = [d for d in os.listdir(base) if re.match(r"^p4-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
     try: baseline = json.load(open(os.path.join(kit, "baseline.json")))
     except (OSError, ValueError): baseline = {}
-    res = dict(state="not started", run_id=None, env={}, rows=[], current=None, done=0, total=0, dry=False, baseline_src=baseline.get("_source"), flags=0,
+    try: baseline2 = json.load(open(os.path.join(kit, "baseline_ub2048.json")))
+    except (OSError, ValueError): baseline2 = {}
+    res = dict(state="not started", run_id=None, env={}, rows=[], current=None, done=0, total=0, dry=False, baseline_src=baseline.get("_source"), baseline2_src=baseline2.get("_source"), flags=0,
                runs=sorted((r for r in runs if not r.startswith("p4-dry-")), reverse=True))
     if not runs: return res
     run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
@@ -810,9 +829,9 @@ def p4_full():
     got = {(r["backend"], r["model"], r["test"], r["ub"]): r for r in csv.DictReader(open(f"{out}/canary.csv"))} if os.path.exists(f"{out}/canary.csv") else {}
     log = read_lines(os.path.join(kit, "p4-run.log")); last = [l[3:].split() for l in log if l.startswith(">> ")]
     cur = tuple(last[-1][:3]) + (last[-1][3][2:],) if res["state"] == "running" and last else None
-    plan = p4_plan(models, ub, vk)
+    plan = p4_plan(models, ub, vk, env.get("ub", "512"))   # runs before Phase 6 have no ub= line: they ran at 512
     for k in plan:
-        r = got.get(k); b = baseline.get(k[1], {}).get(k[2]) if k[0] == "sycl" and k[3] == "512" else None
+        r = got.get(k); b = {"512": baseline, "2048": baseline2}.get(k[3], {}).get(k[1], {}).get(k[2]) if k[0] == "sycl" else None
         row = dict(backend=k[0], model=k[1], test=k[2], ub=k[3], baseline=b, status="pending")
         if r:
             if r["tok_s"] in ("FAIL", ""): row["status"] = "fail"
@@ -947,6 +966,69 @@ def p5_share():
                 progress={k: len(f[k]) for k in ("A", "B", "C", "D")}, **({k: f[k] for k in ("A", "B", "C", "D")} if complete else {}),
                 ref=f["ref"] if complete else {})
 
+def p6_full():
+    """Phase 6 (b65-phase6/raw/p6-*): A Qwen/Muse coding with thinking off, B regenerate/edit with checkpoints on/off, C canary at ub 2048."""
+    kit = os.path.join(ROOT, "b65-phase6"); base = os.path.join(kit, "raw")
+    runs = [d for d in os.listdir(base) if re.match(r"^p6-(dry-)?\d{8}-\d{6}$", d)] if os.path.isdir(base) else []
+    res = dict(state="not started", run_id=None, env={}, dry=False, A=[], B=[], C=[], current=None, parts=[], ref={}, progress=[], live=None, recent=[], elapsed_s=None)
+    try: res["ref"]["baseline_ub2048"] = {k: v for k, v in json.load(open(os.path.join(kit, "baseline_ub2048.json"))).items() if not k.startswith("_")}
+    except (OSError, ValueError): pass
+    p3 = os.path.join(ROOT, "b65-phase3", "raw", "p3-20261013-135609")
+    for m in ("qwen3.8-27b", "muse-glimmer"):
+        try: res["ref"].setdefault("p3_coding", {})[m] = {c["id"]: dict(passed=bool(c["pass"]), tokens=c.get("tokens"), s=c.get("s")) for c in json.load(open(os.path.join(p3, f"{m}.quality.json")))["coding"]}
+        except (OSError, ValueError, KeyError): pass
+    if not runs: return res
+    run = max(runs, key=lambda r: r[-15:]); out = os.path.join(base, run); res.update(run_id=run, dry="-dry-" in run)
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip(); alive = False
+    try: alive = bool(pid) and "phase6" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: pass
+    res["state"] = "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    res["parts"] = (env.get("parts_list") or "A B C").split()
+    for k, fn_ in (("A", "A_coding.csv"), ("B", "B_regen.csv"), ("C", "C_canary.csv")):
+        f = os.path.join(out, fn_)
+        if os.path.exists(f): res[k] = list(csv.DictReader(open(f)))
+    log = read_lines(os.path.join(kit, "p6-dry.log" if res["dry"] else "p6-run.log"))
+    marks = [l[3:] for l in log if l.startswith(">> ")]
+    if res["state"] == "running" and marks:
+        part = next((m.split()[1] for m in reversed(marks) if m.startswith("part ")), None)
+        tail = [l for l in log if l.strip()][-1].strip()
+        res["current"] = dict(part=part, step=marks[-1], last=tail[:160])
+    res["recent"] = [l.rstrip()[:200] for l in log if l.strip()][-10:] if res["state"] == "running" else []
+    dry = res["dry"]; tries = 1 if dry else 3; ntask = 2 if dry else 10; turns = 2 if dry else 6
+    per_cfg = turns + 5; totals = dict(A=2 * ntask * tries, B=8 * per_cfg, C=4 if dry else 8)
+    seen = [m.split()[1] for m in marks if m.startswith("part ")]
+    cur = res["current"]["part"] if res["current"] else None
+    res["progress"] = [dict(part=p, done=len(res[p]), total=totals[p],
+                            status="done" if res["state"] == "finished" or (p in seen and p != cur) else "running" if p == cur else "pending" if res["state"] == "running" else "skipped")
+                       for p in res["parts"] if p in totals]
+    if res["state"] == "running" and cur in ("A", "B"):
+        logs = glob.glob(os.path.join(out, "*.server.log"))
+        if logs:
+            sl = max(logs, key=os.path.getmtime); age = time.time() - os.path.getmtime(sl)
+            ln = read_lines(sl); i = max((k for k, l in enumerate(ln) if "stop processing" in l), default=-1)
+            ticks = [t for t in (re.search(r"n_gen =\s*(\d+), tg =\s*([\d.]+)", l) for l in ln[i + 1:]) if t]
+            live = dict(server=os.path.basename(sl).replace(".server.log", ""), n_gen=int(ticks[-1].group(1)) if ticks and age < 30 else None,
+                        tg=float(ticks[-1].group(2)) if ticks and age < 30 else None)
+            if cur == "A":
+                k = len(res["A"]) % (ntask * tries); live.update(task=f"c{k // tries + 1:02d}", try_=k % tries + 1, tries=tries, cap=4096)
+            else:
+                k = len(res["B"]) % per_cfg; steps = [f"turn{t}" for t in range(1, turns + 1)] + ["regen", "regen2", "edit-last", "edit-early", "back-to-original"]
+                live.update(step=steps[k] if k < len(steps) else "?", step_i=k + 1, steps=per_cfg)
+            res["live"] = live
+    try:
+        from datetime import datetime
+        t0 = datetime.fromisoformat(env["date"]).timestamp()
+        t1 = os.path.getmtime(f"{out}/done") if os.path.exists(f"{out}/done") else time.time()
+        res["elapsed_s"] = round(t1 - t0)
+    except (KeyError, ValueError, OSError): pass
+    return res
+
+def p6_share():
+    f = p6_full(); complete = f["state"] == "finished" and not f["dry"]
+    return dict(state=f["state"], complete=complete, dry=f["dry"], run_id=f["run_id"], parts=f["parts"], progress=f["progress"],
+                **({k: f[k] for k in ("A", "B", "C")} if complete else {}), ref=f["ref"] if complete else {})
+
 def p1g_share():
     """Gemma server rerun for share cards: statuses only until it finishes, then medians per config."""
     g = p1g_full()
@@ -979,7 +1061,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p5=p5_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p5=p5_share(), p6=p6_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -991,7 +1073,7 @@ def share_status():
 
 
 # --- read-only file access to benchmark outputs (tailnet only via tailscale serve) ---
-FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "b65-ubserve", "b65-phase5", "results.csv", "README.md")
+FILE_ROOTS = ("findings", "dist", "charts", "raw", "b65-phase05", "b65-phase1", "b65-phase1s", "b65-gemmadiag", "b65-phase2", "b65-phase3", "b65-phase4", "b65-ubserve", "b65-phase5", "b65-phase6", "results.csv", "README.md")
 INLINE = (".png", ".csv", ".txt", ".md", ".json", ".jsonl", ".log", ".sha256")
 
 def safe_path(rel):
@@ -1072,6 +1154,10 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "gd.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/gd":
             return self.send(200, json.dumps(dict(gd=gd_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p6", "/p6.html"):
+            return self.send(200, open(os.path.join(HERE, "p6.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p6":
+            return self.send(200, json.dumps(dict(p6=p6_full(), now=time.time())).encode(), "application/json")
         if path in ("/p5", "/p5.html"):
             return self.send(200, open(os.path.join(HERE, "p5.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p5":

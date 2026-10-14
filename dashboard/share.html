@@ -1837,10 +1837,10 @@ const CARDS = [
 
   { id: "p4-drift", name: "Canary: drift vs baseline", safe: false, group: "p4", ready: d => !!(d.p4 && d.p4.complete), lockMsg: d => `Unlocks when the canary finishes (${(d.p4 || {}).done || 0} of ${(d.p4 || {}).total || 0} tests)`,
     draw(ctx, W, H, u, d) {
-      const p = d.p4, wide = W > H, rows = p.rows.filter(r => r.backend === "sycl" && r.ub === "512" && r.baseline != null);
+      const p = d.p4, wide = W > H, mainUb = (p.rows.find(r => r.backend === "sycl") || {}).ub || "512", rows = p.rows.filter(r => r.backend === "sycl" && r.ub === mainUb && r.baseline != null);
       const ms = d.models.filter(m => rows.some(r => r.model === m.name)), tests = ["pp512", "pp16384", "tg128", "tg128@d16384"], tl = { pp512: "Prefill 512", pp16384: "Prefill 16K", tg128: "Decode @ 0", "tg128@d16384": "Decode @ 16K" };
       const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 4", title: p.flags ? `${p.flags} test${p.flags > 1 ? "s" : ""} moved more than 5%` : "Nothing moved",
-        sub: "canary vs the Phase 2 baseline · SYCL, flash attention on · same versions · 5 runs each · flag at ±5%", results: true, foot: p1foot(viewP1S(d)) });
+        sub: `canary vs the ${mainUb === "2048" ? "Phase 5 baseline (-ub 2048)" : "Phase 2 baseline"} · SYCL, flash attention on · same versions · 5 runs each · flag at ±5%`, results: true, foot: p1foot(viewP1S(d)) });
       const labW = Math.min(230 * u, b.w * 0.26), cw = (b.w - labW) / tests.length, headH = 50 * u, rh = Math.min(wide ? 150 * u : 260 * u, (b.h - headH) / ms.length);
       tests.forEach((t, j) => text(ctx, tl[t], b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
       ms.forEach((m, i) => { const y = b.y + headH + rh * i, cy = y + rh / 2;
@@ -1853,7 +1853,7 @@ const CARDS = [
           text(ctx, `${r.baseline.toFixed(r.baseline > 100 ? 0 : 2)} → ${r.tok_s.toFixed(r.tok_s > 100 ? 0 : 2)} tok/s`, x, cy + 22 * u, 14 * u, { color: C.ink2, align: "center", max: cw - 10 * u }); });
       });
     },
-    caption: d => { const p = d.p4, rows = p.rows.filter(r => r.backend === "sycl" && r.ub === "512" && r.baseline != null && r.status === "ok"), mx = Math.max(...rows.map(r => Math.abs(r.drift)));
+    caption: d => { const p = d.p4, mainUb = (p.rows.find(r => r.backend === "sycl") || {}).ub || "512", rows = p.rows.filter(r => r.backend === "sycl" && r.ub === mainUb && r.baseline != null && r.status === "ok"), mx = Math.max(...rows.map(r => Math.abs(r.drift)));
       return [["Post", `Phase 4 canary on the Arc Pro B65: ${rows.length} tests rerun against the pinned baseline (SYCL, llama.cpp b11574).\n\n${p.flags ? `${p.flags} moved more than 5%.` : `Nothing moved more than 5%. Largest drift: ${mx.toFixed(1)}%.`}\n\nThat's the bar every future driver or llama.cpp update has to clear. What should it catch first?`]]; } },
 
   { id: "p4-ub", name: "Canary: the micro-batch check", safe: false, group: "p4",
@@ -2022,9 +2022,105 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
     caption: d => { const p = d.p5, vs = [...new Set(p.D.map(r => r.variant))], pr = v => { const rs = p.D.filter(r => r.variant === v); return `${rs.filter(r => r.pass === "1").length}/${rs.length}`; };
       const lab = { "think-4k": "4K cap", "think-8k": "8K cap", "think-16k": "16K cap", "think-8k-pp1.5": "8K + presence penalty", "think-8k-qwen-sampler": "8K + Qwen's sampler", nothink: "thinking off" };
       return [["Post", `Qwen3.8 27B ran out of tokens thinking about a simple Python task. 5 tries per fix, passes:\n\n${vs.map(v => `• ${lab[v] || v}: ${pr(v)}`).join("\n")}\n\nDo you leave thinking on for coding?`]]; } },
+  // ---------- Phase 6: confirming the recipes ----------
+  { id: "p6-preview", name: "Phase 6: confirming the recipes", safe: true, group: "p6",
+    draw(ctx, W, H, u, d) {
+      const p = d.p6 || {}, wide = W > H, done = !!p.complete;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 6", title: done ? "Phase 6: the answers" : "Two recipes to prove",
+        sub: "Phase 5's answers rested on thin evidence. Phase 6 tests them properly.", live: p.state === "running" && !p.dry, results: done, foot: p1foot(viewP1S(d)) });
+      const qs = [["A", "Coding with thinking off", "Qwen and Muse on all 10 Phase 3 coding tasks, 3 tries each, thinking off. Does Qwen still score 9/10?"],
+                  ["B", "Regenerate and edit", "resend, edit the last message, edit turn 3, go back: is checkpoints off safe beyond append-only chats?"],
+                  ["C", "The new canary", "Qwen and Muse at -ub 2048 against the Phase 5 baseline"]];
+      if (done) { const a = p6answers(d); qs.forEach((q, i) => q[2] = a[i]); }
+      const cols = wide ? 3 : 1, cw = (b.w - 24 * u * (cols - 1)) / cols, rows = Math.ceil(qs.length / cols), rh = (b.h - 16 * u * (rows - 1)) / rows;
+      qs.forEach(([k, t, v], i) => { const x = b.x + (cw + 24 * u) * (i % cols), y = b.y + (rh + 16 * u) * Math.floor(i / cols);
+        rr(ctx, x, y, cw, rh, 14 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+        ctx.beginPath(); ctx.arc(x + 36 * u, y + 40 * u, 18 * u, 0, 7); ctx.fillStyle = C.series[i % 3]; ctx.fill();
+        text(ctx, k, x + 36 * u, y + 47 * u, 19 * u, { w: 800, color: C.page, align: "center" });
+        text(ctx, t, x + 66 * u, y + 47 * u, 21 * u, { w: 750, max: cw - 80 * u });
+        ctx.font = `400 ${16 * u}px ${FONT}`; wrap(ctx, v, cw - 44 * u).slice(0, 6).forEach((l, j) => text(ctx, l, x + 22 * u, y + 92 * u + j * 22 * u, 16 * u, { color: C.ink2 })); });
+    },
+    caption: d => (d.p6 || {}).complete ? [["Post", `Phase 6 on the Arc Pro B65:\n\n${p6answers(d).map((a, i) => `${"ABC"[i]}) ${a.split(". ")[0]}.`).join("\n")}\n\nWhat should Phase 7 test?`]]
+      : [["Post", `Phase 6 on the Arc Pro B65 puts two recipes to the test:\n\nA) Qwen coding with thinking off, all 10 tasks\nB) regenerate and edit with context checkpoints off\nC) the canary at the new -ub 2048 baseline\n\nWhich one do you expect to fail?`]] },
+
+  { id: "p6-coding", name: "A: coding with thinking off", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.A || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p6, wide = W > H, ms = d.models.filter(m => p.A.some(r => r.model === m.name)), tasks = [...new Set(p.A.map(r => r.task))], p3 = p.ref.p3_coding || {};
+      const med = a => { a = a.filter(x => !isNaN(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 6 · A", title: "Coding with thinking off",
+        sub: "Phase 3's 10 Python tasks · 3 tries each (greedy + 2 seeded) · tests run on the code · SYCL", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(250 * u, b.w * 0.24), statW = wide ? 330 * u : 0, gridW = b.w - labW - statW, rh = (b.h - 30 * u) / ms.length;
+      const cell = Math.min(gridW / tasks.length - 8 * u, wide ? 54 * u : 64 * u);
+      ms.forEach((m, i) => { const y = b.y + rh * i, rs = p.A.filter(r => r.model === m.name), g = rs.filter(r => r.try === "0"), ref = p3[m.name] || {};
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, y + 24 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m))); text(ctx, m.display, b.x + 20 * u, y + 36 * u, 20 * u, { w: 700, max: labW - 24 * u });
+        text(ctx, "thinking off", b.x + 20 * u, y + 60 * u, 15 * u, { color: C.ink2 });
+        tasks.forEach((t, j) => { const x = b.x + labW + j * (gridW / tasks.length), cy = y + 22 * u, x2 = rs.filter(r => r.task === t), ps = x2.filter(r => r.pass === "1").length;
+          rr(ctx, x, cy, cell, cell, 6 * u, ps === x2.length ? C.good : ps ? "#b8860b" : C.critical);
+          text(ctx, `${ps}/${x2.length}`, x + cell / 2, cy + cell / 2 + 6 * u, 15 * u, { w: 800, align: "center", color: C.page });
+          text(ctx, t, x + cell / 2, cy + cell + 18 * u, 12 * u, { color: C.muted, align: "center" });
+          if (ref[t]) text(ctx, ref[t].passed ? "P3 ✓" : "P3 ✗", x + cell / 2, cy + cell + 34 * u, 12 * u, { color: ref[t].passed ? C.ink2 : C.critical, align: "center", w: ref[t].passed ? 400 : 700 }); });
+        const sx = wide ? b.x + labW + gridW + 20 * u : b.x + labW, sy = wide ? y + 40 * u : y + cell + 92 * u, refPass = Object.values(ref).filter(x => x.passed).length;
+        text(ctx, `greedy ${g.filter(r => r.pass === "1").length}/${g.length} · all ${rs.filter(r => r.pass === "1").length}/${rs.length}`, sx, sy, 20 * u, { w: 750 });
+        text(ctx, `median ${Math.round(med(rs.map(r => +r.completion_tokens)))} tokens · Phase 3 (thinking on): ${refPass}/${Object.keys(ref).length}, median ${Math.round(med(Object.values(ref).map(x => +x.tokens)))}`, sx, sy + 24 * u, 14 * u, { color: C.ink2, max: wide ? statW - 20 * u : gridW }); });
+      text(ctx, "Green = passed every try, amber = some, red = none. P3 = Phase 3's single greedy try with thinking on and a 2K cap.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.p6, s = m => { const rs = p.A.filter(r => r.model === m.name), g = rs.filter(r => r.try === "0"); return `${g.filter(r => r.pass === "1").length}/${g.length} greedy, ${rs.filter(r => r.pass === "1").length}/${rs.length} over 3 tries`; };
+      const ms = d.models.filter(m => p.A.some(r => r.model === m.name));
+      return [["Post", `Turning thinking off for coding on a local 27B: Phase 3's 10 Python tasks, Intel Arc Pro B65.\n\n${ms.map(m => `• ${short(m)}: ${s(m)}`).join("\n")}\n\nWith thinking on, Qwen scored 9/10 and Muse 10/10. Do you code with thinking on?`]]; } },
+
+  { id: "p6-regen", name: "B: regenerate and edit", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.B || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p6, wide = W > H, ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], steps = ["regen", "edit-last", "edit-early", "back-to-original"], sl = { regen: "Regenerate", "edit-last": "Edit last msg", "edit-early": "Edit turn 3", "back-to-original": "Back to original" };
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 6 · B", title: "Regenerate and edit: what gets re-read?",
+        sub: "6-turn chat (~9.5K tokens) · tokens the server reprocessed, and seconds to first token · red = most of the chat re-read", results: true, foot: (p1foot(viewP1S(d)) || "") + ` · Vulkan: Mesa ${d.stack.mesa}` });
+      const labW = Math.min(wide ? 320 * u : 300 * u, b.w * 0.32), cw = (b.w - labW) / steps.length, headH = 34 * u, rh = (b.h - headH - 24 * u) / ks.length;
+      steps.forEach((s2, j) => text(ctx, sl[s2], b.x + labW + cw * j + cw / 2, b.y + 20 * u, 15 * u, { w: 700, color: C.ink2, align: "center", max: cw - 8 * u }));
+      ks.forEach((k, i) => { const [m, be, cfg] = k.split("|"), mm = d.models.find(x => x.name === m), y = b.y + headH + rh * i, by = Object.fromEntries(p.B.filter(r => `${r.model}|${r.backend}|${r.cfg}` === k).map(r => [r.step, r]));
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        text(ctx, `${short(mm)} · ${be === "sycl" ? "SYCL" : "Vulkan"}`, b.x, y + rh / 2 - 2 * u, 17 * u, { w: 700, max: labW - 10 * u });
+        text(ctx, cfg === "ckpt0" ? "checkpoints off" : "checkpoints on", b.x, y + rh / 2 + 16 * u, 13 * u, { color: C.ink2 });
+        steps.forEach((s2, j) => { const r = by[s2], x = b.x + labW + cw * j; if (!r) { text(ctx, "–", x + cw / 2, y + rh / 2 + 6 * u, 16 * u, { color: C.muted, align: "center" }); return; }
+          const n = +r.prompt_n_processed, full = n >= 0.8 * +r.ctx_tokens, t = +r.ttft_s;
+          rr(ctx, x + 6 * u, y + 5 * u, cw - 12 * u, rh - 10 * u, 6 * u, full ? "rgba(208,59,59,0.22)" : "rgba(255,255,255,0.04)");
+          text(ctx, n.toLocaleString(), x + cw / 2, y + rh / 2 + 1 * u, Math.min(20 * u, rh * 0.42), { w: 800, align: "center", color: full ? C.critical : C.ink });
+          text(ctx, `${t >= 100 ? Math.round(t) : t.toFixed(1)} s`, x + cw / 2, y + rh / 2 + Math.min(18 * u, rh * 0.36), Math.min(13 * u, rh * 0.28), { align: "center", color: C.ink2 }); }); });
+      text(ctx, "Tokens reprocessed (big) and seconds to first token (small). Edit turn 3 has to redo turns 3–6 (~6K) by design.", b.x, b.y + b.h + 4 * u, 13 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const p = d.p6, ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = ks.filter(k => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && ["regen", "edit-last", "back-to-original"].includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens));
+      const off = bad.filter(k => k.endsWith("|ckpt0")).length;
+      return [["Post", `Regenerate and edit in llama-server on Intel Arc, context checkpoints on vs off, ${ks.length} setups:\n\n${bad.length ? `${bad.length} re-read most of a ~9.5K chat to regenerate, edit the last message or go back${off ? `, ${off} of them with checkpoints off` : ""}.` : "None re-read the whole ~9.5K chat to regenerate, edit the last message or go back."}\n\nDo you regenerate replies often?`]]; } },
+
+  { id: "p6-canary", name: "C: canary at ub 2048", safe: false, group: "p6", ready: d => !!(d.p6 && d.p6.complete && (d.p6.C || []).length), lockMsg: () => "Unlocks when Phase 6 finishes",
+    draw(ctx, W, H, u, d) {
+      const p = d.p6, wide = W > H, ref = p.ref.baseline_ub2048 || {}, tests = ["pp512", "pp16384", "tg128", "tg128@d16384"], tl = { pp512: "Prefill 512", pp16384: "Prefill 16K", tg128: "Decode @ 0", "tg128@d16384": "Decode @ 16K" };
+      const ms = d.models.filter(m => p.C.some(r => r.model === m.name)), all = p.C.filter(r => r.tok_s !== "FAIL" && (ref[r.model] || {})[r.test]).map(r => Math.abs(100 * (r.tok_s / ref[r.model][r.test] - 1)));
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 6 · C", title: all.length && Math.max(...all) <= 5 ? "The new canary: nothing moved" : "The new canary",
+        sub: "llama-bench, SYCL, flash attention on, -ub 2048 · 5 runs · vs the Phase 5 baseline · flag at ±5%", results: true, foot: p1foot(viewP1S(d)) });
+      const labW = Math.min(230 * u, b.w * 0.26), cw = (b.w - labW) / tests.length, headH = 46 * u, rh = Math.min(wide ? 150 * u : 260 * u, (b.h - headH) / ms.length);
+      tests.forEach((t, j) => text(ctx, tl[t], b.x + labW + cw * j + cw / 2, b.y + 22 * u, 16 * u, { w: 700, color: C.ink2, align: "center" }));
+      ms.forEach((m, i) => { const y = b.y + headH + rh * i, cy = y + rh / 2; ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, cy - 16 * u, 12 * u, 12 * u, 3 * u, mcolor(d.models.indexOf(m))); text(ctx, m.display, b.x + 20 * u, cy - 4 * u, 19 * u, { w: 700, max: labW - 28 * u });
+        tests.forEach((t, j) => { const r = p.C.find(x => x.model === m.name && x.test === t), x = b.x + labW + cw * j + cw / 2, base = (ref[m.name] || {})[t];
+          if (!r || r.tok_s === "FAIL" || !base) { text(ctx, r ? "failed" : "–", x, cy, 16 * u, { color: r ? C.critical : C.muted, align: "center" }); return; }
+          const v = +r.tok_s, dr = 100 * (v / base - 1);
+          text(ctx, `${dr >= 0 ? "+" : "−"}${Math.abs(dr).toFixed(1)}%`, x, cy, 30 * u, { w: 800, align: "center", color: Math.abs(dr) <= 5 ? C.good : C.critical });
+          text(ctx, `${base} → ${v} tok/s`, x, cy + 24 * u, 13 * u, { color: C.ink2, align: "center" }); }); });
+    },
+    caption: d => { const p = d.p6, ref = p.ref.baseline_ub2048 || {}, rs = p.C.filter(r => r.tok_s !== "FAIL" && (ref[r.model] || {})[r.test]), dd = rs.map(r => Math.abs(100 * (r.tok_s / ref[r.model][r.test] - 1))), mx = dd.length ? Math.max(...dd) : 0;
+      return [["Post", `New canary for the Arc Pro B65 at -ub 2048: ${rs.length} llama-bench tests against the Phase 5 baseline, every one within ${Math.max(0.1, Math.ceil(mx * 10) / 10).toFixed(1)}%.\n\nIt reruns after every driver, kernel or llama.cpp update. What should it watch for next?`]]; } },
 ];
 const cell = (d, m, t) => d.cells.find(c => c.model === m.name && c.test === t);
 const short = m => m.display.split(" ")[0];
+function p6answers(d) {  // one-line results for the Phase 6 preview card, computed from the data
+  const p = d.p6, ref = p.ref.baseline_ub2048 || {}, q = p.A.filter(r => r.model.startsWith("qwen")), qg = q.filter(r => r.try === "0"), mu = p.A.filter(r => r.model.startsWith("muse"));
+  const ks = [...new Set(p.B.map(r => `${r.model}|${r.backend}|${r.cfg}`))], bad = ks.filter(k => p.B.some(r => `${r.model}|${r.backend}|${r.cfg}` === k && ["regen", "edit-last", "back-to-original"].includes(r.step) && +r.prompt_n_processed >= 0.8 * +r.ctx_tokens));
+  const cc = p.C.filter(r => r.tok_s !== "FAIL" && (ref[r.model] || {})[r.test]), mx = cc.length ? Math.max(...cc.map(r => Math.abs(100 * (r.tok_s / ref[r.model][r.test] - 1)))) : 0;
+  const pass = rs => rs.filter(r => r.pass === "1").length;
+  return [`Qwen ${pass(qg)}/${qg.length} greedy, ${pass(q)}/${q.length} over all tries; Muse ${pass(mu)}/${mu.length}.`,
+    bad.length ? `${bad.length} of ${ks.length} setups re-read most of the chat to regenerate, edit the last message or go back: ${bad.map(k => k.split("|").slice(0, 3).join(" ").replace("gemma-4-31b-qat", "Gemma").replace("qwen3.8-27b", "Qwen").replace("muse-glimmer", "Muse").replace("ckpt0", "ckpt off").replace("ckpt-default", "ckpt on")).join(", ")}.` : `No setup re-read the whole chat to regenerate, edit the last message or go back.`,
+    `All ${cc.length} tests within ${Math.max(0.1, Math.ceil(mx * 10) / 10).toFixed(1)}% of the Phase 5 baseline.`];
+}
 function p5answers(d) {  // one-line results for the preview card, computed from the data
   const p = d.p5, ref = p.ref.p4_ub2048 || {}, med = a => { a = a.sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
   const drift = Math.max(...p.A.filter(r => ref[`${r.model}|${r.test}`] && r.tok_s !== "FAIL").map(r => Math.abs(100 * (r.tok_s / ref[`${r.model}|${r.test}`] - 1))));
@@ -2215,6 +2311,7 @@ const SHARE_PHASES = [
   { key: "p4", label: "Phase 4", name: "Canary", href: "p4", st: d => d.p4 || {} },
   { key: "us", label: "Phase 4+", name: "Server at ub 2048", href: "us", st: d => d.us || {} },
   { key: "p5", label: "Phase 5", name: "Open questions", href: "p5", st: d => d.p5 || {} },
+  { key: "p6", label: "Phase 6", name: "Confirming the recipes", href: "p6", st: d => d.p6 || {} },
 ];
 const groupOf = card => card.group || "p0";
 let tab = null;

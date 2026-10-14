@@ -4,16 +4,22 @@ import argparse, csv, json, os, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import quality as Q, p5tools as P
 
+SYSMSG = {"role": "system", "content": "Reply with only one ```python code block containing the full solution. No explanation."}
+
 def coding(a):
     tasks = json.load(open("tasks/coding.json"))[: a.limit or None]
-    H = ["model", "task", "try", "pass", "finish_reason", "completion_tokens", "seconds", "err"]
+    H = ["model", "task", "try", "pass", "finish_reason", "completion_tokens", "seconds", "err", "reasoning_chars"]   # local: reasoning_chars shows whether thinking was really off
     for t in tasks:
         for i in range(a.tries):
-            body = {"messages": [{"role": "user", "content": t["prompt"]}], "max_tokens": 4096, "temperature": 0 if i == 0 else 0.3,
+            # local: the same system message as Phase 3's coding section (quality.py), so the scores compare like for like
+            body = {"messages": [SYSMSG, {"role": "user", "content": t["prompt"]}], "max_tokens": 4096, "temperature": 0 if i == 0 else 0.3,
                     "seed": 2000 + i, "chat_template_kwargs": {"enable_thinking": False}}
-            t0 = time.time(); d = json.load(P.post(a.port, "/v1/chat/completions", body, timeout=1800)); s = time.time() - t0
+            t0 = time.time()
+            try: d = json.load(P.post(a.port, "/v1/chat/completions", body, timeout=1800))   # local: one failed request is a fail, not a lost model
+            except Exception as e: d = {"choices": [{"message": {"content": ""}, "finish_reason": f"error {e}"[:80]}]}
+            s = time.time() - t0
             m = d["choices"][0]["message"]; ok, err = Q.run_test(Q.code_from(m.get("content") or ""), t["test"])
-            P.append(a.out, H, [a.model, t["id"], i, int(ok), d["choices"][0].get("finish_reason"), d.get("usage", {}).get("completion_tokens"), round(s, 1), err.replace("\n", " ")[:200]])
+            P.append(a.out, H, [a.model, t["id"], i, int(ok), d["choices"][0].get("finish_reason"), d.get("usage", {}).get("completion_tokens"), round(s, 1), err.replace("\n", " ")[:200], len(m.get("reasoning_content") or "")])
             print(f"  {a.model} {t['id']} try {i}: {'PASS' if ok else 'FAIL'} {d.get('usage',{}).get('completion_tokens')} tok {s:.0f}s", flush=True)
 
 def regen(a):
@@ -24,7 +30,7 @@ def regen(a):
         tt, _, tim, txt = P.stream(a.port, "/v1/chat/completions", {"messages": msgs, "max_tokens": 64, "temperature": 0, "cache_prompt": True,
                                                                    "chat_template_kwargs": {"enable_thinking": False}})
         P.append(a.out, H, a.label.split(",") + [step, tim.get("cache_n", 0) + tim.get("prompt_n", 0), tim.get("prompt_n", ""), round(tt or -1, 3), round(tim.get("prompt_ms", -1), 1)])
-        print(f"  {a.label} {step}: reprocessed={tim.get('prompt_n')} ttft={tt:.2f}s", flush=True); return Q.strip_think(txt)
+        print(f"  {a.label} {step}: reprocessed={tim.get('prompt_n')} ttft={(tt or -1):.2f}s", flush=True); return Q.strip_think(txt)
     users = [f"Turn {t} notes:\n{block}\nQuestion {t}: summarize the main risk in these notes." for t in range(1, a.turns + 1)]
     msgs = [sysm]
     for t, u in enumerate(users, 1):
