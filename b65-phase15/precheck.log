@@ -1,0 +1,15 @@
+run_id=p15pre-20261014-131018
+date=2026-10-14T13:10:18-04:00
+kernel=7.2.5-3-omarchy
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.31.39395.13-1 
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32583 MiB free)
+lab=/home/snowdesk/src/ext/local-ai-registry-20261014/lab/lab.py lab_commit=7c15d9cab8b6d4312418b5df24e156c81307252a
+ctx=32768 models=qwen3.8-27b gemma-4-31b-qat muse-glimmer
+>> server qwen3.8-27b ctx 32768
+>> qwen3.8-27b: PASS  load=y chat=y reasoning=y tools=y context=y speed=y  tps=23.8 prefill=620
+>> server gemma-4-31b-qat ctx 32768
+>> gemma-4-31b-qat: PASS  load=y chat=y reasoning=y tools=y context=y speed=y  tps=21.8 prefill=444
+>> server muse-glimmer ctx 32768
+>> muse-glimmer: PASS  load=y chat=y reasoning=y tools=y context=y speed=y  tps=25.4 prefill=131
+>> done p15pre-20261014-131018

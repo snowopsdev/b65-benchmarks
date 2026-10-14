@@ -1,0 +1,34 @@
+ghcr.io/ggml-org/llama.cpp@sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5: Pulling from ggml-org/llama.cpp
+528ea8389025: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+1107c55af8d1: Pulling fs layer
+b2d913202870: Pulling fs layer
+8dfa815280c4: Pulling fs layer
+3f6bfc12a8df: Pulling fs layer
+60f7b8925664: Pulling fs layer
+8f749622a3f0: Pulling fs layer
+ef852a656105: Pulling fs layer
+f8d5d3c402ea: Pulling fs layer
+4f4fb700ef54: Download complete
+8dfa815280c4: Download complete
+b2d913202870: Download complete
+60f7b8925664: Download complete
+528ea8389025: Download complete
+1107c55af8d1: Download complete
+ef852a656105: Download complete
+ef852a656105: Pull complete
+8f749622a3f0: Download complete
+60f7b8925664: Pull complete
+528ea8389025: Pull complete
+3f6bfc12a8df: Download complete
+8f749622a3f0: Pull complete
+f8d5d3c402ea: Download complete
+f8d5d3c402ea: Pull complete
+3f6bfc12a8df: Pull complete
+1107c55af8d1: Pull complete
+b2d913202870: Pull complete
+4f4fb700ef54: Pull complete
+8dfa815280c4: Pull complete
+Digest: sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5
+Status: Downloaded newer image for ghcr.io/ggml-org/llama.cpp@sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5
+ghcr.io/ggml-org/llama.cpp@sha256:86b37d266ce85b485127adea68c9dc6d04d0ec9a64b0979844d5bbd8d66c53c5

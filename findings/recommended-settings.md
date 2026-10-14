@@ -69,11 +69,13 @@ Use flash attention off, ub 512, and `--ctx-checkpoints 0` for Gemma.
 - **Idle:** about 45 W with a model loaded, and 43 W empty.
 - All figures are board power, not wall power.
 
+## In the registry
+All three models pass local-ai-registry's six lab gates on these settings at 32K, in the official server-intel image (21.4–25.2 tok/s); the recipes are on a local branch, not yet submitted ([Phase 1.5](phase15.md)).
+
 ## Not covered
 - **Muse with thinking off:** no working switch was found.
 - **Qwen's 32K regression on SYCL:** untested against SYCL tuning variables.
 - **Gemma's ~1.1 s request floor on SYCL:** unexplained.
 - **The PCIe link:** the card sits in a 4.0 x4 chipset slot, and its effect wasn't measured (it should mainly affect load time).
 - **Other engines:** vLLM on XPU wasn't attempted.
-- **Phase 1.5:** the registry recipes are still blocked on @0xSero.
 - **Quality sets:** small and self-made. They're sanity checks, not leaderboards.

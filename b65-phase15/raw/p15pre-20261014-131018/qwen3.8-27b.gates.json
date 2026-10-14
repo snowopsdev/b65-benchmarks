@@ -1,0 +1,58 @@
+{
+ "label": "qwen3.8-27b",
+ "ctx": 32768,
+ "passed": true,
+ "proof": {
+  "gates": "load chat reasoning tools context speed",
+  "tps": 23.8,
+  "prefill": 620,
+  "served": "qwen3.8-27b"
+ },
+ "evidence": {
+  "ok": {
+   "load": true,
+   "chat": true,
+   "reasoning": true,
+   "tools": true,
+   "context": true,
+   "speed": true
+  },
+  "chat": {
+   "content": "red, yellow, blue",
+   "finish": "stop"
+  },
+  "reasoning": {
+   "thinking_chars": 127,
+   "content": "391"
+  },
+  "tools": {
+   "call": [
+    {
+     "type": "function",
+     "function": {
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Paris\"}"
+     },
+     "id": "EKed75LzYENczFEehs5QkB2NNMdepjK2"
+    }
+   ],
+   "reply": "It's currently **17\u00b0C** in Paris with **overcast** skies. \ud83c\udf25\ufe0f",
+   "finish": "stop",
+   "calls_again": 0,
+   "thinking_chars": 344
+  },
+  "context": {
+   "prompt_tokens": 25782,
+   "seconds": 41.6,
+   "content": "58213"
+  },
+  "speed": {
+   "window_s": 30,
+   "tokens_total": 16177,
+   "seconds_total": 770.3
+  }
+ },
+ "error": null,
+ "seconds": 828.5,
+ "lab_sha256": "d23f8f52a1a21c52b4077822cfc542758cbc3172c95878f2ce118aaa08c89162"
+}

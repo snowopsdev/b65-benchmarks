@@ -16,6 +16,7 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 | 4+ | llama-server at the new SYCL default -ub 2048 (Qwen, Muse) | `b65-ubserve/raw/us-20261013-161926` | [ubserve.md](ubserve.md) |
 | 5 | Open questions: ub 2048 canary baseline, Gemma short prompts, chat cache/checkpoints, Qwen thinking | `b65-phase5/raw/p5-20261013-171039` | [phase5.md](phase5.md) |
 | 6 | Qwen/Muse coding with thinking off; regenerate/edit with checkpoints on/off; canary at ub 2048 | `b65-phase6/raw/p6-20261013-211819` | [phase6.md](phase6.md) |
+| 1.5 | local-ai-registry's six lab gates: native pre-check, then `lab.py try` in the official server-intel image (3 recipes, local branch) | `b65-phase15/raw/p15pre-20261014-131018`, `p15reg-20261014-141612` | [phase15.md](phase15.md) |
 | 1S diag | Gemma SYCL server prefill: micro-batch, checkpoints, ctx, swa-full, FA | `b65-gemmadiag/raw/gd-20261013-123933` | [gemma-sycl-diag.md](gemma-sycl-diag.md) |
 
 Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`; `p6-dry-20261013-205752`) are kept for the record and aren't used in any findings.

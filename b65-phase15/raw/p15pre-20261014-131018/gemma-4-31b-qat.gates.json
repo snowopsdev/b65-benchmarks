@@ -1,0 +1,58 @@
+{
+ "label": "gemma-4-31b-qat",
+ "ctx": 32768,
+ "passed": true,
+ "proof": {
+  "gates": "load chat reasoning tools context speed",
+  "tps": 21.8,
+  "prefill": 444,
+  "served": "gemma-4-31b-qat"
+ },
+ "evidence": {
+  "ok": {
+   "load": true,
+   "chat": true,
+   "reasoning": true,
+   "tools": true,
+   "context": true,
+   "speed": true
+  },
+  "chat": {
+   "content": "Red, Yellow, Blue",
+   "finish": "stop"
+  },
+  "reasoning": {
+   "thinking_chars": 214,
+   "content": "391"
+  },
+  "tools": {
+   "call": [
+    {
+     "type": "function",
+     "function": {
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Paris\"}"
+     },
+     "id": "pTNp3qSYnLqxJ6Q3Wh0jfB56InkOv3el"
+    }
+   ],
+   "reply": "The current weather in Paris is 17\u00b0C and overcast.",
+   "finish": "stop",
+   "calls_again": 0,
+   "thinking_chars": 0
+  },
+  "context": {
+   "prompt_tokens": 25746,
+   "seconds": 58.0,
+   "content": "58213"
+  },
+  "speed": {
+   "window_s": 30,
+   "tokens_total": 1214,
+   "seconds_total": 59.9
+  }
+ },
+ "error": null,
+ "seconds": 140.3,
+ "lab_sha256": "d23f8f52a1a21c52b4077822cfc542758cbc3172c95878f2ce118aaa08c89162"
+}

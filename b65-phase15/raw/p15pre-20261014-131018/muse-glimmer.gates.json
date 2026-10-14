@@ -1,0 +1,58 @@
+{
+ "label": "muse-glimmer",
+ "ctx": 32768,
+ "passed": true,
+ "proof": {
+  "gates": "load chat reasoning tools context speed",
+  "tps": 25.4,
+  "prefill": 131,
+  "served": "muse-glimmer"
+ },
+ "evidence": {
+  "ok": {
+   "load": true,
+   "chat": true,
+   "reasoning": true,
+   "tools": true,
+   "context": true,
+   "speed": true
+  },
+  "chat": {
+   "content": "red, blue, yellow",
+   "finish": "stop"
+  },
+  "reasoning": {
+   "thinking_chars": 322,
+   "content": "391"
+  },
+  "tools": {
+   "call": [
+    {
+     "type": "function",
+     "function": {
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Paris\"}"
+     },
+     "id": "xuQOuv4MojKlrG6pS0nAQovyGqS5ACgD"
+    }
+   ],
+   "reply": "Paris is currently 17\u00b0C with overcast skies.\n",
+   "finish": "stop",
+   "calls_again": 0,
+   "thinking_chars": 219
+  },
+  "context": {
+   "prompt_tokens": 21127,
+   "seconds": 161.7,
+   "content": "58213"
+  },
+  "speed": {
+   "window_s": 30,
+   "tokens_total": 3973,
+   "seconds_total": 160.4
+  }
+ },
+ "error": null,
+ "seconds": 348.5,
+ "lab_sha256": "d23f8f52a1a21c52b4077822cfc542758cbc3172c95878f2ce118aaa08c89162"
+}
