@@ -1,0 +1,2 @@
+[lab 16:05:57] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 325 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-128k-arc-pro-b65.128k.20261014T200557.json
+[lab 16:05:57] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.128k.json (590 bytes)

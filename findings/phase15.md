@@ -1,10 +1,10 @@
 # Arc Pro B65: Phase 1.5 findings (registry recipes)
 
-Runs on 2026-10-14. All three models pass the six lab gates of [local-ai-registry](https://github.com/sybil-solutions/local-ai-registry), both on our native SYCL build and in the pinned official image, so the B65 has three recipes ready on a local registry branch. Nothing is pushed; opening the PR is AJ's call.
+Runs on 2026-10-14. All three models pass the six lab gates of [local-ai-registry](https://github.com/sybil-solutions/local-ai-registry), both on our native SYCL build and in the pinned official image, so the B65 has three 32K recipes, now in [PR #260](https://github.com/sybil-solutions/local-ai-registry/pull/260) with the card and its hardware photo. The same three also pass at 64K and 128K (six more recipes, on a local branch).
 
 - **Unblocked by the registry itself:** Phase 1.5 waited on @0xSero about llama.cpp recipes. The registry merged a llama.cpp SYCL recipe for the Arc B390 on 2026-10-10 (`a8e64af`), so llama.cpp counts.
 - **Not the recipe kit's own target:** the kit's first target (Qwen3.8-Flash-Next, experts in RAM) needs 68 GB free RAM and an NVMe table; this machine has 48 GB.
-- **Kit:** `b65-phase15/` (see its README). Registry clone `~/src/ext/local-ai-registry-20261014`, branch `b65-arc-pro-recipes`, commit `77e44e5` on top of upstream `7c15d9c`.
+- **Kit:** `b65-phase15/` (see its README). Registry clone `~/src/ext/local-ai-registry-20261014`: branch `b65-arc-pro-recipes` (`77e44e5` recipes, `473e8f7` photo; pushed to the `snowopsdev` fork for PR #260) and `b65-arc-pro-longctx` (`6458604`, 64K/128K, on top of it, not pushed).
 
 ## The gates
 load · chat · reasoning (thinking returned separately, 17 × 23 = 391) · tools (calls `get_weather` for Paris, then uses the result) · context (finds a code planted at 85% of the window) · speed (decode ≥ 15 tok/s over the first 30 s of an uncapped answer, empty context, one user).
@@ -30,13 +30,33 @@ load · chat · reasoning (thinking returned separately, 17 × 23 = 391) · tool
 2. **The registry's "prefill" is not prefill speed.** It divides the context prompt by the whole request time, thinking included: the recipes say Qwen 716, Muse 503, Gemma 385 tok/s, but the same Muse prompt gave 131 in the pre-check because it thought for longer before answering. For real prefill numbers use Phase 4+ ([ubserve.md](ubserve.md)).
 3. **The speed gate's uncapped answer is long for Qwen:** 11.6–16.2K tokens (9–13 min) for "a detailed 600-word story". Only the first 30 s count, so it doesn't change the result; it does make Qwen's run the slowest.
 
-## Recipes (local registry branch, not pushed)
+## Longer contexts (`p15reg-20261014-154648`)
+Same image, flags and weights; only `--ctx-size` changes (launch ids `…-64k-…`/`…-128k-…`). All six pass; the whole run took 53 min.
+
+| Model | Context | Gates | Decode (tok/s) | Context prompt | Context request | Registry "prefill" | Speed answer |
+|---|---|---|---|---|---|---|---|
+| Qwen3.8 27B Q4_K_M | 128K | **6/6** | **23.6** | 106,294 tokens | 182.8 s | 581 | 7,146 tokens, 327 s |
+| | 64K | **6/6** | **23.6** | 52,625 | 83.0 s | 634 | 14,179 tokens, 684 s |
+| Gemma 4 31B QAT Q4_0 | 128K | **6/6** | **21.4** | 106,258 | 326.9 s | 325 | 1,320 tokens, 65 s |
+| | 64K | **6/6** | **21.4** | 52,589 | 139.4 s | 377 | 1,317 tokens, 69 s |
+| Muse Glimmer 28B Q4_K_M | 128K | **6/6** | **25.1** | 87,285 | 130.8 s | 667 | 1,269 tokens, 52 s |
+| | 64K | **6/6** | **25.3** | 43,186 | 212.1 s | 204 | 3,590 tokens, 146 s |
+
+1. **Decode doesn't change with the window** (the speed gate runs on an empty context): 23.6 / 21.4 / 25.1–25.3 tok/s at 32K, 64K and 128K.
+2. **Everything fits in 32 GB at 128K**, Gemma included: its KV state at 128K is 10.7 GB (the server log's prompt-state size), plus 17.7 GB of weights.
+3. **Muse's 128K is its trained maximum** (`context_length` 131072); Qwen and Gemma are trained to 256K, not tried here.
+4. The 64K Muse "prefill" (204) is again thinking time: the request took longer at 64K than at 128K.
+5. With these in the catalog, the B65's picks become Qwen 128K, Gemma 128K, Muse 64K. `make check` passes (SDKs agree on 317 recipes).
+
+## Recipes
 - `registry/cards/intel/intel-arc-pro-b65-32gb.json`: Intel Arc Pro B65, 32 GB, 608 GB/s (published spec).
 - Three frozen launches `registry/launches/llama.cpp-sycl-<model>-32k-arc-pro-b65.json` and three recipes in `registry/recipes/intel/intel-arc-pro-b65-32gb/`, each with its proof (`on: owner`, `launch_sha256`, gates, tps, prefill).
 - `make` regenerated `dist/catalog.json` and the plugin exports; the catalog lists the B65 with picks Qwen, Gemma, Muse. `make check` passes (320 recipes; SDKs agree on 64 cards).
 - Evidence JSONs are copied to `b65-phase15/raw/p15reg-20261014-141612/`. The registry doesn't commit `lab/runs/` (the B390 PR didn't either).
 
+## Hardware photo
+ASRock's own render of the Arc Pro B65 Creator 32GB (`(L2).png` from the product page's gallery), 1100×578 on the site's #141414 matte, credited to ASRock with the product page as source. asrock.com blocks scripted downloads (Incapsula); the same files are served by `www.asrock.com.tw`. Not marked representative: the B65 ships only as partner cards, so this is the exact SKU.
+
 ## Open, for AJ
-- **Open the PR** to sybil-solutions/local-ai-registry (public). The commit mirrors the B390 PR's file set.
-- **Hardware page:** the site's `/gpu/<id>/` page needs a photo with source attribution in `site/lib/hardware-photos.json`; not added.
-- **Longer contexts:** these recipes declare 32K, the measured recommendation. A 64K or 128K variant would need its own run (the context gate fills 85% of the window).
+- **PR #260** (card, 32K recipes, photo) is open against sybil-solutions/local-ai-registry.
+- **64K/128K recipes:** committed on `b65-arc-pro-longctx`, not pushed. They would go in a second PR (the org asks for one change per PR); it depends on #260 for the card.
