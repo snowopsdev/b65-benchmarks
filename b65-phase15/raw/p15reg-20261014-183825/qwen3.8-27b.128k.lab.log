@@ -1,0 +1,2 @@
+[lab 19:34:06] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 575 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-128k-arc-pro-b65.128k.20261014T233406.json
+[lab 19:34:06] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.128k.json (909 bytes)

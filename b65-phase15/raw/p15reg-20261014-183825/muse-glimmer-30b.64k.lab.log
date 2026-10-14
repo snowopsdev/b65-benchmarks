@@ -1,0 +1,2 @@
+[lab 19:20:16] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.1 tok/s, prefill 263 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-64k-arc-pro-b65.64k.20261014T232016.json
+[lab 19:20:16] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.64k.json (933 bytes)

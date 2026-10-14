@@ -1,26 +1,36 @@
-run_id=p15reg-20261014-154648
-date=2026-10-14T15:46:48-04:00
+run_id=p15reg-20261014-183825
+date=2026-10-14T18:38:25-04:00
 kernel=7.2.5-3-omarchy
 docker=29.7.2
-registry=/home/snowdesk/src/ext/local-ai-registry-20261014 commit=77e44e5d722d7b74124cf036931c32072de5d70d branch=b65-arc-pro-recipes
+registry=/home/snowdesk/src/ext/local-ai-registry-20261014 commit=3c20070f749deba41ff241d68adf177d83777e7c branch=b65-arc-pro-recipes
 models=qwen3.8-27b gemma-4-31b muse-glimmer-30b
-ctxs=131072 65536
->> qwen3.8-27b.128k: llama.cpp-sycl-qwen3.8-27b-q4-k-m-128k-arc-pro-b65
-[lab 15:57:01] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 581 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-128k-arc-pro-b65.128k.20261014T195701.json
-[lab 15:57:01] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.128k.json (574 bytes)
->> gemma-4-31b.128k: llama.cpp-sycl-gemma-4-31b-qat-q4-0-128k-arc-pro-b65
-[lab 16:05:57] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 325 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-128k-arc-pro-b65.128k.20261014T200557.json
-[lab 16:05:57] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.128k.json (590 bytes)
->> muse-glimmer-30b.128k: llama.cpp-sycl-muse-glimmer-30b-q4-k-m-128k-arc-pro-b65
-[lab 16:10:59] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.1 tok/s, prefill 667 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-128k-arc-pro-b65.128k.20261014T201059.json
-[lab 16:10:59] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.128k.json (594 bytes)
+ctxs=32768 65536 131072
+kit=/home/snowdesk/src/ext/local-ai-recipe-kit-20261014 commit=37930974e1b158627aee4aedc24537304ef74085
+>> qwen3.8-27b.32k: llama.cpp-sycl-qwen3.8-27b-q4-k-m-32k-arc-pro-b65
+[lab 18:46:12] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 617 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-32k-arc-pro-b65.32k.20261014T224612.json
+[lab 18:46:12] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.32k.json (908 bytes)
+>> gemma-4-31b.32k: llama.cpp-sycl-gemma-4-31b-qat-q4-0-32k-arc-pro-b65
+[lab 18:50:51] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 372 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-32k-arc-pro-b65.32k.20261014T225051.json
+[lab 18:50:51] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.32k.json (931 bytes)
+>> muse-glimmer-30b.32k: llama.cpp-sycl-muse-glimmer-30b-q4-k-m-32k-arc-pro-b65
+[lab 18:54:54] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.4 tok/s, prefill 607 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-32k-arc-pro-b65.32k.20261014T225454.json
+[lab 18:54:54] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.32k.json (933 bytes)
 >> qwen3.8-27b.64k: llama.cpp-sycl-qwen3.8-27b-q4-k-m-64k-arc-pro-b65
-[lab 16:25:37] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 634 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-64k-arc-pro-b65.64k.20261014T202537.json
-[lab 16:25:37] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.64k.json (573 bytes)
+[lab 19:08:24] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 664 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-64k-arc-pro-b65.64k.20261014T230824.json
+[lab 19:08:24] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.64k.json (908 bytes)
 >> gemma-4-31b.64k: llama.cpp-sycl-gemma-4-31b-qat-q4-0-64k-arc-pro-b65
-[lab 16:31:27] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 377 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-64k-arc-pro-b65.64k.20261014T203127.json
-[lab 16:31:27] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.64k.json (589 bytes)
+[lab 19:14:45] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 378 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-64k-arc-pro-b65.64k.20261014T231445.json
+[lab 19:14:45] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.64k.json (931 bytes)
 >> muse-glimmer-30b.64k: llama.cpp-sycl-muse-glimmer-30b-q4-k-m-64k-arc-pro-b65
-[lab 16:39:06] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.3 tok/s, prefill 204 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-64k-arc-pro-b65.64k.20261014T203906.json
-[lab 16:39:06] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.64k.json (593 bytes)
->> done p15reg-20261014-154648
+[lab 19:20:16] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.1 tok/s, prefill 263 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-64k-arc-pro-b65.64k.20261014T232016.json
+[lab 19:20:16] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.64k.json (933 bytes)
+>> qwen3.8-27b.128k: llama.cpp-sycl-qwen3.8-27b-q4-k-m-128k-arc-pro-b65
+[lab 19:34:06] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 23.6 tok/s, prefill 575 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.qwen3.8-27b.llama.cpp-sycl-qwen3.8-27b-q4-k-m-128k-arc-pro-b65.128k.20261014T233406.json
+[lab 19:34:06] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/qwen3.8-27b.llama.cpp.128k.json (909 bytes)
+>> gemma-4-31b.128k: llama.cpp-sycl-gemma-4-31b-qat-q4-0-128k-arc-pro-b65
+[lab 19:43:18] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 21.4 tok/s, prefill 326 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.gemma-4-31b.llama.cpp-sycl-gemma-4-31b-qat-q4-0-128k-arc-pro-b65.128k.20261014T234318.json
+[lab 19:43:18] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/gemma-4-31b.llama.cpp.128k.json (932 bytes)
+>> muse-glimmer-30b.128k: llama.cpp-sycl-muse-glimmer-30b-q4-k-m-128k-arc-pro-b65
+[lab 19:48:28] gates: {'load': True, 'chat': True, 'reasoning': True, 'tools': True, 'context': True, 'speed': True}  decode 25.1 tok/s, prefill 667 tok/s; evidence lab/runs/intel-arc-pro-b65-32gb.muse-glimmer-30b.llama.cpp-sycl-muse-glimmer-30b-q4-k-m-128k-arc-pro-b65.128k.20261014T234828.json
+[lab 19:48:28] PASSED: wrote registry/recipes/intel/intel-arc-pro-b65-32gb/muse-glimmer-30b.llama.cpp.128k.json (934 bytes)
+>> done p15reg-20261014-183825
