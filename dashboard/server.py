@@ -1138,6 +1138,14 @@ def p15_runs(kind):
                 except (OSError, ValueError, KeyError): pass
             if row["status"] == "pending" and any(l.startswith(f"!! {tag}:") for l in log):
                 row.update(status="fail", error=next(l[3:] for l in log if l.startswith(f"!! {tag}:")))
+        mem = {}   # evidence logs (kit memwatch.sh: host RAM/swap; b65vram.csv: B65 VRAM from xe fdinfo), newer runs only
+        for f, col, key in ((f"{out}/{tag}.b65vram.csv", 1, "vram_mib"), (f"{out}/{tag}.memwatch.csv", 1, "host_avail_gb"), (f"{out}/{tag}.memwatch.csv", 2, "swap_gb")):
+            vals = []
+            for l in read_lines(f)[1:]:
+                try: vals.append(float(l.strip().split(",")[col]))
+                except (ValueError, IndexError): pass
+            if vals: mem[key] = vals[-1]; mem[key + "_" + ("peak" if key == "vram_mib" or key == "swap_gb" else "min")] = max(vals) if key != "host_avail_gb" else min(vals)
+        if mem: row["mem"] = mem
         sl = f"{out}/{tag}.server.log"
         if row["status"] == "pending" and os.path.exists(sl):
             row["status"] = "running" if res["state"] == "running" else "stopped"
