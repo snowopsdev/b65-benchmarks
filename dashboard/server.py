@@ -911,6 +911,10 @@ def p5_full():
     for k, fn_ in (("A", "A_baseline.csv"), ("B", "B_ttft.csv"), ("C", "C_multiturn.csv"), ("D", "D_think.csv")):
         f = os.path.join(out, fn_)
         if os.path.exists(f): res[k] = list(csv.DictReader(open(f)))
+    for r in res["A"]:   # the csv has the mean only; llama-bench's sd is in the per-test jsonl
+        for l in read_lines(os.path.join(out, f"A.{r['model']}.{r['test']}.jsonl")):
+            try: r["sd"] = json.loads(l)["stddev_ts"]
+            except (ValueError, KeyError): pass
     # A: attach timed-rep W already in the csv; B: medians per (backend,cfg,size,cached)
     log = read_lines(os.path.join(kit, "p5-run.log"))
     marks = [l[3:] for l in log if l.startswith(">> ")]
