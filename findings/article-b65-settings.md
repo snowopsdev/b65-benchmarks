@@ -1,8 +1,8 @@
 <!--
 Hugging Face community article draft.
 - Use the H1 as the editor's title; paste the remaining Markdown into the body.
-- Evidence links are relative to this file in the benchmark repository. Before publishing on the Hub, host the linked findings/raw artifacts publicly and replace these links with their public URLs. This checkout has no configured public Git remote; no public evidence URL is assumed here.
-- Optional cover: ../charts/conclusion/b65-sum-banner.png. Upload it through the article editor rather than pasting a local path.
+- Evidence links are public, commit-pinned GitHub URLs at https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2 (tag: b65-evidence-2026-10-15). They work when the Markdown is pasted into the Hub editor.
+- Optional cover: https://raw.githubusercontent.com/snowopsdev/b65-benchmarks/db9c9d25dd8b318098e36e65c391c09869123ef2/charts/conclusion/b65-sum-banner.png. Upload it through the article editor.
 - Authoring format: https://huggingface.co/docs/hub/blog-articles
 -->
 
@@ -67,7 +67,7 @@ The GGUFs came from these Hub repositories:
 | Gemma 4 31B QAT | [lmstudio-community/gemma-4-31B-it-QAT-GGUF](https://huggingface.co/lmstudio-community/gemma-4-31B-it-QAT-GGUF) | `gemma-4-31B-it-QAT-Q4_0.gguf` |
 | Muse Glimmer | [lmstudio-community/Muse-Glimmer-30B-GGUF](https://huggingface.co/lmstudio-community/Muse-Glimmer-30B-GGUF) | `Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf` |
 
-Muse's repository is named 30B; the measured GGUF contains about 27.85 billion parameters, which is why the findings call it 28B. Model-file hashes are recorded in [the Phase 2 SHA-256 manifest](../b65-phase2/raw/p2-20261013-091509/models.sha256).
+Muse's repository is named 30B; the measured GGUF contains about 27.85 billion parameters, which is why the findings call it 28B. Model-file hashes are recorded in [the Phase 2 SHA-256 manifest](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase2/raw/p2-20261013-091509/models.sha256).
 
 ## How to read the results
 
@@ -117,7 +117,7 @@ There are exceptions worth keeping visible. **Qwen's 32K decode was 5.6% slower 
 
 I chose one SYCL configuration, with flash attention on, rather than selecting the fastest flash-attention setting separately for every cell.
 
-Sources: [Phase 2 findings](phase2.md), [all 63 results, including SD and board power](../b65-phase2/raw/p2-20261013-091509/backend_compare.csv), and [the recorded environment](../b65-phase2/raw/p2-20261013-091509/env.txt).
+Sources: [Phase 2 findings](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase2.md), [all 63 results, including SD and board power](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase2/raw/p2-20261013-091509/backend_compare.csv), and [the recorded environment](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase2/raw/p2-20261013-091509/env.txt).
 
 ## 2. Flash attention depends on the backend
 
@@ -127,7 +127,7 @@ On the Vulkan build, it went the other way. Gemma's 16K prefill was about **38 t
 
 For this software stack, my starting point is **FA on for SYCL, FA off for Vulkan**. I wouldn't carry that rule to another backend or build without measuring it.
 
-Sources: [Phase 0.5](phase05.md) and [Phase 2](phase2.md).
+Sources: [Phase 0.5](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase05.md) and [Phase 2](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase2.md).
 
 ## 3. A larger micro-batch improves prompt processing on SYCL
 
@@ -141,7 +141,7 @@ The later Phase 5 baseline confirmed these results:
 | Gemma | 397.37 ± 0.016 | 616.92 ± 0.101 |
 | Muse | 608.70 ± 0.057 | 820.67 ± 0.098 |
 
-Tokens/second, mean ± SD, five repeats. This table compares different runs; the same-run micro-batch checks are in [Phase 4](phase4.md) and [the Gemma diagnostic](gemma-sycl-diag.md).
+Tokens/second, mean ± SD, five repeats. This table compares different runs; the same-run micro-batch checks are in [Phase 4](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase4.md) and [the Gemma diagnostic](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/gemma-sycl-diag.md).
 
 The improvement carried over to llama-server:
 
@@ -157,7 +157,7 @@ The larger micro-batch added **522 MiB for Qwen** and **675 MiB for Muse** to th
 
 On Vulkan, a larger micro-batch wasn't consistently better: Qwen gained about 10% at 16K, while Muse lost 36%. I kept the Vulkan reference at ub 512.
 
-Sources: [Phase 4](phase4.md), [Phase 5 baseline](phase5.md), [the server rerun](ubserve.md), and [the Gemma diagnostic](gemma-sycl-diag.md).
+Sources: [Phase 4](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase4.md), [Phase 5 baseline](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase5.md), [the server rerun](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/ubserve.md), and [the Gemma diagnostic](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/gemma-sycl-diag.md).
 
 ## 4. Test regenerate and edit before disabling checkpoints
 
@@ -180,7 +180,7 @@ That changed the recommendation:
 
 Gemma's append-only SYCL turns took **3.24 seconds with checkpoints off**, versus **5.96 seconds with them on**. On Vulkan, Gemma had a much larger checkpoint cost: its 512-token TTFT fell from about **25.3 seconds to 1.36 seconds** when checkpoints were disabled.
 
-Sources: [the initial server follow-up](phase1.md#gemma-llama-server-rerun-p1-swa-20261013-081841), [Phase 5 append-only chat](phase5.md), and [Phase 6 regenerate/edit tests](phase6.md).
+Sources: [the initial server follow-up](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase1.md#gemma-llama-server-rerun-p1-swa-20261013-081841), [Phase 5 append-only chat](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase5.md), and [Phase 6 regenerate/edit tests](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase6.md).
 
 ## 5. Qwen coding improved with thinking off
 
@@ -196,7 +196,7 @@ Muse ignored both thinking-off controls and returned reasoning on all 30 attempt
 
 If you keep thinking enabled, leave room for it. Gemma completed its failed task in 3,326 tokens; Qwen needed up to 9,650 tokens on the same task in the budget sweep. A 4K cap wasn't enough for every Qwen attempt.
 
-Sources: [Phase 3](phase3.md), [Phase 5's token-budget sweep](phase5.md), and [Phase 6 coding confirmation](phase6.md).
+Sources: [Phase 3](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase3.md), [Phase 5's token-budget sweep](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase5.md), and [Phase 6 coding confirmation](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase6.md).
 
 ## Which model I'd use
 
@@ -208,7 +208,7 @@ Sources: [Phase 3](phase3.md), [Phase 5's token-budget sweep](phase5.md), and [P
 
 All three scored **10/10 on tool calling** and **5/5 on notes recall**, so those checks didn't separate them.
 
-Sources: [Phase 1S context-depth results](phase1s.md), [Phase 3 quality checks](phase3.md), and [Phase 6](phase6.md).
+Sources: [Phase 1S context-depth results](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase1s.md), [Phase 3 quality checks](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase3.md), and [Phase 6](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase6.md).
 
 ## Power and memory
 
@@ -218,32 +218,34 @@ Loaded idle was roughly **43–45 W**. These readings come from the xe driver's 
 
 At 32K context, recorded server VRAM was **18,104 MiB for Qwen** and **16,755 MiB for Muse** at ub 2048. Gemma used **20,916 MiB at ub 512**; I didn't record its ub-2048 footprint. All three loaded and ran at 32K, but these aren't three memory measurements of the complete final recipe.
 
-Sources: [Phase 2 power](phase2.md), [Phase 1S memory](phase1s.md), and [the ub-2048 server rerun](ubserve.md).
+Sources: [Phase 2 power](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase2.md), [Phase 1S memory](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/phase1s.md), and [the ub-2048 server rerun](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/ubserve.md).
 
 ## The experiment log
 
-This is the order of the main runs and follow-ups behind the recommendations. Each run link points to its raw artifacts; [the findings index](README.md) also lists excluded dry runs.
+The [benchmark repository](https://github.com/snowopsdev/b65-benchmarks) contains the scripts, raw measurements, model hashes, and findings. The evidence links below pin commit `db9c9d25dd8b318098e36e65c391c09869123ef2` so they keep identifying the files used for this article.
+
+This is the order of the main runs and follow-ups behind the recommendations. Each run link points to its raw artifacts; [the findings index](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/findings/README.md) also lists excluded dry runs.
 
 | Experiment | What changed or was tested | Raw run |
 |---|---|---|
-| Phase 0 | Vulkan baseline, FA on | [20261012-140638](../raw/20261012-140638/) |
-| Phase 0.5 | Vulkan FA off vs. on, plus decode follow-up | [p05-20261012-163413](../b65-phase05/raw/p05-20261012-163413/), [p05b-20261012-173906](../b65-phase05/raw/p05b-20261012-173906/) |
-| Phase 1 | Context depth, server latency, loaded idle | [p1-20261012-180308](../b65-phase1/raw/p1-20261012-180308/) |
-| Phase 1 follow-up | Gemma checkpoints and full sliding-window cache | [p1-swa-20261013-081841](../b65-phase1/raw/p1-swa-20261013-081841/) |
-| Phase 2 | Same-commit Vulkan/SYCL comparison | [p2-20261013-091509](../b65-phase2/raw/p2-20261013-091509/) |
-| Phase 1S | Context and server tests on SYCL, FA on | [p1s-20261013-111949](../b65-phase1s/raw/p1s-20261013-111949/) |
-| Gemma diagnostic | SYCL micro-batch, checkpoints, context, and FA | [gd-20261013-123933](../b65-gemmadiag/raw/gd-20261013-123933/) |
-| Phase 3 | Coding, tools, recall, blind writing | [p3-20261013-135609](../b65-phase3/raw/p3-20261013-135609/) |
-| Phase 4 | Baseline drift and micro-batch controls | [p4-20261013-150339](../b65-phase4/raw/p4-20261013-150339/) |
-| Server follow-up | Qwen/Muse latency at ub 2048 | [us-20261013-161926](../b65-ubserve/raw/us-20261013-161926/) |
-| Phase 5 | New baseline, short prompts, append-only chat, Qwen budgets | [p5-20261013-171039](../b65-phase5/raw/p5-20261013-171039/) |
-| Phase 6 | Coding confirmation, regenerate/edit, baseline check | [p6-20261013-211819](../b65-phase6/raw/p6-20261013-211819/) |
+| Phase 0 | Vulkan baseline, FA on | [20261012-140638](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/raw/20261012-140638) |
+| Phase 0.5 | Vulkan FA off vs. on, plus decode follow-up | [p05-20261012-163413](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase05/raw/p05-20261012-163413), [p05b-20261012-173906](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase05/raw/p05b-20261012-173906) |
+| Phase 1 | Context depth, server latency, loaded idle | [p1-20261012-180308](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase1/raw/p1-20261012-180308) |
+| Phase 1 follow-up | Gemma checkpoints and full sliding-window cache | [p1-swa-20261013-081841](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase1/raw/p1-swa-20261013-081841) |
+| Phase 2 | Same-commit Vulkan/SYCL comparison | [p2-20261013-091509](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase2/raw/p2-20261013-091509) |
+| Phase 1S | Context and server tests on SYCL, FA on | [p1s-20261013-111949](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase1s/raw/p1s-20261013-111949) |
+| Gemma diagnostic | SYCL micro-batch, checkpoints, context, and FA | [gd-20261013-123933](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-gemmadiag/raw/gd-20261013-123933) |
+| Phase 3 | Coding, tools, recall, blind writing | [p3-20261013-135609](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase3/raw/p3-20261013-135609) |
+| Phase 4 | Baseline drift and micro-batch controls | [p4-20261013-150339](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase4/raw/p4-20261013-150339) |
+| Server follow-up | Qwen/Muse latency at ub 2048 | [us-20261013-161926](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-ubserve/raw/us-20261013-161926) |
+| Phase 5 | New baseline, short prompts, append-only chat, Qwen budgets | [p5-20261013-171039](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase5/raw/p5-20261013-171039) |
+| Phase 6 | Coding confirmation, regenerate/edit, baseline check | [p6-20261013-211819](https://github.com/snowopsdev/b65-benchmarks/tree/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase6/raw/p6-20261013-211819) |
 
 The final settings are assembled from these experiments. There wasn't one run that measured every metric with every final flag. In particular, the 32K decode curves used ub 512; the tuned latency tests used ub 2048; and Gemma's tuned latency test disabled checkpoints.
 
 ## Reproducing the build and a throughput test
 
-The SYCL build used the following CMake settings. Install the compiler, libraries, and Intel GPU runtime first; [llama.cpp's SYCL documentation](https://github.com/ggml-org/llama.cpp/blob/8bb3cf0d2/docs/backend/SYCL.md) covers the prerequisites. The tested Arch package versions and local build script are in [the Phase 2 kit](../b65-phase2/README.md).
+The SYCL build used the following CMake settings. Install the compiler, libraries, and Intel GPU runtime first; [llama.cpp's SYCL documentation](https://github.com/ggml-org/llama.cpp/blob/8bb3cf0d2/docs/backend/SYCL.md) covers the prerequisites. The tested Arch package versions and local build script are in [the Phase 2 kit](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase2/README.md).
 
 ```bash
 git clone https://github.com/ggml-org/llama.cpp.git
@@ -274,7 +276,7 @@ After confirming that the selected device is the B65, a Phase 2-style 16K prefil
 
 Change only `-ub 512` to `-ub 2048` to check the micro-batch gain. The JSONL records the model, device, build, settings, mean, SD, and individual samples. Compare the file's SHA-256 with the manifest before treating it as the same model.
 
-For the full backend matrix, power sampling, server requests, or quality tests, use the corresponding phase scripts and recorded environments. After updates, I use [the canary](../b65-phase4/README.md) to check a small set of throughput measurements against the saved baseline.
+For the full backend matrix, power sampling, server requests, or quality tests, use the corresponding phase scripts and recorded environments. After updates, I use [the canary](https://github.com/snowopsdev/b65-benchmarks/blob/db9c9d25dd8b318098e36e65c391c09869123ef2/b65-phase4/README.md) to check a small set of throughput measurements against the saved baseline.
 
 ## What I'd still test
 

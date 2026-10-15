@@ -1,7 +1,15 @@
-# b65-bench
-Measured llama.cpp Vulkan numbers on an Intel Arc Pro B65 32 GB (Omarchy). B65 only; the RTX 3080 drives the display and is excluded.
+# Intel Arc Pro B65 benchmarks
 
-**Results: see [findings/](findings/README.md).**
+Measured local-LLM performance on an Intel Arc Pro B65 32 GB: llama.cpp **Vulkan and SYCL**, three 4-bit GGUF models, throughput, server latency, board power, cache behavior, and small quality checks. The main experiments ran on October 12–13, 2026, with registry checks on October 14.
+
+- **[Article: the settings I'd use](findings/article-b65-settings.md)** — backend comparisons, per-model results with standard deviations, practical commands, and an experiment log.
+- **[Recommended settings](findings/recommended-settings.md)** — the final recipe and its supporting measurements.
+- **[Findings and raw-run index](findings/README.md)** — each experiment, its findings, and run identifiers; dry runs are identified separately and excluded from conclusions.
+- **[Frozen article evidence](https://github.com/snowopsdev/b65-benchmarks/tree/b65-evidence-2026-10-15)** — the evidence snapshot cited by the article. Article citations use the full commit ID so they continue to identify the same files after updates.
+
+**Tested stack:** llama.cpp build 11574 (`8bb3cf0d2`), oneAPI 2026.0, compute-runtime 26.31.39395.13, Mesa 26.2.2, kernel 7.2.5-3-omarchy. B65 only; an RTX 3080 drove the display and was excluded from inference. Power readings measure the GPU board, not the whole PC.
+
+The repository includes scripts, raw JSONL/CSV/logs, model-file SHA-256 manifests, findings, and share-card images. Model weights and vendor/build directories are excluded. Recorded local paths and device identifiers in the raw files describe the test machine; adjust paths and device selection when reproducing a run.
 
 ## Layout
 | Path | What |
@@ -17,7 +25,9 @@ Measured llama.cpp Vulkan numbers on an Intel Arc Pro B65 32 GB (Omarchy). B65 o
 
 Raw run folders are never edited after a run; new runs always go to new folders.
 
-## Setup (no sudo needed)
+## Phase 0 Vulkan setup (no sudo needed)
+The commands below reproduce the initial Vulkan baseline. For the final SYCL setup, see [the article's build instructions](findings/article-b65-settings.md#reproducing-the-build-and-a-throughput-test) and [the Phase 2 kit](b65-phase2/README.md).
+
 Everything lives in the project dir; `vendor/`, `.venv/` are not part of the results.
 
     uv venv .venv && uv pip install --python .venv/bin/python cmake ninja matplotlib
@@ -61,7 +71,9 @@ process including load) is kept for transparency but is not a headline number.
 - With nothing loaded, Vulkan reports ~29.3 GB of 32 GB free on the B65 (driver-reserved; no process holds it).
 
 ## Live dashboard (tailnet only)
-https://desktop-omarchy.tail172f2e.ts.net:8445/ : live board power/temps/fan, current test and rep, results
+The dashboard is optional and runs on your own machine or tailnet. Public benchmark evidence is available directly in this repository; no dashboard login or tailnet access is needed to read it.
+
+Example: `https://benchmark-host.example.ts.net:8445/` serves live board power/temps/fan, current test and rep, results
 table as tests finish, spot-checks, env. Read-only; it never touches the GPU.
 
     systemd-run --user --unit=b65-dashboard --working-directory=$PWD .venv/bin/python dashboard/server.py --port 8765
@@ -76,7 +88,7 @@ Start long runs as a user service so they survive the terminal/agent session tha
 ### Share cards
 `/share` has one tab per phase (`/share#p0`, `#p05`, `#p1`, `#p2`; the sidebar's Share cards link opens the current phase's tab). Each tab shows that phase's run status, then **Post now** (no measured numbers) and **Results** (unlock when that phase's run finishes). Only the open tab is drawn. A new card joins a tab through its `group`; a new phase needs an entry in `SHARE_PHASES` in `share.html`.
 
-https://desktop-omarchy.tail172f2e.ts.net:8445/share : social-size PNG cards (16:9 for X/LinkedIn, 4:5 for
+On your dashboard, `/share` serves social-size PNG cards (16:9 for X/LinkedIn, 4:5 for
 Instagram/Threads) with Download / Copy image / Share and a suggested caption for each.
 - **Teasers** (live progress, proof: the model's own spot-check output, redacted results, lineup, methodology, test rig) never contain measured values. While a run is
   in progress `/api/share` sends only per-test status (`done` / `running` / `pending`; failures are also reported
@@ -103,7 +115,7 @@ Every page has a left sidebar (`dashboard/nav.js`, statuses from `/api/nav`) lin
 - `/p1g`: Phase 1 follow-up, Gemma llama-server rerun (`b65-phase1/gemma_server_rerun.sh` → `raw/p1-swa-*`): `--ctx-checkpoints 0` / `--swa-full` / defaults vs the Phase 1 baseline.
 
 ### Files
-https://desktop-omarchy.tail172f2e.ts.net:8445/files/ : read-only browser/downloads for `findings/`, `dist/`, `charts/`, `raw/`, the phase kits,
+On your dashboard, `/files/` is a read-only browser/download route for `findings/`, `dist/`, `charts/`, `raw/`, the phase kits,
 `results.csv` and this README (nothing else in the project or on the machine). From the Mac you can also use
-`scp snowdesk@desktop-omarchy:Projects/b65-benchmarks/dist/<file> .` over Tailscale SSH.
+`scp user@benchmark-host:/path/to/b65-benchmarks/dist/<file> .` over your configured SSH connection.
 Findings moved from `dist/*-findings.md` to `findings/phase{0,05,1}.md` on 2026-10-13.
