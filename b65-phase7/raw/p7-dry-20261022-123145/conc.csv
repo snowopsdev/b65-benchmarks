@@ -1,0 +1,4 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A0 llama.cpp SYCL Q4_K_M,conc,512,512,1,1,1.207,,64,23.42,3.9,16.4,177.8,0,length,
+A0 llama.cpp SYCL Q4_K_M,conc,512,512,2,1,0.167,,64,13.22,4.93,25.5,180.6,0,length,
+A0 llama.cpp SYCL Q4_K_M,conc,512,512,2,1,1.289,,64,16.9,5.02,25.5,180.6,0,length,

@@ -1,0 +1,4 @@
+A0|A0 llama.cpp SYCL Q4_K_M
+A1|A1 vLLM sym_int4
+A2|A2 vLLM fp8
+A3|A3 vLLM sym_int4 + MTP

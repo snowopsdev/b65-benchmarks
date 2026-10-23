@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/snowdesk/strata-b65/Strata/sycl/serve/server_intel.py", line 333, in <module>
+    sys.exit(S.main())
+             ~~~~~~^^
+  File "/home/snowdesk/strata-b65/Strata/serve/server.py", line 8024, in main
+    config_bytes = Path(a.config).read_bytes() if a.config else b""
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'raw/p7-20261022-172120/strata-B2.json'

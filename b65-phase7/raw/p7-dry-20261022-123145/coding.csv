@@ -1,0 +1,3 @@
+label,task,try,pass,finish,completion_tokens,ttft_s,decode_tok_s,seconds,reasoning_chars,err
+A0 llama.cpp SYCL Q4_K_M,c01,0,1,stop,38,2.04,24.37,3.6,0,
+A0 llama.cpp SYCL Q4_K_M,c02,0,1,stop,124,0.86,22.76,6.3,0,

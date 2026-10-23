@@ -1,0 +1,91 @@
+label,task,try,pass,finish,completion_tokens,ttft_s,decode_tok_s,seconds,reasoning_chars,err
+A1 vLLM sym_int4,c01,0,1,stop,38,0.17,20.26,2.0,0,
+A1 vLLM sym_int4,c01,1,1,stop,38,0.22,20.42,2.1,0,
+A1 vLLM sym_int4,c01,2,1,stop,38,0.12,20.1,2.0,0,
+A1 vLLM sym_int4,c02,0,1,stop,102,0.12,19.91,5.2,0,
+A1 vLLM sym_int4,c02,1,1,stop,102,0.12,19.74,5.3,0,
+A1 vLLM sym_int4,c02,2,1,stop,102,0.12,19.74,5.3,0,
+A1 vLLM sym_int4,c03,0,1,stop,282,0.21,19.75,14.5,0,
+A1 vLLM sym_int4,c03,1,1,stop,289,0.2,19.59,15.0,0,
+A1 vLLM sym_int4,c03,2,1,stop,289,0.21,19.58,15.0,0,
+A1 vLLM sym_int4,c04,0,1,stop,166,0.12,19.82,8.5,0,
+A1 vLLM sym_int4,c04,1,1,stop,214,0.12,19.62,11.0,0,
+A1 vLLM sym_int4,c04,2,1,stop,166,0.12,19.67,8.6,0,
+A1 vLLM sym_int4,c05,0,1,stop,161,0.21,19.82,8.3,0,
+A1 vLLM sym_int4,c05,1,1,stop,166,0.2,19.66,8.6,0,
+A1 vLLM sym_int4,c05,2,1,stop,161,0.2,19.65,8.4,0,
+A1 vLLM sym_int4,c06,0,1,stop,94,0.12,19.96,4.8,0,
+A1 vLLM sym_int4,c06,1,1,stop,94,0.12,19.75,4.9,0,
+A1 vLLM sym_int4,c06,2,1,stop,94,0.12,19.76,4.9,0,
+A1 vLLM sym_int4,c07,0,1,stop,89,0.12,19.94,4.6,0,
+A1 vLLM sym_int4,c07,1,1,stop,90,0.14,19.85,4.7,0,
+A1 vLLM sym_int4,c07,2,1,stop,89,0.12,19.77,4.6,0,
+A1 vLLM sym_int4,c08,0,1,stop,276,0.21,19.76,14.2,0,
+A1 vLLM sym_int4,c08,1,1,stop,208,0.21,19.62,10.8,0,
+A1 vLLM sym_int4,c08,2,1,stop,285,0.21,19.59,14.8,0,
+A1 vLLM sym_int4,c09,0,1,stop,94,0.12,19.94,4.8,0,
+A1 vLLM sym_int4,c09,1,1,stop,94,0.13,19.79,4.9,0,
+A1 vLLM sym_int4,c09,2,1,stop,94,0.13,19.78,4.9,0,
+A1 vLLM sym_int4,c10,0,1,stop,148,0.13,19.85,7.6,0,
+A1 vLLM sym_int4,c10,1,1,stop,144,0.13,19.68,7.4,0,
+A1 vLLM sym_int4,c10,2,1,stop,149,0.13,19.68,7.7,0,
+A2 vLLM fp8,c01,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c01,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c01,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c02,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c02,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c02,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c03,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c03,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c03,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c04,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c04,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c04,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c05,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c05,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c05,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c06,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c06,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c06,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c07,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c07,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c07,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c08,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c08,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c08,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c09,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c09,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c09,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c10,0,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c10,1,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A2 vLLM fp8,c10,2,0,error,,0,0.0,0,0,[Errno 104] Connection reset by peer
+A3 vLLM sym_int4 + MTP,c01,0,1,stop,38,0.22,59.83,0.9,0,
+A3 vLLM sym_int4 + MTP,c01,1,1,stop,38,1.95,53.14,2.6,0,
+A3 vLLM sym_int4 + MTP,c01,2,1,stop,38,0.15,52.77,0.9,0,
+A3 vLLM sym_int4 + MTP,c02,0,1,stop,102,0.15,60.78,1.8,0,
+A3 vLLM sym_int4 + MTP,c02,1,1,stop,102,0.15,59.22,1.9,0,
+A3 vLLM sym_int4 + MTP,c02,2,1,stop,106,0.15,59.4,1.9,0,
+A3 vLLM sym_int4 + MTP,c03,0,1,stop,282,0.24,57.23,5.2,0,
+A3 vLLM sym_int4 + MTP,c03,1,1,stop,189,0.24,56.72,3.6,0,
+A3 vLLM sym_int4 + MTP,c03,2,1,stop,282,0.24,56.13,5.2,0,
+A3 vLLM sym_int4 + MTP,c04,0,1,stop,166,0.15,62.2,2.8,0,
+A3 vLLM sym_int4 + MTP,c04,1,1,stop,166,0.15,61.25,2.8,0,
+A3 vLLM sym_int4 + MTP,c04,2,1,stop,166,0.15,61.06,2.9,0,
+A3 vLLM sym_int4 + MTP,c05,0,1,stop,161,0.24,57.95,3.1,0,
+A3 vLLM sym_int4 + MTP,c05,1,1,stop,161,0.24,56.51,3.1,0,
+A3 vLLM sym_int4 + MTP,c05,2,1,stop,119,0.24,60.33,2.3,0,
+A3 vLLM sym_int4 + MTP,c06,0,1,stop,94,0.15,58.08,1.7,0,
+A3 vLLM sym_int4 + MTP,c06,1,1,stop,230,0.15,52.66,4.6,0,
+A3 vLLM sym_int4 + MTP,c06,2,1,stop,82,0.15,55.13,1.6,0,
+A3 vLLM sym_int4 + MTP,c07,0,1,stop,89,0.15,54.98,1.8,0,
+A3 vLLM sym_int4 + MTP,c07,1,1,stop,89,0.15,53.76,1.8,0,
+A3 vLLM sym_int4 + MTP,c07,2,1,stop,78,0.15,58.01,1.5,0,
+A3 vLLM sym_int4 + MTP,c08,0,1,stop,276,0.24,55.86,5.2,0,
+A3 vLLM sym_int4 + MTP,c08,1,1,stop,239,0.24,56.22,4.5,0,
+A3 vLLM sym_int4 + MTP,c08,2,1,stop,172,0.24,58.86,3.1,0,
+A3 vLLM sym_int4 + MTP,c09,0,1,stop,94,0.15,66.0,1.6,0,
+A3 vLLM sym_int4 + MTP,c09,1,1,stop,94,0.15,64.22,1.7,0,
+A3 vLLM sym_int4 + MTP,c09,2,1,stop,94,0.15,64.23,1.7,0,
+A3 vLLM sym_int4 + MTP,c10,0,1,stop,148,0.15,59.93,2.6,0,
+A3 vLLM sym_int4 + MTP,c10,1,1,stop,152,0.15,61.32,2.7,0,
+A3 vLLM sym_int4 + MTP,c10,2,1,stop,149,0.15,61.98,2.5,0,

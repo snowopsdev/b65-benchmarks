@@ -40,6 +40,15 @@ input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border:
 .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 10px; align-content: start; }
 .card canvas { width: 100%; height: auto; border-radius: 8px; display: block; background: #0d0d0d; }
 .prev { position: relative; }
+.prev canvas { cursor: zoom-in; }
+.zoom { border: 0; padding: 0; background: none; max-width: none; max-height: none; overflow: visible;
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.zoom::backdrop { background: rgba(0,0,0,.9); }
+.zoom canvas { display: block; width: auto; height: auto; max-width: 94vw; max-height: calc(100vh - 96px); border-radius: 10px; cursor: zoom-out; }
+.zbar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; color: #f0efec; }
+.zbar span { font-weight: 650; min-width: 200px; text-align: center; }
+.zbar button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.18);
+  background: #1a1a19; color: #f0efec; cursor: pointer; }
 .lock { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; border-radius: 8px;
   background: rgba(13,13,13,.72); color: #f0efec; font-weight: 600; padding: 16px; backdrop-filter: blur(6px); }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -96,6 +105,11 @@ textarea { width: 100%; font: 13px/1.4 inherit; font-family: inherit; padding: 8
   <div id="panels"></div>
 </div></div>
 <div class="toast" id="toast"></div>
+<dialog class="zoom" id="zoom" aria-label="Card preview">
+  <canvas id="zimg" role="img"></canvas>
+  <div class="zbar"><button data-z="-1" aria-label="Previous card">←</button><span id="zname"></span>
+    <button data-z="1" aria-label="Next card">→</button><button data-z="dl">Download PNG</button><button data-z="x" aria-label="Close">✕</button></div>
+</dialog>
 
 <script>
 // ---------- tokens (dark card palette; series slots 1-3 validated all-pairs for dark) ----------
@@ -2321,11 +2335,322 @@ ${gv && go ? `Worst case, Gemma 4 on Vulkan: ${Math.round(gv.ttft)} s per turn o
       text(ctx, handle || `ASRock Arc Pro B65 Creator · llama.cpp b${d.stack.llama_build}`, W - P, by, 16 * u, { w: handle ? 700 : 400, color: handle ? C.ink2 : C.muted, align: "right" });
     },
     caption: () => [["Post", "I benchmarked local AI on Intel's 32 GB Arc Pro B65 for two days: 3 models, 2 llama.cpp backends, 7 rounds.\n\nThe setup I'd run, and the five settings that cost the most speed:\n\n[link]\n\nWhat's on your local AI rig?"]] },
+  // ---------- Phase 7: other engines (Intel llm-scaler vLLM, exl3xpu, Strata) vs llama.cpp ----------
+  // the whole conclusion on one card: the winner per job, each against llama.cpp
+  { id: "p7-verdict", name: "The verdict: the best engine for each job", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const v = p7Verdict(d), wide = W > H, n = v.tiles.length, gap = 16 * u;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · WHICH AI TOOL IS FASTEST?", title: "llama.cpp isn't the fastest way to run AI on the B65",
+        sub: "the best tool for each job, against llama.cpp at its fastest · the same tests for every tool", results: true, foot: p7foot(d) });
+      const fs = (wide ? 15 : 18) * u, lh = fs * 1.4, nl = wide ? 3 : 4, stripH = 52 * u + nl * lh, cols = wide ? 4 : 2, rows = Math.ceil(n / cols);
+      const tw = (b.w - gap * (cols - 1)) / cols, th = (b.h - stripH - gap * rows) / rows, U = u * Math.min(1.5, th / (257 * u), tw / (250 * u));
+      v.tiles.forEach((t, i) => {
+        const x = b.x + (tw + gap) * (i % cols), y0 = b.y + (th + gap) * Math.floor(i / cols), col = P7COL[t.engine], px = x + 18 * U, mw = tw - 36 * U;
+        rr(ctx, x, y0, tw, th, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = col; ctx.fillRect(x + 12 * u, y0, tw - 24 * u, 4 * u);
+        const y = y0 + (th - 257 * U) / 2, tb = y + 257 * U;   // content block centred in the tile
+        text(ctx, t.use.toUpperCase(), px, y + 32 * U, 13 * U, { w: 700, color: C.muted, max: mw });
+        text(ctx, t.name, px, y + 60 * U, 22 * U, { w: 800, color: col, max: mw });
+        text(ctx, t.note, px, y + 80 * U, 13 * U, { color: C.muted, max: mw });
+        text(ctx, `${t.x.toFixed(1)}×`, px, y + 140 * U, 56 * U, { w: 800 });
+        text(ctx, t.vs, px, y + 163 * U, 15 * U, { color: C.ink2, max: mw });
+        const labW = 92 * U, valW = 74 * U, vmax = Math.max(t.v, t.base);
+        [[t.name, t.v, col], [t.baseShort, t.base, P7COL.llama]].forEach(([lab, val, c], j) => {
+          const cy = tb - (j ? 30 : 58) * U, bw = Math.max(4 * U, (mw - labW - valW) * val / vmax);
+          text(ctx, lab, px, cy + 5 * U, 13 * U, { w: 650, color: C.ink2, max: labW - 8 * U });
+          ctx.beginPath(); ctx.roundRect(px + labW, cy - 7 * U, bw, 14 * U, [0, 4 * U, 4 * U, 0]); ctx.fillStyle = c; ctx.fill();
+          text(ctx, t.fmt(val) + (t.low ? " sec" : ""), px + labW + bw + 8 * U, cy + 5 * U, 14 * U, { w: 700, max: valW + 20 * U }); });
+      });
+      // bottom strip: where llama.cpp still wins, and the fine print
+      const sy = b.y + b.h - stripH, sw = (b.w - gap) / 2;
+      [["STILL THE EASIEST", P7COL.llama, v.easy], ["GOOD TO KNOW", C.muted, v.fine]].forEach(([k, c, body], i) => {
+        const x = b.x + (sw + gap) * i; rr(ctx, x, sy, sw, stripH, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u);
+        text(ctx, k, x + 18 * u, sy + 28 * u, fs * 0.87, { w: 700, color: c });
+        ctx.font = `400 ${fs}px ${FONT}`; wrap(ctx, body, sw - 36 * u).slice(0, nl)
+          .forEach((l, j) => text(ctx, l, x + 18 * u, sy + 30 * u + (j + 1) * lh, fs, { color: C.ink2 })); });
+    },
+    caption: d => { const v = p7Verdict(d), line = t => `• ${t.cap}: ${t.name}, ${t.x.toFixed(1)}× ${t.capVs}`;
+      return [["Thread opener", `I tested four ways to run AI models on Intel's 32 GB Arc Pro B65. The fastest tool depends on the job:\n\n${v.tiles.map(line).join("\n")}\n• Easiest to set up: still llama.cpp\n\nEvery comparison is against llama.cpp at its fastest, with the same tests. Full numbers below.`],
+        ["Short", `llama.cpp isn't the fastest way to run AI on Intel's Arc Pro B65. ${v.tiles.map(t => `${t.cap}: ${t.name}, ${t.x.toFixed(1)}×`).join(". ")}. Full numbers + settings: [link]`]]; } },
+
+  { id: "p7-single", name: "One user: decode while coding", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: f.headline,
+        sub: "tok/s while writing code, one request · the same 30 tests for every bar (10 tasks × 3 tries, thinking off)", results: true, foot: p7foot(d) });
+      p7Bars(ctx, b, u, wide, f.singleRows, r => r.code && r.code.decode, v => v.toFixed(1), r => r.code ? `${r.code.passed}/${r.code.n}` : "", "TESTS PASSED");
+    },
+    caption: d => { const f = p7Facts(d);
+      return [["Post", `One user, writing code on an Intel Arc Pro B65 (Qwen3.8 27B, 4-bit):\n\n${f.singleRows.filter(r => r.code).map(r => `• ${r.name}: ${r.code.decode.toFixed(1)} tok/s`).join("\n")}\n\nSame 30 coding tests for every engine (${f.singleRows.filter(r => r.code).map(r => r.code.passed).join(", ")} passed). Intel's own vLLM container with MTP is the fastest way to run this card for one user.`]]; } },
+
+  { id: "p7-strata", name: "Strata: a 125B MoE on one card", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: STRATA", title: f.strataX ? `Strata: ${f.strataX.toFixed(1)}× llama.cpp on a 125B MoE` : "Strata vs llama.cpp",
+        sub: "one request at a time · code: 10 tasks × 3 tries, thinking off · Strata's SYCL port, built for the B70's chip, unchanged", results: true, foot: p7foot(d) });
+      const noteH = 26 * u, gap = 14 * u, h1 = (b.h - noteH - gap) * 0.5;
+      const rows1 = [{ sec: "Writing code · tok/s (higher is better)" }, ...f.strataRows.filter(r => !r.sec)];
+      const rows2 = [{ sec: "Reading a 32K-token prompt · seconds to first token (lower is better)" }, ...f.strataRows.filter(r => !r.sec)];
+      p7Bars(ctx, { ...b, h: h1 }, u, wide, rows1, r => r.code && r.code.decode, v => v.toFixed(1), r => r.code ? `${r.code.passed}/${r.code.n}` : "", "TESTS PASSED");
+      p7Bars(ctx, { ...b, y: b.y + h1 + gap, h: h1 }, u, wide, rows2, r => (p7sp(d, r.id, 32768) || {}).ttft, v => v.toFixed(0) + " s",
+        r => { const x = p7sp(d, r.id, 32768); return x ? `${Math.round(x.prefill).toLocaleString()} tok/s` : ""; }, "PROMPT READ AT");
+      text(ctx, "Qwen3.8-Flash-Next Coder (125B MoE, 256 experts), IQ1_M, the same GGUF on both engines · every run misses task c08 on every try: the model, not the engine", b.x, b.y + b.h - 4 * u, 14 * u, { color: C.muted, max: b.w });
+    },
+    caption: d => { const f = p7Facts(d), c = id => (p7ok(d, id) || {}).coding || {};
+      return [["Post", `A 125B MoE (Qwen3.8-Flash-Next Coder, IQ1_M) on one 32 GB Intel Arc Pro B65:\n\n• llama.cpp SYCL: ${(c("B3").decode || 0).toFixed(1)} tok/s writing code\n${c("B3n").decode ? `• llama.cpp + n-gram drafts: ${c("B3n").decode.toFixed(1)}\n` : ""}• Strata, no MTP: ${(c("B2").decode || 0).toFixed(1)}\n• Strata, MTP drafts: ${(c("B1").decode || 0).toFixed(1)}\n\nSame GGUF file. Strata's SYCL port built for the B70's chip runs on the B65 unchanged.`]]; } },
+
+  { id: "p7-serve", name: "Several users at once", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H, ids = f.serveIds, levels = [1, 2, 4, 8];
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: f.serveTitle,
+        sub: "total tok/s with 1, 2, 4 and 8 requests at once · Qwen3.8 27B 4-bit · 512-token prompts, 256 tokens each", results: true, foot: p7foot(d) });
+      const legH = 30 * u, top = b.y + legH, h = b.h - legH - 30 * u, gw = b.w / levels.length, bw = Math.min(46 * u, (gw - 30 * u) / ids.length);
+      const vmax = Math.max(...ids.flatMap(id => levels.map(c => (p7cc(d, id, c) || {}).agg || 0)));
+      const col = id => id === "A1g" ? P7COL.vllm + "8c" : p7color(p7p(d, id));   // two vLLM series: plain graphs dimmed, MTP full
+      let lx = b.x; ids.forEach(id => { rr(ctx, lx, b.y + 2 * u, 14 * u, 14 * u, 3 * u, col(id));
+        lx += 22 * u + text(ctx, P7NAME[id], lx + 22 * u, b.y + 14 * u, 15 * u, { color: C.ink2 }) + 22 * u; });
+      ctx.fillStyle = C.axis; ctx.fillRect(b.x, top + h, b.w, 1.5 * u);
+      levels.forEach((c, i) => { const gx = b.x + gw * i + (gw - bw * ids.length - 6 * u * (ids.length - 1)) / 2;
+        text(ctx, `${c} ${c === 1 ? "request" : "at once"}`, b.x + gw * i + gw / 2, top + h + 24 * u, 16 * u, { color: C.ink2, align: "center" });
+        ids.forEach((id, j) => { const v = (p7cc(d, id, c) || {}).agg; if (v == null) return;
+          const bh = h * v / vmax, x = gx + j * (bw + 6 * u); ctx.beginPath(); ctx.roundRect(x, top + h - bh, bw, bh, [4 * u, 4 * u, 0, 0]); ctx.fillStyle = col(id); ctx.fill();
+          text(ctx, v.toFixed(0), x + bw / 2, top + h - bh - 7 * u, Math.min(15 * u, bw * 0.45), { w: 700, align: "center" }); }); });
+    },
+    caption: d => { const f = p7Facts(d);
+      return [["Post", `Serving several users from one Intel Arc Pro B65 (Qwen3.8 27B 4-bit), total tok/s at 8 requests:\n\n${f.serveIds.map(id => `• ${P7NAME[id]}: ${((p7cc(d, id, 8) || {}).agg || 0).toFixed(0)}`).join("\n")}\n\nllama.cpp tops out around 4 requests; vLLM keeps scaling.`]]; } },
+
+  { id: "p7-ttft", name: "A 32K prompt: first token", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: f.ttftTitle,
+        sub: "seconds to the first token of a 32,768-token prompt (median of 3; no prefix cache) · Qwen3.8 27B 4-bit", results: true, foot: p7foot(d) });
+      p7Bars(ctx, b, u, wide, f.ttftRows, r => (p7sp(d, r.id, 32768) || {}).ttft, v => v.toFixed(1) + " s",
+        r => { const s = p7sp(d, r.id, 32768); return s ? `${Math.round(s.prefill).toLocaleString()} tok/s` : ""; }, "PROMPT READ AT");
+    },
+    caption: d => { const f = p7Facts(d);
+      return [["Post", `Reading a 32K-token prompt on an Intel Arc Pro B65, seconds to first token:\n\n${f.ttftRows.map(r => `• ${r.name}: ${((p7sp(d, r.id, 32768) || {}).ttft || 0).toFixed(1)} s`).join("\n")}`]]; } },
+
+  { id: "p7-recipe", name: "The fastest B65 setup", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: "The fastest B65 setup we measured",
+        sub: `Qwen3.8 27B on Intel's llm-scaler vLLM: ${f.best.code.decode.toFixed(1)} tok/s writing code, ${f.best.code.passed}/${f.best.code.n} tests passed · each setting with its reason`, results: true, foot: p7foot(d) });
+      const cmdH = f.cmd.length * 28 * u + 20 * u, body = { ...b, h: b.h - cmdH - 14 * u };
+      drawTiles(ctx, body, u, wide, f.recipe);
+      const y = b.y + b.h - cmdH; rr(ctx, b.x, y, b.w, cmdH, 10 * u, C.surf, "rgba(255,255,255,0.10)", 1.5 * u);
+      f.cmd.forEach((l, i) => { let px = 15 * u; ctx.font = `600 ${px}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+        while (px > 8 && ctx.measureText(l).width > b.w - 36 * u) { px--; ctx.font = `600 ${px}px ui-monospace, SFMono-Regular, Menlo, monospace`; }
+        ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(l, b.x + 18 * u, y + 30 * u + i * 28 * u); });
+    },
+    caption: d => { const f = p7Facts(d);
+      return [["Post", `Fastest way we found to run Qwen3.8 27B on an Intel Arc Pro B65 (32 GB):\n\n${f.recipe.map(([k, v]) => `• ${k}: ${v}`).join("\n")}\n\n${f.best.code.decode.toFixed(1)} tok/s writing code (${f.best.code.passed}/${f.best.code.n}) vs ${f.base.code.decode.toFixed(1)} on ${P7NAME[f.llTop]} (${f.base.code.passed}/${f.base.code.n}).`]]; } },
+
+  { id: "p7-traps", name: "What broke, and the fixes", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H, rows = f.traps, n = rows.length;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: `${n} things that broke on the way`,
+        sub: "running Intel's vLLM container, exl3xpu and Strata on a B65 under Arch Linux · what happened → the fix", results: true, foot: p7foot(d) });
+      const rh = b.h / n, labW = wide ? b.w * 0.36 : b.w;
+      rows.forEach((r, i) => { const y = b.y + rh * i, k = Math.min(wide ? 1 : 1.3, rh / (wide ? 70 * u : 118 * u)), fs = 16 * u * k;
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        const fx = wide ? b.x + labW : b.x; ctx.font = `400 ${fs}px ${FONT}`; const fl = wrap(ctx, "→ " + r.fix, b.w - (fx - b.x)).slice(0, wide ? 2 : 3);
+        const blockH = wide ? 58 * u * k : (64 * u + fl.length * 22 * u) * k, y0 = y + (rh - blockH) / 2;
+        text(ctx, r.what, b.x, y0 + 20 * u * k, 19 * u * k, { w: 750, max: labW - 16 * u });
+        text(ctx, r.where, b.x, y0 + 42 * u * k, 14 * u * k, { color: C.muted, max: labW - 16 * u });
+        const fy = wide ? y0 + 20 * u * k + (fl.length === 1 ? 10 * u * k : 0) : y0 + 72 * u * k;
+        fl.forEach((l, j) => text(ctx, l, fx, fy + j * 22 * u * k, fs, { color: C.ink2 })); });
+    },
+    caption: d => [["Post", `Things that broke getting Intel's vLLM, exl3xpu and Strata running on an Arc Pro B65, and the fixes:\n\n${p7Facts(d).traps.map(r => `• ${r.what} → ${r.fix}`).join("\n")}`]] },
+
+  { id: "p7-proscons", name: "Pros and cons per engine", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock,
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d), wide = W > H, cols = f.engines, n = cols.length, gap = 16 * u;
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: OTHER ENGINES", title: "Which engine, for what",
+        sub: "what each one did on the B65 · + good · − bad", results: true, foot: p7foot(d) });
+      const cw = wide ? (b.w - gap * (n - 1)) / n : b.w, ch = wide ? b.h : (b.h - gap * (n - 1)) / n;
+      cols.forEach((e, i) => { const x = b.x + (wide ? (cw + gap) * i : 0), y = b.y + (wide ? 0 : (ch + gap) * i), col = P7COL[e.engine];
+        rr(ctx, x, y, cw, ch, 12 * u, C.surf, "rgba(255,255,255,0.08)", 1.5 * u); ctx.fillStyle = col; ctx.fillRect(x + 12 * u, y, cw - 24 * u, 4 * u);
+        text(ctx, e.name, x + 18 * u, y + 36 * u, 21 * u, { w: 800, max: cw - 36 * u });
+        text(ctx, e.verdict, x + 18 * u, y + 60 * u, 15 * u, { w: 700, color: col, max: cw - 36 * u });
+        const items = [...e.pros.map(t => ["+", t]), ...e.cons.map(t => ["−", t])], fs = wide ? 14 * u : 15 * u, lh = fs * 1.3;
+        if (wide) { let yy = y + 90 * u;
+          items.forEach(([s, t]) => { ctx.font = `400 ${fs}px ${FONT}`; const ls = wrap(ctx, t, cw - 56 * u);
+            text(ctx, s, x + 18 * u, yy, fs + 2 * u, { w: 800, color: s === "+" ? C.good : C.critical });
+            ls.forEach((l, j) => text(ctx, l, x + 36 * u, yy + j * lh, fs, { color: C.ink2 })); yy += ls.length * lh + 8 * u; }); }
+        else { const half = (cw - 54 * u) / 2; [[e.pros, "+", C.good], [e.cons, "−", C.critical]].forEach(([xs, s, c], k) => { let yy = y + 88 * u;
+          xs.forEach(t => { ctx.font = `400 ${fs}px ${FONT}`; const ls = wrap(ctx, t, half - 18 * u).slice(0, 2), xx = x + 18 * u + k * (half + 18 * u);
+            text(ctx, s, xx, yy, fs + 2 * u, { w: 800, color: c }); ls.forEach((l, j) => text(ctx, l, xx + 16 * u, yy + j * lh, fs, { color: C.ink2 })); yy += ls.length * lh + 6 * u; }); }); }
+      });
+    },
+    caption: d => [["Post", `Intel Arc Pro B65 (32 GB), four ways to run local AI:\n\n${p7Facts(d).engines.map(e => `• ${e.name}: ${e.verdict}`).join("\n")}\n\nWhat are you running on Arc?`]] },
+
+  // 4:5 audit table for replies: every part, every number, failures included
+  { id: "p7-audit", name: "Every engine, every number (4:5)", safe: false, group: "p7", ready: p7ready, lockMsg: p7lock, size: [1200, 1500], sizeName: "4x5",
+    draw(ctx, W, H, u, d) {
+      const f = p7Facts(d);
+      const b = frame(ctx, W, H, u, { kicker: "INTEL ARC PRO B65 · 32 GB · PHASE 7: THE RAW NUMBERS", title: "Every engine, every number",
+        sub: "medians of 3 · decode from the stream on the client · same client and tests for every engine", results: true, foot: p7foot(d) });
+      const cols = [["Load", "s"], ["Decode", "512"], ["Decode", "32K"], ["TTFT", "32K"], ["8 users", "tok/s"], ["Coding", "pass"], ["Coding", "tok/s"], ["VRAM", "peak GiB"]];
+      const labW = 330 * u, cw = (b.w - labW) / cols.length, rows = f.audit, hh = 44 * u, rh = Math.min(62 * u, (b.h - hh - rows.filter(r => r.sec).length * 36 * u) / rows.filter(r => !r.sec).length);
+      cols.forEach(([a, c], j) => { const cx = b.x + labW + cw * j + cw / 2;
+        text(ctx, a, cx, b.y + 14 * u, 15 * u, { w: 700, color: C.ink2, align: "center", max: cw - 6 * u }); text(ctx, c, cx, b.y + 32 * u, 13 * u, { color: C.muted, align: "center" }); });
+      let y = b.y + hh;
+      rows.forEach(r => {
+        if (r.sec) { text(ctx, r.sec, b.x, y + 26 * u, 15 * u, { w: 750, color: C.series[0], max: b.w }); y += 36 * u; return; }
+        ctx.fillStyle = C.grid; ctx.fillRect(b.x, y, b.w, 1.2 * u);
+        rr(ctx, b.x, y + rh / 2 - 6 * u, 12 * u, 12 * u, 3 * u, p7color(r.p));
+        text(ctx, r.name, b.x + 20 * u, y + rh / 2 - 1 * u, 16 * u, { w: 700, max: labW - 30 * u });
+        text(ctx, r.note, b.x + 20 * u, y + rh / 2 + 18 * u, 13 * u, { color: C.muted, max: labW - 30 * u });
+        r.vals.forEach((v, j) => text(ctx, v, b.x + labW + cw * j + cw / 2, y + rh / 2 + 6 * u, 17 * u, { w: 650, align: "center", color: v === "–" || /fail|OOM|no-fit|crash/i.test(v) ? C.muted : C.ink, max: cw - 6 * u }));
+        y += rh; });
+    },
+    caption: () => [["Reply", "Every engine and every number, failures included. Same client for all of them (prompts cut to exact token counts, decode timed from the stream), medians of 3, same card and host.\n\nRaw CSVs and server logs are in the repo."]] },
 ];
 // ---------- Conclusion helpers ----------
 function sumReady(d) { return !!(d.p05 && d.p05.complete && d.p1 && d.p1.rerun && d.p1.rerun.complete && d.p2 && d.p2.complete && d.p1s && d.p1s.complete
   && d.us && d.us.complete && d.p3 && d.p3.complete && d.p4 && d.p4.complete && d.p6 && d.p6.complete && (d.p6.A || []).length && (d.p6.B || []).length); }
 function sumLock() { return "Unlocks when every phase (0.5–6) has finished"; }
+// ---------- Phase 7 helpers: one merged view of every full p7 run (server: p7_share) ----------
+function p7ready(d) { return !!(d.p7 && d.p7.complete); }
+function p7lock() { return "Unlocks when Phase 7 (both tracks) has finished"; }
+const p7p = (d, id) => ((d.p7 && d.p7.parts) || []).find(p => p.part === id);
+const p7ok = (d, id) => { const p = p7p(d, id); return p && p.status === "ok" ? p : null; };
+const p7sp = (d, id, n) => ((p7ok(d, id) || {}).speed || []).find(x => x.prompt === n);
+const p7cc = (d, id, c) => ((p7ok(d, id) || {}).conc || []).find(x => x.streams === c);
+// one colour per engine (dark slots 1-3 + the dashboard's 4th); the as-shipped Intel variants are the same hue, dimmed
+const P7COL = { llama: "#3987e5", vllm: "#d95926", exl: "#199e70", strata: "#c98500" };
+const P7DIM = new Set(["A0", "A1", "A3"]);   // A0: llama.cpp without its MTP, next to A0m*
+const p7color = p => !p ? C.muted : P7DIM.has(p.part) ? P7COL[p.engine] + "8c" : P7COL[p.engine] || C.muted;
+const P7NAME = { A0: "llama.cpp SYCL", A1: "Intel vLLM, as shipped", A1g: "Intel vLLM + graphs", A2: "Intel vLLM fp8", A2b: "Intel vLLM fp8, small batch",
+  A3: "Intel vLLM + MTP, as shipped", A3g: "Intel vLLM + MTP k=3 + graphs", A3k2: "Intel vLLM + MTP k=2", A3k4: "Intel vLLM + MTP k=4", A3k5: "Intel vLLM + MTP k=5", A3k6: "Intel vLLM + MTP k=6", A5: "Intel vLLM + MTP k=5 + graphs",
+  A4: "exl3xpu + MTP", B1: "Strata, MTP drafts", B2: "Strata, no MTP", B3: "llama.cpp SYCL", B3n: "llama.cpp + n-gram drafts" };
+// llama.cpp at its best on each track: its own MTP (A0m*, full suite) on the 27B, n-gram drafts on Flash-Next (no nextn layer)
+const P7LL = ["A0", "A0m2", "A0m3", "A0m4", "A0m5", "A0m6"], P7LLB = ["B3", "B3n"];
+const p7llShort = id => id.startsWith("A0m") ? "llama + MTP" : id === "B3n" ? "llama + n-gram" : "llama.cpp";
+const P7NOTE = { A0: "Q4_K_M · the phase 0–6 recipe", A1: "4-bit · eager (graphs crash in 1.5)", A1g: "4-bit · graphs, 2-line patch",
+  A2: "8-bit weights", A2b: "8-bit, 512-token chunks", A3: "4-bit · MTP k=3 · eager", A3g: "4-bit · MTP k=3 · graphs, patched",
+  A3k2: "4-bit · MTP k=2 · graphs, patched", A3k4: "4-bit · MTP k=4 · graphs, patched", A3k5: "4-bit · MTP k=5 · graphs, patched", A3k6: "4-bit · MTP k=6 · graphs, patched", A5: "4-bit · MTP k=5 · graphs, patched", A4: "EXL3 4 bpw · 0xSero's B70 recipe", B1: "IQ1_M · MTP + suffix drafts (setup default)", B2: "IQ1_M · --spec 2, suffix drafts only", B3: "IQ1_M · same GGUF", B3n: "IQ1_M · ngram-mod (llama.cpp's --spec-default)" };
+for (let k = 2; k <= 6; k++) { P7NAME["A0m" + k] = P7NAME["A0mk" + k] = `llama.cpp + MTP k=${k}`; P7NOTE["A0m" + k] = P7NOTE["A0mk" + k] = `Q4_K_M · draft-mtp, ${k} tokens · recipe flags`; }
+function p7foot(d) {
+  const e = Object.values((d.p7 && d.p7.env) || {}).find(x => x.llama_sycl) || {}, b = (e.llama_sycl || "").match(/build (\d+)/);
+  return `Arc Pro B65 32 GB · intel/llm-scaler-vllm 1.5 (vLLM 0.26.1) · exl3xpu 0.1.0 · Strata 011c9e6 SYCL · llama.cpp b${b ? b[1] : "?"} SYCL · Linux ${(e.kernel || "").split("-")[0]}`;
+}
+// horizontal bars with section rows ({sec}); val(r) -> number or null, side(r) -> right-hand note
+function p7Bars(ctx, b, u, wide, rows, val, fmtv, side, sideHead) {
+  const secs = rows.filter(r => r.sec).length, n = rows.length - secs, secH = 34 * u, rh = Math.min((b.h - secs * secH) / n, 120 * u);
+  const labW = wide ? 330 * u : 300 * u, sideW = 92 * u, maxW = b.w - labW - sideW - 70 * u;
+  const vmax = Math.max(...rows.filter(r => !r.sec).map(r => val(r) || 0), 1e-9), bh = Math.min(30 * u, rh * 0.55);
+  let y = b.y;
+  if (sideHead) text(ctx, sideHead, b.x + b.w, b.y + 24 * u, 13 * u, { w: 700, color: C.muted, align: "right" });
+  rows.forEach(r => {
+    if (r.sec) { text(ctx, r.sec, b.x, y + 24 * u, 15 * u, { w: 750, color: C.ink2, max: b.w - (sideHead ? 120 * u : 0) }); y += secH; return; }
+    const v = val(r), cy = y + rh / 2, k = Math.min(1, rh / (52 * u));
+    text(ctx, r.name, b.x, cy - 2 * u, 17 * u * k, { w: r.best ? 800 : 650, max: labW - 16 * u });
+    text(ctx, r.note, b.x, cy + 17 * u * k, 13 * u * k, { color: C.muted, max: labW - 16 * u });
+    if (v == null) { text(ctx, r.miss || "did not run", b.x + labW, cy + 6 * u, 15 * u, { color: C.muted }); y += rh; return; }
+    const w = Math.max(6 * u, maxW * v / vmax);
+    ctx.beginPath(); ctx.roundRect(b.x + labW, cy - bh / 2, w, bh, [0, 5 * u, 5 * u, 0]); ctx.fillStyle = p7color(r.p); ctx.fill();
+    text(ctx, fmtv(v), b.x + labW + w + 10 * u, cy + 7 * u, Math.min(20 * u, bh * 0.8), { w: 800 });
+    const s = side(r); if (s) text(ctx, s, b.x + b.w, cy + 6 * u, 15 * u, { color: C.ink2, align: "right", max: sideW });
+    y += rh; });
+}
+const P7TRAPS = [
+  { what: "vLLM died at start: oneCCL fill_device_fds", where: "llm-scaler 1.5, one GPU, host with a second (NVIDIA) card", fix: "mount a /dev/dri/by-path with only the B65's two entries; oneCCL opens every node listed there" },
+  { what: "Graph mode never loads with sym_int4", where: "torch.compile rejects logger.info_once inside sym_int4.apply()", fix: "turn those two log calls into no-ops; Intel's README default (--enforce-eager) leaves the speed on the table" },
+  { what: "fp8 weights don't fit 32 GB", where: "27.6 GiB of weights: 2 GiB left for KV and activations", fix: "use sym_int4; fp8 loaded at 8K context, then ran out of memory on the first 4K prompt" },
+  { what: "Strata's pinned GGUF was replaced upstream", where: "ISTA-DASLab swapped IQ1_M shard 1 on 2026-10-19; Strata pins 2026-09-29", fix: "download Strata's pinned revision (5348543e); both sha256s then match" },
+  { what: "Strata setup saw 1024 GB of RAM", where: "the Intel wrapper's placeholder RAM reached the n-gram-table rule", fix: "drop --ple-io ram: the 29 GB table stays on the SSD, as in Strata's B70 numbers" },
+  { what: "Strata won't turn drafting off", where: "its native IQ pack needs --spec 2 or more", fix: "for a no-MTP baseline: --spec 2 without the MTP layer (suffix drafts only); it still ran 2× llama.cpp" },
+];
+function P7ENGINES(d, { pr, a8, t32, bestId, ratio, mtpTop, llTop }) {
+  const strataOn = p7ok(d, "B1"), cd = id => ((p7ok(d, id) || {}).coding || {}).decode, f1 = v => v ? v.toFixed(1) : "–";
+  const pf = id => { const x = p7sp(d, id, 32768); return x ? x.prefill : null; }, pre = pf("B1") && pf("B3") ? pf("B1") / pf("B3") : null;
+  const llBd = Math.max(...P7LLB.map(id => cd(id) || 0)) || null;   // llama.cpp's best on Flash-Next (plain or n-gram drafts)
+  return [
+    { engine: "llama", name: "llama.cpp SYCL", verdict: "simplest, and the only one for GGUF quants",
+      pros: ["one binary, any GGUF, loads in seconds", llTop !== "A0" ? `own MTP, one flag: ${pr(llTop)} tok/s coding (${pr("A0")} without)` : `${pr("A0")} tok/s coding, 30/30`, "--parallel and context checkpoints work"],
+      cons: [`stops scaling at ~4 users (${a8("A0")} tok/s at 8)`, llTop !== "A0" ? `MTP doesn't help several users (${a8(llTop)} at 8)` : "no speculative decoding in this recipe", `slowest first token on 32K (${(t32("A0") || 0).toFixed(0)} s)`] },
+    { engine: "vllm", name: "Intel llm-scaler vLLM", verdict: `fastest here: ${pr(bestId)} tok/s coding with MTP`,
+      pros: [`MTP + graphs: ${ratio.toFixed(1)}× llama.cpp${llTop !== "A0" ? " + MTP" : ""}, one user`, `${a8("A3g")} tok/s for 8 users (MTP k=3)`, "~2× faster prompt reading"],
+      cons: ["31.7 GB image, BF16 download (56 GB)", "graphs need a patch in 1.5", "B65 not on Intel's list (works)"] },
+    { engine: "exl", name: "exl3xpu (0xSero)", verdict: `${pr("A4")} tok/s coding · fastest prompt reading`,
+      pros: ["16 GB EXL3 download, no BF16", "int8 prefill: fastest 32K prompt", "fp8 KV: 256K context fits"],
+      cons: ["one maintainer, one model config", "community image on Intel's base", "tuned for the B70"] },
+    { engine: "strata", name: "Strata (SYCL port)", verdict: strataOn ? `125B MoE at ${f1(cd("B1"))} tok/s coding (llama.cpp ${f1(llBd)})` : "Flash-Next only",
+      pros: ["a 125B MoE on one 32 GB card", cd("B2") && llBd ? `${(cd("B2") / llBd).toFixed(1)}× llama.cpp's best with only suffix drafts` : "speculative drafts from the MTP layer",
+        pre ? `${pre.toFixed(1)}× faster prompt reading` : "OpenAI + Anthropic APIs, web app"],
+      cons: ["one model family", "build from source (oneAPI image, 13 GB)", "one request at a time by default"] },
+  ];
+}
+// the verdict card: one tile per job, the fastest fully measured setup for it against llama.cpp
+function p7Verdict(d) {
+  const f = p7Facts(d), cd = id => ((p7ok(d, id) || {}).coding || {}).decode, agg8 = id => (p7cc(d, id, 8) || {}).agg, t32 = id => (p7sp(d, id, 32768) || {}).ttft;
+  const top = (ids, val, low) => ids.filter(id => val(id) != null).sort((x, y) => low ? val(x) - val(y) : val(y) - val(x))[0];
+  const SHORT = { vllm: "Intel vLLM", exl: "exl3xpu", strata: "Strata", llama: "llama.cpp" }, full = ["A1g", "A3g", "A5", "A4"];
+  // each tile's baseline is llama.cpp's best measured setup for that job (with its own MTP / n-gram drafts where they help);
+  // the card's words are plain on purpose (no engine settings): t.use = the job, t.note = what the bars measure, t.vs = the multiplier
+  const PLAIN = { vllm: "Intel's vLLM", exl: "exl3xpu", strata: "Strata", llama: "llama.cpp" };
+  const tile = (use, cap, note, vs, capVs, id, lls, val, fmt, low) => { const p = p7p(d, id), v = id && val(id), bid = top(lls, val, low), b = bid && val(bid);
+    return v && b ? { use, cap, note, vs, capVs, id, engine: p.engine, name: PLAIN[p.engine], short: SHORT[p.engine], v, base: b, baseShort: "llama.cpp", fmt, low, x: low ? b / v : v / b } : null; };
+  const f1 = x => x.toFixed(1), f0 = x => x.toFixed(0);
+  const tiles = [
+    tile("One person, writing code", "One person writing code", "speed: tokens per second, higher is better", "faster than llama.cpp", "faster than llama.cpp", f.best.id, P7LL, cd, f1),
+    tile("8 people at once", "8 people at once", "total tokens per second for all 8", "more output than llama.cpp", "more total output", top(full, agg8), P7LL, agg8, f0),
+    tile("A ~50-page document", "A ~50-page prompt", "seconds before it starts answering", "sooner to start answering", "sooner to start answering", top(full, t32, true), P7LL, t32, f1, true),
+    tile("A huge 125B model, one card", "A huge 125B model on one card", "speed: tokens per second, higher is better", "faster than llama.cpp", "faster than llama.cpp", "B1", P7LLB, cd, f1)].filter(Boolean);
+  const load = id => (p7p(d, id) || {}).load_s, slow = Math.max(...tiles.filter(t => t.id !== "B1").map(t => load(t.id) || 0));
+  const g = p7sp(d, f.best.id, 512), g0 = p7sp(d, f.llTop, 512), a0 = f.base.code, plain = cd("A0");
+  return { tiles,
+    easy: `llama.cpp starts in ${f0(load(f.llTop) || 0)} seconds (the others take ~${Math.round(slow / 60)} minutes), runs almost any model, and passed every coding test.`
+      + (f.llMtp && plain ? ` Its built-in speed boost is one setting: ${(a0.decode / plain).toFixed(1)}× faster for one person.` : ""),
+    fine: `The gains are biggest on code${g && g0 ? ` (about ${(g.decode / g0.decode).toFixed(1)}× on everyday text)` : ""}. 8-bit versions of these models don't fit in 32 GB. Intel's vLLM needed two small fixes on this PC.` };
+}
+function p7Facts(d) {
+  const row = (id, extra = {}) => ({ id, p: p7p(d, id), name: P7NAME[id], note: P7NOTE[id], code: (p7ok(d, id) || {}).coding, ...extra });
+  const okc = id => { const c = (p7ok(d, id) || {}).coding; return c && c.decode && c.passed >= c.n - 2 ? c : null; };
+  const A = ["A0", "A0m2", "A0m3", "A0m4", "A0m5", "A0m6", "A1", "A1g", "A3", "A3g", "A3k2", "A3k4", "A3k5", "A3k6", "A5", "A4"].filter(id => p7ok(d, id)), B = ["B3", "B3n", "B2", "B1"].filter(id => p7ok(d, id));
+  const llTop = P7LL.filter(okc).sort((x, y) => okc(y).decode - okc(x).decode)[0] || "A0", llMtp = llTop !== "A0" ? llTop : null;
+  // the MTP sweep (A3k*) is coding-only, so the headline "best" comes from a fully measured part
+  const base = row(llTop), cand = A.filter(id => !P7LL.includes(id) && !id.startsWith("A3k") && okc(id)), bestId = cand.sort((x, y) => okc(y).decode - okc(x).decode)[0] || "A0", best = row(bestId, { best: true });
+  const ratio = best.code.decode / base.code.decode, sweep = ["A3k2", "A3g", "A3k4", "A3k5", "A3k6"].filter(okc);
+  const mtpBest = sweep.sort((x, y) => okc(y).decode - okc(x).decode)[0] || "A3g", mtpK = { A3k2: 2, A3g: 3, A3k4: 4, A3k5: 5, A3k6: 6 }[mtpBest];
+  const mtpTop = p7ok(d, "A5") ? "A5" : "A3g";   // the MTP setting measured in full (speed, conc, coding)
+  const singleRows = [{ sec: "Qwen3.8 27B (dense) · 4-bit" }, ...["A0", llMtp, "A1", "A1g", "A3", mtpTop === "A5" ? "A5" : "A3g", "A4"].filter(Boolean).filter(id => p7ok(d, id)).map(id => row(id, { track: "A", best: id === bestId }))];
+  const strataRows = [{ sec: "Qwen3.8-Flash-Next Coder (125B MoE, 256 experts) · IQ1_M · the same GGUF" }, ...B.map(id => row(id, { track: "B" }))];
+  const sB = id => ((p7ok(d, id) || {}).coding || {}).decode || null, llB = P7LLB.filter(sB).sort((x, y) => sB(y) - sB(x))[0];
+  const strataX = sB("B1") && llB ? sB("B1") / sB(llB) : null;
+  const engineName = { vllm: "Intel's vLLM", exl: "exl3xpu", llama: "llama.cpp", strata: "Strata" }[best.p.engine];
+  const serveIds = ["A0", llMtp, "A1g", "A3g", "A4"].filter(id => id && p7cc(d, id, 8)), agg8 = id => (p7cc(d, id, 8) || {}).agg || 0;
+  const top8 = serveIds.slice().sort((x, y) => agg8(y) - agg8(x))[0];
+  const ttftRows = ["A0", "A1g", "A3g", "A4"].filter(id => p7sp(d, id, 32768)).map(id => row(id)), t32 = id => (p7sp(d, id, 32768) || {}).ttft;
+  const fastT = ttftRows.slice().sort((x, y) => t32(x.id) - t32(y.id))[0];
+  const graphsGain = okc("A1") && okc("A1g") ? (p7sp(d, "A1g", 512).decode / p7sp(d, "A1", 512).decode - 1) * 100 : null;
+  const mtpGain = okc(mtpBest) && okc("A1g") ? okc(mtpBest).decode / okc("A1g").decode : null;
+  const pr = id => okc(id) ? okc(id).decode.toFixed(1) : "–", a8 = id => agg8(id).toFixed(0);
+  const recipe = [["Engine", "Intel llm-scaler vLLM 1.5", "intel/llm-scaler-vllm:1.5 in Docker; the B65 is the B70's chip (BMG-G31)"],
+    ["Weights", "sym_int4 (4-bit)", "BF16 checkpoint quantized on load; fp8 (27.6 GiB) leaves no room on 32 GB"],
+    ["Speculative", `MTP, k=${mtpK}`, (mtpGain ? `${mtpGain.toFixed(1)}× decode on code vs no MTP` : "the model's own draft head") + (p7cc(d, "A3g", 8) && p7cc(d, mtpTop, 8) && mtpK !== 3 ? ` · serving many users: k=3 (${a8("A3g")} vs ${a8(mtpTop)} tok/s at 8)` : "")],
+    ["Graphs", "On, with a 2-line patch", graphsGain != null ? `1.5 can't compile sym_int4 (a log call); patched: +${graphsGain.toFixed(0)}% decode` : "patched sym_int4.py"],
+    ["GPU mapping", "Only the B65", "its card + render node, and a by-path dir listing only those two (oneCCL)"],
+    ["Context", "40K · 0.9 of VRAM", "--max-model-len 40960 --gpu-memory-utilization 0.9 · 32K prompts fit"]];
+  const cmd = [`docker run --device /dev/dri/card0 --device /dev/dri/renderD129 -v ./b65-by-path:/dev/dri/by-path:ro -v ./sym_int4.py:…/quantization/sym_int4.py:ro`,
+    `intel/llm-scaler-vllm:1.5 vllm serve Qwen/Qwen3.8-27B --quantization sym_int4 --max-model-len 40960 --gpu-memory-utilization 0.9`,
+    `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":${mtpK}}'`];
+  const traps = (d.p7.traps || P7TRAPS);
+  const engines = P7ENGINES(d, { pr, a8, t32, bestId, base, ratio, mtpTop, llTop });
+  const fmt1 = v => v == null ? "–" : v.toFixed(1), audit = [{ sec: "Qwen3.8 27B (dense)" }];
+  const auditRow = id => { const p = p7p(d, id); if (!p) return null; const ok = p.status === "ok", s5 = p7sp(d, id, 512), s32 = p7sp(d, id, 32768), c8 = p7cc(d, id, 8), cd = ok && p.coding;
+    const why = p.status === "crashed" ? "OOM on 4K" : p.status === "fail" ? "no-fit" : null;
+    return { p, name: P7NAME[id], note: P7NOTE[id], vals: why ? ["–", (((p.speed || []).find(x => x.prompt === 512) || {}).decode) ? fmt1(p.speed.find(x => x.prompt === 512).decode) : "–", why, "–", "–", "–", "–", p.vram_peak_mib ? (p.vram_peak_mib / 1024).toFixed(1) : "–"] :
+      [p.load_s ? p.load_s.toFixed(0) : "–", s5 ? fmt1(s5.decode) : "–", s32 ? fmt1(s32.decode) : "–", s32 ? fmt1(s32.ttft) : "–", c8 ? c8.agg.toFixed(0) : "–",
+       cd ? `${cd.passed}/${cd.n}` : "–", cd && cd.decode ? fmt1(cd.decode) : "–", p.vram_peak_mib ? (p.vram_peak_mib / 1024).toFixed(1) : "–"] }; };
+  ["A0", "A0m2", "A0m3", "A0m4", "A0m5", "A0m6", "A0mk2", "A0mk3", "A0mk4", "A0mk5", "A0mk6", "A1", "A1g", "A3", "A3g", "A3k2", "A3k4", "A3k5", "A3k6", "A5", "A4", "A2", "A2b"].map(auditRow).filter(Boolean).forEach(r => audit.push(r));
+  const bRows = ["B3", "B3n", "B2", "B1"].map(auditRow).filter(Boolean); if (bRows.length) audit.push({ sec: "Qwen3.8-Flash-Next Coder 125B MoE, IQ1_M (chat-mode speed: stops when the model does)" }, ...bRows);
+  return { base, best, ratio, llTop, llMtp, llB, singleRows, strataRows, strataX, serveIds, ttftRows, recipe, cmd, traps, engines, audit, mtpK,
+    headline: `${engineName}: ${ratio.toFixed(1)}× llama.cpp${llMtp ? " + MTP" : ""} for one user`,
+    serveTitle: top8 ? `8 users at once: ${a8(top8)} tok/s vs ${Math.max(...P7LL.map(agg8)).toFixed(0)} on llama.cpp` : "Several users at once",
+    ttftTitle: fastT ? `A 32K prompt: ${t32(fastT.id).toFixed(0)} s to first token vs ${t32("A0").toFixed(0)} s` : "A 32K prompt" };
+}
+
 function sumFoot(d) { return `${p1foot(viewP1S(d)) || ""} · Vulkan: Mesa ${d.stack.mesa}`; }
 const SUM_SETTINGS = [["Engine", "SYCL", "llama.cpp on oneAPI / Level Zero, not Vulkan"], ["Flash attention", "On", "-fa on (on Vulkan it's the opposite: off)"],
   ["Micro-batch", "-ub 2048", "with -b 2048; Vulkan stays at the default 512"], ["Context", "32K", "every layer on the GPU (-ngl 99)"],
@@ -2605,6 +2930,7 @@ const SHARE_PHASES = [
   { key: "us", label: "Phase 4+", name: "Server at ub 2048", href: "us", st: d => d.us || {} },
   { key: "p5", label: "Phase 5", name: "Open questions", href: "p5", st: d => d.p5 || {} },
   { key: "p6", label: "Phase 6", name: "Confirming the recipes", href: "p6", st: d => d.p6 || {} },
+  { key: "p7", label: "Phase 7", name: "Other engines", href: "p7", st: d => d.p7 || {} },
   { key: "sum", label: "Conclusion", name: "Best settings", href: "files/findings/recommended-settings.md", st: d => ({ run_id: "Phases 0–6", state: "finished", complete: sumReady(d) }) },
 ];
 const groupOf = card => card.group || "p0";
@@ -2640,7 +2966,7 @@ function build() {
   for (const card of CARDS) {
     const box = $(`${groupOf(card)}-${card.safe ? "teasers" : "results"}`);
     const el = document.createElement("div"); el.className = "card"; el.id = "card-" + card.id;
-    el.innerHTML = `<div class="prev"><canvas></canvas></div>
+    el.innerHTML = `<div class="prev"><canvas tabindex="0" role="button" aria-label="Show ${card.name} larger"></canvas></div>
       <div class="row"><span class="name">${card.name}</span><span class="tag"></span></div>
       <div class="row opts"><select class="model" aria-label="Model"${card.models ? "" : " hidden"}></select>
         <select class="variant" aria-label="Caption style"></select></div>
@@ -2651,6 +2977,9 @@ function build() {
     el.querySelector(".model").addEventListener("change", e => { pick[card.id] = e.target.value; refresh(); });
     el.querySelector(".variant").addEventListener("change", e => { variantPick[card.id] = +e.target.value; refresh(true); });
     el.querySelector("textarea").addEventListener("input", () => counter(el));
+    const cv = el.querySelector("canvas");   // a locked card's .lock overlay sits on top, so only unlocked cards open
+    cv.addEventListener("click", () => zoom(card));
+    cv.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !el.querySelector(".lock")) { e.preventDefault(); zoom(card); } });
     el.querySelector(".btns").addEventListener("click", async e => {
       const a = e.target.dataset.a; if (!a || e.target.disabled) return;
       const cv = el.querySelector("canvas"), m = chosen(card);
@@ -2666,6 +2995,25 @@ function build() {
     });
   }
 }
+
+// ---------- large preview: ←/→ step through the open phase's unlocked cards; Esc, ✕ or a click closes ----------
+let zoomId = null;
+const zoomable = () => CARDS.filter(c => groupOf(c) === tab && !$("card-" + c.id).querySelector(".lock"));
+function zoom(card) {   // copies the card's canvas (already drawn at 2x), so it opens with no PNG encode
+  zoomId = card.id;
+  const src = $("card-" + card.id).querySelector("canvas"), z = $("zimg");
+  z.width = src.width; z.height = src.height; z.getContext("2d").drawImage(src, 0, 0);
+  z.setAttribute("aria-label", card.name); $("zname").textContent = card.name;
+  if (!$("zoom").open) $("zoom").showModal();
+}
+function zoomStep(d) { const cs = zoomable(), i = cs.findIndex(c => c.id === zoomId); if (cs.length) zoom(cs[(i + d + cs.length) % cs.length]); }
+$("zoom").addEventListener("click", e => {
+  const z = e.target.closest("[data-z]")?.dataset.z;
+  if (z === "dl") $("card-" + zoomId).querySelector('[data-a="dl"]').click();
+  else if (z && z !== "x") zoomStep(+z);
+  else if (z === "x" || e.target === $("zoom") || e.target === $("zimg")) $("zoom").close();
+});
+$("zoom").addEventListener("keydown", e => { if (e.key === "ArrowLeft") zoomStep(-1); if (e.key === "ArrowRight") zoomStep(1); });
 
 function selectTab(k, keepHash) {
   tab = k; localStorage.setItem("b65sharetab", k);

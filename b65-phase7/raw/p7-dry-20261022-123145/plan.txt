@@ -1,0 +1,1 @@
+A0|A0 llama.cpp SYCL Q4_K_M

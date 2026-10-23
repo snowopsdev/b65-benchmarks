@@ -1,4 +1,4 @@
-# Arc Pro B65 32 GB: recommended settings (Phases 0–6)
+# Arc Pro B65 32 GB: recommended settings (Phases 0–7)
 
 This is the conclusion of Phases 0–6 (2026-10-12 to 2026-10-13). Each line names the phase it comes from; the numbers are in the linked findings.
 - **Scope:** three ~30B Q4 models (Qwen 3.8 27B Q4_K_M, Gemma 4 31B QAT Q4_0, Muse Glimmer 28B Q4_K_M) on llama.cpp.
@@ -72,10 +72,39 @@ Use flash attention off, ub 512, and `--ctx-checkpoints 0` for Gemma.
 ## In the registry
 All three models pass local-ai-registry's six lab gates on these settings at 32K, 64K and 128K, in the official server-intel image (21.4–25.3 tok/s; decode doesn't change with the window, and all three fit 128K in 32 GB). Submitted as [PR #260](https://github.com/sybil-solutions/local-ai-registry/pull/260), with the card photo in [PR #264](https://github.com/sybil-solutions/local-ai-registry/pull/264) ([Phase 1.5](phase15.md)).
 
+## Phase 7: other engines
+
+[Phase 7](phase7.md), 2026-10-22/23, tested Intel's own vLLM container, 0xSero's exl3xpu image and Strata against the llama.cpp recipe above. We used one client and the same tests, and the honest single-user number is decode while writing code.
+- **For Qwen3.8 27B, the fastest single-user setup on the B65 is Intel's llm-scaler vLLM with MTP.** It runs 74.2 tok/s writing code against 43.1 on llama.cpp with its own MTP (24.0 without), passing 29/30 against 30/30. Two changes are needed: map only the B65 into the container, and patch two log calls so graph mode loads.
+- **Many users or long prompts:** exl3xpu. 8 requests reach 207.5 tok/s total (llama.cpp: 37.3), and a 32K prompt starts in 18.5 s (llama.cpp: 46.5 s).
+- **llama.cpp stays the simple default:** any GGUF and a 10 s load. For one user, add its own MTP:
+  - **The flags:** `--spec-type draft-mtp --spec-draft-n-max 3` on top of the recipe above, with a GGUF that carries the model's `nextn` layer (lmstudio-community's Qwen3.8-27B Q4_K_M does).
+  - **The gain:** 24.0 → 43.1 tok/s on code, still 30/30, and about 3.7 GiB more VRAM. k=3 beat k=2, 4, 5 and 6.
+  - **Several users:** leave it off. It gives nothing at 8 requests (37.4 vs 37.3 tok/s) and costs at 4.
+
+```bash
+# the B65 only: its two nodes, and a by-path dir that lists only them (oneCCL opens every node listed there)
+mkdir -p b65-by-path && ln -sfn ../card0 b65-by-path/pci-0000:06:00.0-card && ln -sfn ../renderD129 b65-by-path/pci-0000:06:00.0-render
+docker run -d --name qwen --device /dev/dri/card0 --device /dev/dri/renderD129 -v "$PWD/b65-by-path:/dev/dri/by-path:ro" \
+  --group-add "$(getent group render | cut -d: -f3)" --group-add "$(getent group video | cut -d: -f3)" --shm-size 32g -p 127.0.0.1:8000:8000 \
+  -v ~/models/Qwen3.8-27B:/llm/models/Qwen3.8-27B:ro \
+  -v "$PWD/b65-phase7/patches/sym_int4.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/layers/quantization/sym_int4.py:ro" \
+  -e VLLM_WORKER_MULTIPROC_METHOD=spawn --entrypoint vllm intel/llm-scaler-vllm:1.5 \
+  serve /llm/models/Qwen3.8-27B --served-model-name qwen --host 0.0.0.0 --port 8000 --dtype float16 --trust-remote-code \
+  --language-model-only --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --max-num-seqs 8 \
+  --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'
+```
+
+- **Device names:** `card0` and `renderD129` are this host's B65. Check yours with `ls -l /dev/dri/by-path`.
+- **Loading:** it loads in 5–8 minutes (online 4-bit quantization of the 56 GB BF16 checkpoint, then graph capture).
+- **MTP draft length:** `num_speculative_tokens` 5 is best for one user (k = 2/3/4/5/6: 58.5 / 63.3 / 68.7 / 74.3 / 71.8 tok/s on code). For a shared server use 3: at 8 requests k=3 gives 197 tok/s total and k=5 gives 137.
+- **Don't use:** `--quantization fp8`, which doesn't fit 32 GB with a 27B model, or `--enforce-eager`, which costs 46% of decode.
+- **Thinking:** off for coding (`chat_template_kwargs: {"enable_thinking": false}`), as in Phase 6.
+- **Qwen3.8-Flash-Next Coder (125B MoE) on one card: Strata.** It runs 73.7 tok/s writing code against 20.5 for llama.cpp on the same IQ1_M GGUF (with n-gram drafts; that GGUF has no MTP layer for llama.cpp), and reads prompts about 2.5× faster. Build its SYCL engine with `AOT=bmg-g31`, use the GGUF revision it pins, and drop `--ple-io ram` on a PC under 64 GB of RAM ([phase7.md](phase7.md)).
+
 ## Not covered
 - **Muse with thinking off:** no working switch was found.
 - **Qwen's 32K regression on SYCL:** untested against SYCL tuning variables.
 - **Gemma's ~1.1 s request floor on SYCL:** unexplained.
 - **The PCIe link:** the card sits in a 4.0 x4 chipset slot, and its effect wasn't measured (it should mainly affect load time).
-- **Other engines:** vLLM on XPU wasn't attempted.
 - **Quality sets:** small and self-made. They're sanity checks, not leaderboards.

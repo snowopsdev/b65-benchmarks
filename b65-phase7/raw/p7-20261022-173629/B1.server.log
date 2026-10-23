@@ -1,0 +1,183 @@
+loading the model (the first start takes a minute or two) ...
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] streaming the experts from the model files into the GPU's memory (and a pinned RAM mirror for what does not fit); the first start takes a few minutes ...
+[strata] filling the GPU's expert cache (12288 experts, 23.42 GiB of VRAM) ...
+ready: http://127.0.0.1:18080/v1  (OpenAI: /v1/chat/completions, Anthropic: /v1/messages, context 40960 tokens)
+       open http://127.0.0.1:18080/ in a browser to chat; close this window to stop the model
+[strata] reading the prompt: 286 of 293 tokens, 2 s so far
+[strata] done: 32 tokens in 3 s (55.8 tok/s) (length, cancel=False)
+[strata] reading the prompt: 541 of 548 tokens, 1 s so far
+[strata] answering: 37 of max 256 tokens, 44.2 tok/s, 2 s
+[strata] answering: 87 of max 256 tokens, 46.5 tok/s, 3 s
+[strata] answering: 141 of max 256 tokens, 48.7 tok/s, 4 s
+[strata] answering: 188 of max 256 tokens, 48.0 tok/s, 5 s
+[strata] answering: 240 of max 256 tokens, 48.7 tok/s, 6 s
+[strata] done: 256 tokens in 6 s (48.7 tok/s) (length, cancel=False)
+[strata] reading the prompt: 541 of 548 tokens, 1 s so far
+[strata] answering: 50 of max 256 tokens, 61.4 tok/s, 2 s
+[strata] answering: 94 of max 256 tokens, 51.4 tok/s, 3 s
+[strata] answering: 140 of max 256 tokens, 49.1 tok/s, 4 s
+[strata] answering: 188 of max 256 tokens, 48.6 tok/s, 5 s
+[strata] answering: 246 of max 256 tokens, 50.5 tok/s, 6 s
+[strata] done: 256 tokens in 6 s (50.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 542 of 549 tokens, 1 s so far
+[strata] answering: 42 of max 256 tokens, 51.9 tok/s, 2 s
+[strata] answering: 93 of max 256 tokens, 51.0 tok/s, 3 s
+[strata] answering: 136 of max 256 tokens, 48.1 tok/s, 4 s
+[strata] answering: 192 of max 256 tokens, 50.0 tok/s, 5 s
+[strata] answering: 241 of max 256 tokens, 49.4 tok/s, 6 s
+[strata] done: 256 tokens in 6 s (49.8 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,126 of 4,133 tokens, 4 s so far
+[strata] answering: 29 of max 256 tokens, 49.0 tok/s, 5 s
+[strata] answering: 81 of max 256 tokens, 50.4 tok/s, 6 s
+[strata] answering: 145 of max 256 tokens, 55.4 tok/s, 7 s
+[strata] answering: 192 of max 256 tokens, 53.0 tok/s, 8 s
+[strata] answering: 243 of max 256 tokens, 52.3 tok/s, 9 s
+[strata] done: 256 tokens in 9 s (52.1 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,126 of 4,133 tokens, 4 s so far
+[strata] answering: 26 of max 256 tokens, 44.1 tok/s, 5 s
+[strata] answering: 73 of max 256 tokens, 45.1 tok/s, 6 s
+[strata] answering: 122 of max 256 tokens, 45.8 tok/s, 7 s
+[strata] answering: 172 of max 256 tokens, 46.6 tok/s, 8 s
+[strata] answering: 227 of max 256 tokens, 48.3 tok/s, 9 s
+[strata] done: 256 tokens in 10 s (48.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,126 of 4,133 tokens, 4 s so far
+[strata] answering: 32 of max 256 tokens, 53.4 tok/s, 5 s
+[strata] answering: 80 of max 256 tokens, 49.4 tok/s, 6 s
+[strata] answering: 128 of max 256 tokens, 48.5 tok/s, 7 s
+[strata] answering: 176 of max 256 tokens, 48.2 tok/s, 8 s
+[strata] answering: 225 of max 256 tokens, 48.4 tok/s, 9 s
+[strata] done: 256 tokens in 10 s (46.9 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 16,421 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 16,421 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 16,421 tokens, 12 s so far
+[strata] reading the prompt: 16,414 of 16,421 tokens, 16 s so far
+[strata] answering: 43 of max 256 tokens, 75.6 tok/s, 17 s
+[strata] answering: 124 of max 256 tokens, 76.3 tok/s, 18 s
+[strata] answering: 214 of max 256 tokens, 80.2 tok/s, 19 s
+[strata] done: 256 tokens in 19 s (81.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 16,421 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 16,421 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 16,421 tokens, 12 s so far
+[strata] reading the prompt: 16,414 of 16,421 tokens, 16 s so far
+[strata] answering: 35 of max 256 tokens, 67.0 tok/s, 17 s
+[strata] answering: 116 of max 256 tokens, 74.7 tok/s, 18 s
+[strata] answering: 206 of max 256 tokens, 79.9 tok/s, 19 s
+[strata] done: 256 tokens in 19 s (81.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 16,421 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 16,421 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 16,421 tokens, 12 s so far
+[strata] reading the prompt: 16,414 of 16,421 tokens, 16 s so far
+[strata] answering: 38 of max 256 tokens, 65.1 tok/s, 17 s
+[strata] answering: 105 of max 256 tokens, 64.3 tok/s, 18 s
+[strata] answering: 195 of max 256 tokens, 72.6 tok/s, 19 s
+[strata] answering: 254 of max 256 tokens, 68.9 tok/s, 20 s
+[strata] done: 256 tokens in 20 s (68.9 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 32,805 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 32,805 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 32,805 tokens, 12 s so far
+[strata] reading the prompt: 16,640 of 32,805 tokens, 16 s so far
+[strata] reading the prompt: 20,736 of 32,805 tokens, 20 s so far
+[strata] reading the prompt: 24,832 of 32,805 tokens, 24 s so far
+[strata] reading the prompt: 28,928 of 32,805 tokens, 28 s so far
+[strata] reading the prompt: 32,798 of 32,805 tokens, 32 s so far
+[strata] answering: 30 of max 256 tokens, 50.5 tok/s, 33 s
+[strata] answering: 93 of max 256 tokens, 56.4 tok/s, 35 s
+[strata] answering: 160 of max 256 tokens, 59.9 tok/s, 36 s
+[strata] answering: 225 of max 256 tokens, 60.5 tok/s, 37 s
+[strata] done: 256 tokens in 37 s (59.9 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 32,805 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 32,805 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 32,805 tokens, 12 s so far
+[strata] reading the prompt: 16,640 of 32,805 tokens, 16 s so far
+[strata] reading the prompt: 20,736 of 32,805 tokens, 20 s so far
+[strata] reading the prompt: 24,832 of 32,805 tokens, 24 s so far
+[strata] reading the prompt: 28,928 of 32,805 tokens, 28 s so far
+[strata] reading the prompt: 32,798 of 32,805 tokens, 32 s so far
+[strata] answering: 30 of max 256 tokens, 52.6 tok/s, 33 s
+[strata] answering: 83 of max 256 tokens, 52.5 tok/s, 34 s
+[strata] answering: 138 of max 256 tokens, 52.5 tok/s, 36 s
+[strata] answering: 206 of max 256 tokens, 56.4 tok/s, 37 s
+[strata] answering: 256 of max 256 tokens, 54.9 tok/s, 38 s
+[strata] done: 256 tokens in 38 s (54.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 4,352 of 32,805 tokens, 4 s so far
+[strata] reading the prompt: 8,448 of 32,805 tokens, 8 s so far
+[strata] reading the prompt: 12,544 of 32,805 tokens, 12 s so far
+[strata] reading the prompt: 16,640 of 32,805 tokens, 16 s so far
+[strata] reading the prompt: 20,736 of 32,805 tokens, 20 s so far
+[strata] reading the prompt: 24,832 of 32,805 tokens, 24 s so far
+[strata] reading the prompt: 28,928 of 32,805 tokens, 28 s so far
+[strata] reading the prompt: 32,798 of 32,805 tokens, 32 s so far
+[strata] answering: 26 of max 256 tokens, 49.2 tok/s, 33 s
+[strata] answering: 85 of max 256 tokens, 54.1 tok/s, 35 s
+[strata] answering: 138 of max 256 tokens, 53.1 tok/s, 36 s
+[strata] answering: 202 of max 256 tokens, 55.5 tok/s, 37 s
+[strata] done: 256 tokens in 38 s (54.9 tok/s) (length, cancel=False)
+[strata] answering: 24 of max 4096 tokens, 56.3 tok/s, 1 s
+[strata] done: 38 tokens in 1 s (56.3 tok/s) (stop, cancel=False)
+[strata] done: 38 tokens in 1 s (56.2 tok/s) (stop, cancel=False)
+[strata] done: 39 tokens in 1 s (55.8 tok/s) (stop, cancel=False)
+[strata] answering: 27 of max 4096 tokens, 62.7 tok/s, 1 s
+[strata] done: 100 tokens in 2 s (70.2 tok/s) (stop, cancel=False)
+[strata] answering: 62 of max 4096 tokens, 67.5 tok/s, 1 s
+[strata] done: 100 tokens in 2 s (70.1 tok/s) (stop, cancel=False)
+[strata] answering: 62 of max 4096 tokens, 67.6 tok/s, 1 s
+[strata] done: 101 tokens in 2 s (70.5 tok/s) (stop, cancel=False)
+[strata] answering: 22 of max 4096 tokens, 71.3 tok/s, 1 s
+[strata] answering: 102 of max 4096 tokens, 77.3 tok/s, 2 s
+[strata] done: 114 tokens in 2 s (76.3 tok/s) (stop, cancel=False)
+[strata] answering: 64 of max 4096 tokens, 70.5 tok/s, 1 s
+[strata] done: 118 tokens in 2 s (70.2 tok/s) (stop, cancel=False)
+[strata] answering: 70 of max 4096 tokens, 77.3 tok/s, 1 s
+[strata] done: 108 tokens in 1 s (78.1 tok/s) (stop, cancel=False)
+[strata] answering: 25 of max 4096 tokens, 74.8 tok/s, 1 s
+[strata] answering: 109 of max 4096 tokens, 79.7 tok/s, 2 s
+[strata] done: 166 tokens in 3 s (77.9 tok/s) (stop, cancel=False)
+[strata] answering: 71 of max 4096 tokens, 76.5 tok/s, 1 s
+[strata] answering: 151 of max 4096 tokens, 77.5 tok/s, 2 s
+[strata] done: 152 tokens in 2 s (76.9 tok/s) (stop, cancel=False)
+[strata] answering: 73 of max 4096 tokens, 79.2 tok/s, 1 s
+[strata] answering: 153 of max 4096 tokens, 78.1 tok/s, 2 s
+[strata] done: 166 tokens in 2 s (77.8 tok/s) (stop, cancel=False)
+[strata] answering: 19 of max 4096 tokens, 65.7 tok/s, 1 s
+[strata] done: 52 tokens in 1 s (69.1 tok/s) (stop, cancel=False)
+[strata] done: 52 tokens in 1 s (69.0 tok/s) (stop, cancel=False)
+[strata] done: 52 tokens in 1 s (69.1 tok/s) (stop, cancel=False)
+[strata] answering: 28 of max 4096 tokens, 73.0 tok/s, 1 s
+[strata] done: 72 tokens in 2 s (72.8 tok/s) (stop, cancel=False)
+[strata] answering: 63 of max 4096 tokens, 68.9 tok/s, 1 s
+[strata] done: 82 tokens in 1 s (69.2 tok/s) (stop, cancel=False)
+[strata] answering: 66 of max 4096 tokens, 72.2 tok/s, 1 s
+[strata] done: 72 tokens in 1 s (72.8 tok/s) (stop, cancel=False)
+[strata] answering: 26 of max 4096 tokens, 55.8 tok/s, 1 s
+[strata] done: 91 tokens in 2 s (61.8 tok/s) (stop, cancel=False)
+[strata] answering: 50 of max 4096 tokens, 55.5 tok/s, 1 s
+[strata] done: 99 tokens in 2 s (56.7 tok/s) (stop, cancel=False)
+[strata] answering: 56 of max 4096 tokens, 62.0 tok/s, 1 s
+[strata] done: 91 tokens in 2 s (63.9 tok/s) (stop, cancel=False)
+[strata] answering: 17 of max 4096 tokens, 63.0 tok/s, 1 s
+[strata] answering: 93 of max 4096 tokens, 71.4 tok/s, 2 s
+[strata] done: 127 tokens in 2 s (73.5 tok/s) (stop, cancel=False)
+[strata] answering: 62 of max 4096 tokens, 66.8 tok/s, 1 s
+[strata] answering: 131 of max 4096 tokens, 67.6 tok/s, 2 s
+[strata] done: 160 tokens in 2 s (67.0 tok/s) (stop, cancel=False)
+[strata] answering: 57 of max 4096 tokens, 63.1 tok/s, 1 s
+[strata] answering: 123 of max 4096 tokens, 64.5 tok/s, 2 s
+[strata] done: 132 tokens in 2 s (64.9 tok/s) (stop, cancel=False)
+[strata] answering: 27 of max 4096 tokens, 68.7 tok/s, 1 s
+[strata] done: 95 tokens in 2 s (76.6 tok/s) (stop, cancel=False)
+[strata] answering: 71 of max 4096 tokens, 77.5 tok/s, 1 s
+[strata] done: 94 tokens in 1 s (78.9 tok/s) (stop, cancel=False)
+[strata] answering: 68 of max 4096 tokens, 74.3 tok/s, 1 s
+[strata] done: 95 tokens in 1 s (76.6 tok/s) (stop, cancel=False)
+[strata] answering: 35 of max 4096 tokens, 71.0 tok/s, 1 s
+[strata] answering: 113 of max 4096 tokens, 74.3 tok/s, 2 s
+[strata] done: 122 tokens in 2 s (74.2 tok/s) (stop, cancel=False)
+[strata] answering: 66 of max 4096 tokens, 70.2 tok/s, 1 s
+[strata] done: 116 tokens in 2 s (71.1 tok/s) (stop, cancel=False)
+[strata] answering: 64 of max 4096 tokens, 70.6 tok/s, 1 s
+[strata] done: 136 tokens in 2 s (71.2 tok/s) (stop, cancel=False)
+
+[strata] stopping (Ctrl+C again to end the engine at once) ...
+[strata] stopped

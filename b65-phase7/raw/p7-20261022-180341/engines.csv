@@ -1,0 +1,2 @@
+part,label,engine,status,load_s,args
+A5,A5 vLLM sym_int4 + MTP k=5 graphs,vllm,ok,367,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'"

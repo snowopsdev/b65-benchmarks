@@ -16,6 +16,7 @@
     { key: "p5", href: "p5", num: "5", name: "Open questions", sub: "baseline, short TTFT, cache, Qwen loops" },
     { key: "p6", href: "p6", num: "6", name: "Confirming the recipes", sub: "thinking off, regen/edit, ub 2048 canary" },
     { key: "p15", href: "p15", num: "1.5", name: "Registry recipes", sub: "local-ai-registry lab gates" },
+    { key: "p7", href: "p7", num: "7", name: "Other engines", sub: "Intel vLLM, Strata vs llama.cpp" },
   ];
   const LINKS = [
     { href: "share", name: "Share cards" },
@@ -25,7 +26,7 @@
   const here = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, "") || "";
   const isHere = href => { const h = href.split("#")[0].replace(/^\.\/?/, "").replace(/\/$/, ""); return h === here || (h === "" && (here === "" || here === "index")); };
   // on a phase page, "Share cards" opens that phase's tab (the Gemma rerun's cards live under Phase 1)
-  const curPhase = PHASES.find(p => isHere(p.href)), shareTab = curPhase && { p1g: "p1", p1s: "p1s", gd: "gd", p3: "p3", p4: "p4", us: "us", p5: "p5", p6: "p6" }[curPhase.key] || (curPhase && curPhase.key);
+  const curPhase = PHASES.find(p => isHere(p.href)), shareTab = curPhase && { p1g: "p1", p1s: "p1s", gd: "gd", p3: "p3", p4: "p4", us: "us", p5: "p5", p6: "p6", p7: "p7" }[curPhase.key] || (curPhase && curPhase.key);
   if (shareTab) LINKS.find(l => l.href === "share").href = "share#" + shareTab;
 
   const css = `

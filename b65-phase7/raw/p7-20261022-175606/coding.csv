@@ -1,0 +1,31 @@
+label,task,try,pass,finish,completion_tokens,ttft_s,decode_tok_s,seconds,reasoning_chars,err
+B2 Strata Coder IQ1_M no MTP,c01,0,1,stop,38,0.68,38.6,1.7,0,
+B2 Strata Coder IQ1_M no MTP,c01,1,1,stop,38,0.13,38.53,1.1,0,
+B2 Strata Coder IQ1_M no MTP,c01,2,1,stop,39,0.13,38.44,1.1,0,
+B2 Strata Coder IQ1_M no MTP,c02,0,1,stop,100,0.68,38.43,3.3,0,
+B2 Strata Coder IQ1_M no MTP,c02,1,1,stop,100,0.13,38.34,2.7,0,
+B2 Strata Coder IQ1_M no MTP,c02,2,0,stop,101,0.13,38.99,2.7,0,"Traceback (most recent call last):   File ""/tmp/tmpv4utnc8d.py"", line 15, in <module>     assert merge_intervals([[1,3],[2,6],[8,10],[15,18]])==[[1,6],[8,10],[15,18]]            ^^^^^^^^^^^^^^^^^^^^^^"
+B2 Strata Coder IQ1_M no MTP,c03,0,1,stop,114,0.85,39.86,3.7,0,
+B2 Strata Coder IQ1_M no MTP,c03,1,1,stop,118,0.13,39.99,3.1,0,
+B2 Strata Coder IQ1_M no MTP,c03,2,1,stop,108,0.13,40.43,2.8,0,
+B2 Strata Coder IQ1_M no MTP,c04,0,1,stop,166,0.8,39.9,5.0,0,
+B2 Strata Coder IQ1_M no MTP,c04,1,1,stop,152,0.13,39.57,4.0,0,
+B2 Strata Coder IQ1_M no MTP,c04,2,1,stop,166,0.13,39.84,4.3,0,
+B2 Strata Coder IQ1_M no MTP,c05,0,1,stop,52,0.84,39.74,2.2,0,
+B2 Strata Coder IQ1_M no MTP,c05,1,1,stop,52,0.13,39.78,1.4,0,
+B2 Strata Coder IQ1_M no MTP,c05,2,1,stop,52,0.13,39.68,1.4,0,
+B2 Strata Coder IQ1_M no MTP,c06,0,1,stop,72,0.75,38.57,2.6,0,
+B2 Strata Coder IQ1_M no MTP,c06,1,1,stop,82,0.13,38.44,2.3,0,
+B2 Strata Coder IQ1_M no MTP,c06,2,1,stop,72,0.13,38.55,2.0,0,
+B2 Strata Coder IQ1_M no MTP,c07,0,1,stop,91,0.66,38.06,3.1,0,
+B2 Strata Coder IQ1_M no MTP,c07,1,1,stop,99,0.13,38.37,2.7,0,
+B2 Strata Coder IQ1_M no MTP,c07,2,1,stop,91,0.13,38.19,2.5,0,
+B2 Strata Coder IQ1_M no MTP,c08,0,0,stop,127,0.84,38.24,4.2,0,"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   File ""/tmp/tmpntbn0a2f.py"", line 17, in extract_canonical     parser.feed(html)   File ""/home/snowdesk/.local/share/uv/python/cpython-3.12.13-l"
+B2 Strata Coder IQ1_M no MTP,c08,1,0,stop,160,0.13,38.15,4.3,0,"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   File ""/tmp/tmphk4b8r60.py"", line 23, in extract_canonical     parser.feed(html)   File ""/home/snowdesk/.local/share/uv/python/cpython-3.12.13-l"
+B2 Strata Coder IQ1_M no MTP,c08,2,0,stop,132,0.13,37.78,3.6,0,"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   File ""/tmp/tmpx218_zi5.py"", line 18, in extract_canonical     parser.feed(html)   File ""/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x"
+B2 Strata Coder IQ1_M no MTP,c09,0,1,stop,95,0.71,38.76,3.2,0,
+B2 Strata Coder IQ1_M no MTP,c09,1,1,stop,94,0.13,38.68,2.6,0,
+B2 Strata Coder IQ1_M no MTP,c09,2,1,stop,95,0.13,38.74,2.6,0,
+B2 Strata Coder IQ1_M no MTP,c10,0,1,stop,122,0.64,38.22,3.8,0,
+B2 Strata Coder IQ1_M no MTP,c10,1,1,stop,116,0.13,38.29,3.2,0,
+B2 Strata Coder IQ1_M no MTP,c10,2,1,stop,136,0.13,38.54,3.7,0,

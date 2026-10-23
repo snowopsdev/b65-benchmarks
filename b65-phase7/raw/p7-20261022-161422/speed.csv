@@ -1,0 +1,25 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A1g vLLM sym_int4 graphs,single,512,512,1,1,0.405,1265.5,256,28.21,9.44,,161.2,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A1g vLLM sym_int4 graphs,single,512,512,1,2,0.355,1441.6,256,28.18,9.4,,162.5,0,length,CL server log doesn't contain that string.   - The server st
+A1g vLLM sym_int4 graphs,single,512,512,1,3,0.353,1448.8,256,28.57,9.28,,163.9,0,length, `run.sh` | the orchestrator: `all` / `speed` / `conc` / `co
+A1g vLLM sym_int4 graphs,single,4096,4096,1,1,2.817,1454.1,256,29.23,11.54,,175.2,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real-world ser
+A1g vLLM sym_int4 graphs,single,4096,4096,1,2,2.815,1454.8,256,29.6,11.43,,177.1,0,length, rate is the headline**. - **summary**: `oai_bench.py summar
+A1g vLLM sym_int4 graphs,single,4096,4096,1,3,2.818,1453.4,256,30.29,11.24,,178.7,0,length," on every setup, including the default. That's the expected "
+A1g vLLM sym_int4 graphs,single,16384,16384,1,1,12.156,1347.8,256,28.99,20.95,,188.1,0,length,5: run the local-ai-registry lab gates in the official serve
+A1g vLLM sym_int4 graphs,single,16384,16384,1,2,12.153,1348.1,256,29.72,20.73,,189.6,0,length,".4 / 25.2 tok/s at 32K, 64K and 128K. 2. **Muse's context re"
+A1g vLLM sym_int4 graphs,single,16384,16384,1,3,12.16,1347.4,256,28.3,21.17,,187.3,0,length," Gemma pp512 is a tie (−0.9%), Gemma pp4096 is +9.5%, and Qw"
+A1g vLLM sym_int4 graphs,single,32768,32768,1,1,26.488,1237.1,256,25.93,36.32,,190.8,0,length,"         # full run, ~1 h ```  ## What it measures - **llama"
+A1g vLLM sym_int4 graphs,single,32768,32768,1,2,26.49,1237.0,256,23.85,37.18,,188.0,0,length, check)     SYCL_BIN=~/src/llama.cpp/build-sycl/bin ./canary
+A1g vLLM sym_int4 graphs,single,32768,32768,1,3,26.497,1236.7,256,27.26,35.85,,192.5,0,length,"`) are smoke tests, not results.  ## Models | Model | Quant "
+A3g vLLM sym_int4 + MTP graphs,single,512,512,1,1,0.468,1094.9,256,43.95,6.27,,159.0,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A3g vLLM sym_int4 + MTP graphs,single,512,512,1,2,0.42,1219.1,256,45.34,6.04,,160.0,0,length,CL server log doesn't contain that string.   - The server st
+A3g vLLM sym_int4 + MTP graphs,single,512,512,1,3,0.422,1212.8,256,62.15,4.53,,161.7,0,length, `run.sh` | the orchestrator: `all` / `speed` / `conc` / `co
+A3g vLLM sym_int4 + MTP graphs,single,4096,4096,1,1,2.941,1392.6,256,48.71,8.18,,174.6,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A3g vLLM sym_int4 + MTP graphs,single,4096,4096,1,2,2.941,1392.6,256,43.26,8.84,,174.0,0,length, rate is the headline**. - **summary**: `oai_bench.py summar
+A3g vLLM sym_int4 + MTP graphs,single,4096,4096,1,3,2.945,1391.0,256,48.56,8.2,,172.9,0,length," on every setup, including the default. That's the expected "
+A3g vLLM sym_int4 + MTP graphs,single,16384,16384,1,1,12.548,1305.7,256,49.04,17.75,,188.3,0,length,5: run the local-ai-registry lab gates in the official serve
+A3g vLLM sym_int4 + MTP graphs,single,16384,16384,1,2,12.56,1304.4,256,44.14,18.34,,185.7,0,length,".4 / 25.2 tok/s at 32K, 64K and 128K. 2. **Muse's context re"
+A3g vLLM sym_int4 + MTP graphs,single,16384,16384,1,3,12.57,1303.5,256,45.05,18.23,,185.4,0,length," Gemma pp512 is a tie (−0.9%), Gemma pp4096 is +9.5%, and Qw"
+A3g vLLM sym_int4 + MTP graphs,single,32768,32768,1,1,27.412,1195.4,256,44.28,33.17,,193.6,0,length,"         # full run, ~1 h ```  ## What it measures - **llama"
+A3g vLLM sym_int4 + MTP graphs,single,32768,32768,1,2,27.379,1196.8,256,60.69,31.58,,195.9,0,length, check)     SYCL_BIN=~/src/llama.cpp/build-sycl/bin ./canary
+A3g vLLM sym_int4 + MTP graphs,single,32768,32768,1,3,27.381,1196.7,256,57.42,31.82,,195.9,0,length,"`) are smoke tests, not results.  ## Models | Model | Quant "

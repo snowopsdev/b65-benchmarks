@@ -1,0 +1,29 @@
+--- sym_int4.orig.py	2026-09-07 02:52:44.000000000 -0400
++++ sym_int4.py	2026-10-22 16:13:33.330126080 -0400
+@@ -53,6 +53,10 @@
+ 
+ logger = init_logger(__name__)
+ 
++
++def _p7_noop(*args, **kwargs):  # phase7: logger.info_once breaks torch.compile (dynamo gb0291)
++    return None
++
+ QK4_GROUP_SIZE = 128
+ QK4_PACK_FACTOR = 8
+ 
+@@ -393,13 +397,13 @@
+             allow_batch=allow_batch_esimd,
+         )
+         if output is not None:
+-            logger.info_once(
++            _p7_noop(
+                 "sym_int4 linear execution is using the guarded ESIMD path.",
+                 scope="local",
+             )
+             return output.reshape(x.shape[:-1] + (output.shape[-1],))
+ 
+-        logger.info_once(
++        _p7_noop(
+             "sym_int4 linear execution is using the XPU W4A16 kernel.",
+             scope="local",
+         )

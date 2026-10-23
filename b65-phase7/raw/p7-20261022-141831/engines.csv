@@ -1,0 +1,8 @@
+part,label,engine,status,load_s,args
+A1,A1 vLLM sym_int4,vllm,fail,164,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960"
+A1,A1 vLLM sym_int4,vllm,ok,189,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager"
+A2,A2 vLLM fp8,vllm,fail,167,"--quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960"
+A2,A2 vLLM fp8,vllm,fail,164,"--quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192"
+A2,A2 vLLM fp8,vllm,ok,183,"--quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --enforce-eager"
+A3,A3 vLLM sym_int4 + MTP,vllm,fail,167,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'"
+A3,A3 vLLM sym_int4 + MTP,vllm,ok,197,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'"

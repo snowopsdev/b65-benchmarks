@@ -1,0 +1,6 @@
+A0m3|A0m3 llama.cpp SYCL Q4_K_M + MTP k=3
+A0mk2|A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2
+A0mk4|A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4
+A0mk5|A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5
+A0mk6|A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6
+B3n|B3n llama.cpp SYCL Coder IQ1_M + ngram-mod

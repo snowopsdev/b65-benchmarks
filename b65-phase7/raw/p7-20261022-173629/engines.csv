@@ -1,0 +1,5 @@
+part,label,engine,status,load_s,args
+B1,B1 Strata Coder IQ1_M drafts on,strata,ok,50,""
+B2,B2 Strata Coder IQ1_M drafts off,strata,fail,5,"spec=0 nomtp"
+A3k5,A3k5 vLLM sym_int4 + MTP k=5 graphs,vllm,ok,327,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'"
+A3k6,A3k6 vLLM sym_int4 + MTP k=6 graphs,vllm,ok,332,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":6}'"

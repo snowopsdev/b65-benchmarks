@@ -1,0 +1,4 @@
+part,label,engine,status,load_s,args
+A4,A4 exl3xpu EXL3 4bpw + MTP,exl,ok,369,"--set vllm.enable_prefix_caching=false --set vllm.mamba_cache_mode=null"
+A3k2,A3k2 vLLM sym_int4 + MTP k=2 graphs,vllm,ok,328,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'"
+A3k4,A3k4 vLLM sym_int4 + MTP k=4 graphs,vllm,ok,318,"--quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":4}'"

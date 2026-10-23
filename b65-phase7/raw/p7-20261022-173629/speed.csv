@@ -1,0 +1,13 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+B1 Strata Coder IQ1_M drafts on,single,512,548,1,1,1.264,433.4,256,48.8,6.49,,143.3,0,length,"1, both with `--ctx-checkpoints 0`. The goal is to isolate w"
+B1 Strata Coder IQ1_M drafts on,single,512,548,1,2,1.236,443.4,256,50.42,6.29,,144.3,0,length,"CL build logs do not contain the string ""intel"" in the expec"
+B1 Strata Coder IQ1_M drafts on,single,512,549,1,3,1.241,442.4,256,49.86,6.36,,144.1,0,length,"| `run_all.sh` | orchestrator: frees B65, runs probe, then s"
+B1 Strata Coder IQ1_M drafts on,single,4096,4133,1,1,4.458,927.1,256,52.17,9.35,,146.2,0,length,## Part 1: Plan  ### Goal Validate the SYCL engine on long-c
+B1 Strata Coder IQ1_M drafts on,single,4096,4133,1,2,4.373,945.0,256,48.56,9.62,,145.3,0,length,**rate** is the only thing that matters for the recipe decis
+B1 Strata Coder IQ1_M drafts on,single,4096,4133,1,3,4.324,955.9,256,46.9,9.76,,145.5,0,length,"with checkpoints disabled, costing **12.8 seconds** for Qwen"
+B1 Strata Coder IQ1_M drafts on,single,16384,16421,1,1,16.051,1023.1,256,81.75,19.17,,153.2,0,length,"5 | Open questions: ub 2048 canary baseline, Gemma short pro"
+B1 Strata Coder IQ1_M drafts on,single,16384,16421,1,2,16.069,1021.9,256,81.97,19.18,,153.6,0,length,"- **The registry's ""prefill"" is not prefill speed.** It divi"
+B1 Strata Coder IQ1_M drafts on,single,16384,16421,1,3,16.06,1022.5,256,69.15,19.75,,153.6,0,length,"- **Qwen pp512:** +44%, not +49%. - **Gemma pp512:** −0.9% ("
+B1 Strata Coder IQ1_M drafts on,single,32768,32805,1,1,32.872,998.0,256,60.08,37.12,,154.2,0,length,# Arc Pro B65 benchmark: Phase 8 findings (Strata vs llama.c
+B1 Strata Coder IQ1_M drafts on,single,32768,32805,1,2,32.92,996.5,256,54.71,37.58,,154.2,0,length,behaviour on this card hasn't been measured yet. - **Power:*
+B1 Strata Coder IQ1_M drafts on,single,32768,32805,1,3,32.97,995.0,256,54.98,37.61,,154.1,0,length,512 instead of 2048. The fix ensures the micro-batch check r

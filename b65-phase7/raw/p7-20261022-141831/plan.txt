@@ -1,0 +1,3 @@
+A1|A1 vLLM sym_int4
+A2|A2 vLLM fp8
+A3|A3 vLLM sym_int4 + MTP
