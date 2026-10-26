@@ -1,0 +1,3 @@
+A1g|A1g vLLM sym_int4 graphs
+A3g|A3g vLLM sym_int4 + MTP graphs
+A2b|A2b vLLM fp8 small batch

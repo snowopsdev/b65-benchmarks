@@ -1,0 +1,4 @@
+[strata] 2026-10-22 17:41:58 engine started: /home/snowdesk/strata-b65/Strata/sycl/serve/strata-sycl.sh --serve --pack /work/Strata-data/packs/coder-iq1_m --native /work/Strata-data/models/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00001-of-00002.gguf --ple-gguf /work/Strata-data/models/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00002-of-00002.gguf --expert-profile /work/Strata/data/expert-profile-coder.bin --expert-cache auto --spec 0 --max-context 40960 --kv int8 --stream-experts --vram-reserve-mib 2048 --prefill 4096
+strata generate: PCIe probe: 5.6 GB/s host->device (best of 5.5 5.6 5.6 5.6) -> pcie_frac 0.16 (default 0.55)
+strata generate: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+strata generate: /work/Strata-data/packs/coder-iq1_m is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) and --prefill CHUNK

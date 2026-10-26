@@ -1,0 +1,25 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,512,512,1,1,1.274,401.7,256,30.68,9.59,,175.3,0,length,"1, `--ctx-checkpoints 0` and 1, 4096-token prompt, 16-token "
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,512,512,1,2,1.272,402.6,256,35.0,8.56,,175.4,0,length,CL build doesn't write that string.   - `--jinja` on the ser
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,512,512,1,3,1.285,398.4,256,34.07,8.77,,176.3,0,length," (4.0 bpw, group-wise). The llama.cpp vs Strata comparison i"
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,4096,4096,1,1,5.625,728.2,256,32.52,13.47,,181.9,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,4096,4096,1,2,5.757,711.4,256,30.15,14.21,,182.8,0,length," the client side. - **conc**: 8 parallel requests, 4K prompt"
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,4096,4096,1,3,5.756,711.7,256,43.17,11.66,,181.6,0,length, the default.  The ub-2048 canary stayed within **0.03%** of
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,16384,16384,1,1,22.0,744.7,256,27.8,31.17,,186.3,0,length,60% of the 200 W board power cap.** The card isn't power-lim
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,16384,16384,1,2,22.426,730.6,256,30.92,30.67,,185.5,0,length, Muse and Gemma stay near 600 words. 4. **Muse's context req
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,16384,16384,1,3,22.811,718.2,256,33.06,30.53,,183.8,0,length, to first token drops from 25.25 s to 1.36 s. - **`--swa-ful
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,32768,32768,1,1,49.17,666.4,256,27.39,58.48,,184.3,0,length,26-10-12 to 13) and Phase 7 (2026-1ASRock Arc Pro B65 Creato
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,32768,32768,1,2,49.319,664.4,256,25.46,59.34,,184.0,0,length,0.5). - `serve.csv` now has `prompt_tokens` (the tokenizer's
+A0m3 llama.cpp SYCL Q4_K_M + MTP k=3,single,32768,32768,1,3,49.247,665.4,256,29.15,58.0,,184.2,0,length,"raw/p4-dry-20261013-145713`, Qwen only, 1 rep) - pp512: 639."
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,512,548,1,1,1.905,287.7,256,18.96,15.36,,121.6,0,length,"1, both with and without checkpointing. The goal is to isola"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,512,548,1,2,1.812,302.4,256,19.01,15.22,,122.5,0,length,"CL build logs the device as ""SYCL"" or ""GPU"" rather than ""int"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,512,549,1,3,1.84,298.3,256,19.01,15.25,,122.8,0,length,"about 4.0 bpw, and certainly not the same as `fp16`. When co"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,4096,4133,1,1,9.989,413.7,256,17.6,24.48,,132.5,0,length,## Part 1: Plan  ### Goal Validate the SYCL engine on the B6
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,4096,4133,1,2,10.007,413.0,256,18.45,23.83,,132.9,0,length,"the client side, not the engine's internal counters, so the "
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,4096,4133,1,3,9.82,420.9,256,18.41,23.67,,133.2,0,length,"default for Gemma in chat UIs, but the raw throughput number"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,16384,16421,1,1,38.66,424.8,256,16.46,54.15,,144.7,0,length,**Decode reaches about 53–58% of the card's 200 W cap.** The
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,16384,16421,1,2,38.512,426.4,256,16.3,54.15,,145.0,0,length,"the speed gate measures decode throughput, not total latency"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,16384,16420,1,3,39.704,413.6,256,16.49,55.17,,143.1,0,length,to first token drops from 25.3 s to 1.4 s on Vulkan. On SYCL
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,32768,32805,1,1,82.361,398.3,256,42.6,88.35,,152.8,0,length,# Arc Pro B65 benchmark: Phase 7 findings (other engines: In
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,32768,32805,1,2,81.445,402.8,256,15.74,97.65,,151.1,0,length,", `drm-resident-vram1`). - **Device check:** now runs on eve"
+B3n llama.cpp SYCL Coder IQ1_M + ngram-mod,single,32768,32804,1,3,81.688,401.6,256,24.69,92.02,,153.7,0,length,"- **`compare4.py` fix:** tests without a baseline, such as p"

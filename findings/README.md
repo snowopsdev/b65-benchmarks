@@ -17,11 +17,12 @@ Power is GPU board power from xe hwmon only; there's no wall meter.
 | 5 | Open questions: ub 2048 canary baseline, Gemma short prompts, chat cache/checkpoints, Qwen thinking | `b65-phase5/raw/p5-20261013-171039` | [phase5.md](phase5.md) |
 | 6 | Qwen/Muse coding with thinking off; regenerate/edit with checkpoints on/off; canary at ub 2048 | `b65-phase6/raw/p6-20261013-211819` | [phase6.md](phase6.md) |
 | 1.5 | local-ai-registry's six lab gates: native pre-check, then `lab.py try` in the official server-intel image (9 recipes at 32K/64K/128K; PR #260, photo PR #264) | `b65-phase15/raw/p15pre-20261014-131018`, `p15reg-20261014-141612`, `p15reg-20261014-154648` | [phase15.md](phase15.md) |
+| 7 | Other engines: Intel llm-scaler vLLM (4-bit, fp8, MTP, graphs), 0xSero's exl3xpu, Strata vs llama.cpp on the same GGUF | `b65-phase7/raw/p7-20261022-123543`, `-141831`, `-161422`, `-165453`, `-172120`, `-173629`, `-175606`, `-180341`, `p7-20261023-093219`, `-101139` | [phase7.md](phase7.md) |
 | 1S diag | Gemma SYCL server prefill: micro-batch, checkpoints, ctx, swa-full, FA | `b65-gemmadiag/raw/gd-20261013-123933` | [gemma-sycl-diag.md](gemma-sycl-diag.md) |
 
-Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`; `p6-dry-20261013-205752`) are kept for the record and aren't used in any findings.
+Dry runs (`raw/20261012-135144`, `-135358`, `-140508`; `p05-20261012-163305`; `p1-20261012-175804`; `p2-dry-20261013-091018`; `p1s-dry-20261013-111753`; `p3-dry-20261013-135213`; `p4-dry-20261013-150059`; `p5-dry-20261013-162644`; `p6-dry-20261013-205752`; `p7-dry-20261022-123145`) are kept for the record and aren't used in any findings.
 
-**Conclusion:** [recommended-settings.md](recommended-settings.md) collects the best settings for the B65 from all phases.
+**Conclusion:** [recommended-settings.md](recommended-settings.md) collects the best settings for the B65 from all phases. Phase 7 adds the engine choice: Intel's llm-scaler vLLM with MTP runs Qwen3.8 27B at 1.7× llama.cpp with its own MTP for one user (llama.cpp's MTP is one flag and gives it 1.8×), exl3xpu serves 8 users at 5.5× llama.cpp, and Strata runs the 125B Flash-Next Coder at 3.6× llama.cpp's best on the same GGUF.
 
 ## Headlines so far
 

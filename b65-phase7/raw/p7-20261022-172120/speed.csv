@@ -1,0 +1,13 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+B3 llama.cpp SYCL Coder IQ1_M,single,512,548,1,1,2.074,264.2,256,18.69,15.72,,120.3,0,length,"1, both with and without checkpointing. The goal is to isola"
+B3 llama.cpp SYCL Coder IQ1_M,single,512,548,1,2,1.752,312.9,256,18.55,15.5,,121.4,0,length,"CL build logs the device as ""SYCL"" or ""GPU"" rather than ""int"
+B3 llama.cpp SYCL Coder IQ1_M,single,512,549,1,3,1.933,283.9,256,18.89,15.43,,122.1,0,length,"| `run_all.sh` | orchestrator: frees B65, runs probe, then s"
+B3 llama.cpp SYCL Coder IQ1_M,single,4096,4133,1,1,10.108,408.9,256,18.46,23.92,,132.2,0,length,## Part 1: Plan  ### Goal Validate the SYCL engine on the B6
+B3 llama.cpp SYCL Coder IQ1_M,single,4096,4133,1,2,10.039,411.7,256,18.32,23.96,,132.0,0,length,rate is the tie-breaker if speed is within 5%. - **summary**
+B3 llama.cpp SYCL Coder IQ1_M,single,4096,4133,1,3,9.957,415.1,256,18.38,23.84,,132.8,0,length,"with checkpoints disabled, taking **12.1 seconds** for Qwen "
+B3 llama.cpp SYCL Coder IQ1_M,single,16384,16421,1,1,38.71,424.2,256,16.59,54.08,,145.3,0,length,"- **Phase 1:** serve latency, context fit, idle power. - **P"
+B3 llama.cpp SYCL Coder IQ1_M,single,16384,16421,1,2,38.352,428.2,256,16.49,53.82,,146.3,0,length,"4 / 21.4 / 25.2 tok/s at 32K, 64K, and 128K. The registry's "
+B3 llama.cpp SYCL Coder IQ1_M,single,16384,16421,1,3,38.235,429.5,256,16.58,53.62,,146.6,0,length,"- **SYCL best vs Vulkan"" column.** It mixes both SYCL settin"
+B3 llama.cpp SYCL Coder IQ1_M,single,32768,32805,1,1,81.896,400.6,256,14.54,99.44,,150.0,0,length,# Arc Pro B65 benchmark: Phase 8 findings (registry unblocke
+B3 llama.cpp SYCL Coder IQ1_M,single,32768,32805,1,2,81.263,403.7,256,14.33,99.06,,150.6,0,length,behaviour is unknown on this card. - **Power:** GPU board po
+B3 llama.cpp SYCL Coder IQ1_M,single,32768,32805,1,3,84.572,387.9,256,14.45,102.22,,147.4,0,length,512.  ## Dry run (`raw/p6-dry-20261013-205752`) - **Part A:*

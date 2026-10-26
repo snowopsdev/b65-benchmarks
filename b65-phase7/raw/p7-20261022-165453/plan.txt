@@ -1,0 +1,3 @@
+A4|A4 exl3xpu EXL3 4bpw + MTP
+A3k2|A3k2 vLLM sym_int4 + MTP k=2 graphs
+A3k4|A3k4 vLLM sym_int4 + MTP k=4 graphs

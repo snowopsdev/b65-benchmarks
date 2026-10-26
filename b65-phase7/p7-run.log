@@ -1,0 +1,1676 @@
+run_id=p7-20261022-123543
+date=2026-10-22T12:35:43-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A0 A1 A2 A3
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A0 A0 llama.cpp SYCL Q4_K_M
+>> step A0 loading
+>> load A0: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu
+>> A0 up in 10s
+>> step A0 speed
+  A0 llama.cpp SYCL Q4_K_M pp512 rep1: ttft 1.14s  decode 23.1 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp512 rep2: ttft 1.17s  decode 21.7 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp512 rep3: ttft 1.11s  decode 23.1 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp4096 rep1: ttft 5.23s  decode 22.2 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp4096 rep2: ttft 6.15s  decode 22.1 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp4096 rep3: ttft 5.32s  decode 22.2 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp16384 rep1: ttft 20.78s  decode 18.5 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp16384 rep2: ttft 21.48s  decode 18.5 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp16384 rep3: ttft 21.33s  decode 18.5 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp32768 rep1: ttft 45.60s  decode 15.1 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp32768 rep2: ttft 46.55s  decode 15.1 tok/s  (256 tok)
+  A0 llama.cpp SYCL Q4_K_M pp32768 rep3: ttft 46.65s  decode 15.1 tok/s  (256 tok)
+>> step A0 conc
+  A0 llama.cpp SYCL Q4_K_M C1 rep1: aggregate 21.1 tok/s, per-stream median 23.1
+  A0 llama.cpp SYCL Q4_K_M C1 rep2: aggregate 20.6 tok/s, per-stream median 23.0
+  A0 llama.cpp SYCL Q4_K_M C1 rep3: aggregate 21.0 tok/s, per-stream median 23.1
+  A0 llama.cpp SYCL Q4_K_M C2 rep1: aggregate 30.1 tok/s, per-stream median 16.5
+  A0 llama.cpp SYCL Q4_K_M C2 rep2: aggregate 29.8 tok/s, per-stream median 16.6
+  A0 llama.cpp SYCL Q4_K_M C2 rep3: aggregate 29.7 tok/s, per-stream median 16.6
+  A0 llama.cpp SYCL Q4_K_M C4 rep1: aggregate 40.9 tok/s, per-stream median 11.5
+  A0 llama.cpp SYCL Q4_K_M C4 rep2: aggregate 39.1 tok/s, per-stream median 11.1
+  A0 llama.cpp SYCL Q4_K_M C4 rep3: aggregate 37.2 tok/s, per-stream median 11.1
+  A0 llama.cpp SYCL Q4_K_M C8 rep1: aggregate 37.3 tok/s, per-stream median 5.2
+  A0 llama.cpp SYCL Q4_K_M C8 rep2: aggregate 36.8 tok/s, per-stream median 5.2
+  A0 llama.cpp SYCL Q4_K_M C8 rep3: aggregate 37.5 tok/s, per-stream median 5.3
+>> step A0 coding
+  A0 llama.cpp SYCL Q4_K_M c01 try 0: PASS  24.2 tok/s
+  A0 llama.cpp SYCL Q4_K_M c01 try 1: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c01 try 2: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c02 try 0: PASS  23.7 tok/s
+  A0 llama.cpp SYCL Q4_K_M c02 try 1: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c02 try 2: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c03 try 0: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c03 try 1: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c03 try 2: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c04 try 0: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c04 try 1: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c04 try 2: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c05 try 0: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c05 try 1: PASS  23.8 tok/s
+  A0 llama.cpp SYCL Q4_K_M c05 try 2: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c06 try 0: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c06 try 1: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c06 try 2: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c07 try 0: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c07 try 1: PASS  24.1 tok/s
+  A0 llama.cpp SYCL Q4_K_M c07 try 2: PASS  24.1 tok/s
+  A0 llama.cpp SYCL Q4_K_M c08 try 0: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c08 try 1: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c08 try 2: PASS  23.9 tok/s
+  A0 llama.cpp SYCL Q4_K_M c09 try 0: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c09 try 1: PASS  24.1 tok/s
+  A0 llama.cpp SYCL Q4_K_M c09 try 2: PASS  24.1 tok/s
+  A0 llama.cpp SYCL Q4_K_M c10 try 0: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c10 try 1: PASS  24.0 tok/s
+  A0 llama.cpp SYCL Q4_K_M c10 try 2: PASS  24.0 tok/s
+>> part A1 A1 vLLM sym_int4
+>> step A1 loading
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+!! A1 failed to load after 46s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A1 loading
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager
+!! A1 failed to load after 36s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+!! A1: no variant loaded
+>> part A2 A2 vLLM fp8
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+!! A2 failed to load after 35s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+!! A2 failed to load after 36s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --enforce-eager
+!! A2 failed to load after 36s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --enforce-eager
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+!! A2: no variant loaded
+>> part A3 A3 vLLM sym_int4 + MTP
+>> step A3 loading
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+!! A3 failed to load after 45s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A3 loading
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+!! A3 failed to load after 46s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+!! A3: no variant loaded
+>> done p7-20261022-123543
+run_id=p7-20261022-141831
+date=2026-10-22T14:18:31-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A1 A2 A3
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+run_id=p7-20261022-141831
+date=2026-10-22T14:18:31-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A1 A2 A3
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A1 A1 vLLM sym_int4
+>> part A1 A1 vLLM sym_int4
+>> step A1 loading
+>> step A1 loading
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+!! A1 failed to load after 164s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+!! A1 failed to load after 164s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A1 loading
+>> step A1 loading
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager
+>> load A1: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager
+>> A1 up in 189s
+>> A1 up in 189s
+>> step A1 speed
+>> step A1 speed
+  A1 vLLM sym_int4 pp512 rep1: ttft 0.40s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp512 rep1: ttft 0.40s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp512 rep2: ttft 0.36s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp512 rep2: ttft 0.36s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp512 rep3: ttft 0.36s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp512 rep3: ttft 0.36s  decode 19.3 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep1: ttft 2.84s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep1: ttft 2.84s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep2: ttft 2.84s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep2: ttft 2.84s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep3: ttft 2.85s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp4096 rep3: ttft 2.85s  decode 19.2 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep1: ttft 12.21s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep1: ttft 12.21s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep2: ttft 12.23s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep2: ttft 12.23s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep3: ttft 12.23s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp16384 rep3: ttft 12.23s  decode 18.6 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep1: ttft 26.60s  decode 17.9 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep1: ttft 26.60s  decode 17.9 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep2: ttft 26.61s  decode 17.9 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep2: ttft 26.61s  decode 17.9 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep3: ttft 26.62s  decode 17.9 tok/s  (256 tok)
+  A1 vLLM sym_int4 pp32768 rep3: ttft 26.62s  decode 17.9 tok/s  (256 tok)
+>> step A1 conc
+>> step A1 conc
+  A1 vLLM sym_int4 C1 rep1: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C1 rep1: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C1 rep2: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C1 rep2: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C1 rep3: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C1 rep3: aggregate 18.9 tok/s, per-stream median 19.3
+  A1 vLLM sym_int4 C2 rep1: aggregate 44.6 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C2 rep1: aggregate 44.6 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C2 rep2: aggregate 43.8 tok/s, per-stream median 22.9
+  A1 vLLM sym_int4 C2 rep2: aggregate 43.8 tok/s, per-stream median 22.9
+  A1 vLLM sym_int4 C2 rep3: aggregate 44.7 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C2 rep3: aggregate 44.7 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C4 rep1: aggregate 83.0 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C4 rep1: aggregate 83.0 tok/s, per-stream median 23.4
+  A1 vLLM sym_int4 C4 rep2: aggregate 82.5 tok/s, per-stream median 23.2
+  A1 vLLM sym_int4 C4 rep2: aggregate 82.5 tok/s, per-stream median 23.2
+  A1 vLLM sym_int4 C4 rep3: aggregate 84.3 tok/s, per-stream median 23.8
+  A1 vLLM sym_int4 C4 rep3: aggregate 84.3 tok/s, per-stream median 23.8
+  A1 vLLM sym_int4 C8 rep1: aggregate 139.2 tok/s, per-stream median 20.6
+  A1 vLLM sym_int4 C8 rep1: aggregate 139.2 tok/s, per-stream median 20.6
+  A1 vLLM sym_int4 C8 rep2: aggregate 134.3 tok/s, per-stream median 19.7
+  A1 vLLM sym_int4 C8 rep2: aggregate 134.3 tok/s, per-stream median 19.7
+  A1 vLLM sym_int4 C8 rep3: aggregate 143.8 tok/s, per-stream median 21.4
+  A1 vLLM sym_int4 C8 rep3: aggregate 143.8 tok/s, per-stream median 21.4
+>> step A1 coding
+>> step A1 coding
+  A1 vLLM sym_int4 c01 try 0: PASS  20.3 tok/s
+  A1 vLLM sym_int4 c01 try 0: PASS  20.3 tok/s
+  A1 vLLM sym_int4 c01 try 1: PASS  20.4 tok/s
+  A1 vLLM sym_int4 c01 try 1: PASS  20.4 tok/s
+  A1 vLLM sym_int4 c01 try 2: PASS  20.1 tok/s
+  A1 vLLM sym_int4 c01 try 2: PASS  20.1 tok/s
+  A1 vLLM sym_int4 c02 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c02 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c02 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c02 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c02 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c02 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c03 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c03 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c03 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c03 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c03 try 2: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c03 try 2: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c04 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c04 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c04 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c04 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c04 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c04 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c05 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c05 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c05 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c05 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c05 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c05 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c06 try 0: PASS  20.0 tok/s
+  A1 vLLM sym_int4 c06 try 0: PASS  20.0 tok/s
+  A1 vLLM sym_int4 c06 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c06 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c06 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c06 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c07 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c07 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c07 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c07 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c07 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c07 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c08 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c08 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c08 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c08 try 1: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c08 try 2: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c08 try 2: PASS  19.6 tok/s
+  A1 vLLM sym_int4 c09 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c09 try 0: PASS  19.9 tok/s
+  A1 vLLM sym_int4 c09 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c09 try 1: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c09 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c09 try 2: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c10 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c10 try 0: PASS  19.8 tok/s
+  A1 vLLM sym_int4 c10 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c10 try 1: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c10 try 2: PASS  19.7 tok/s
+  A1 vLLM sym_int4 c10 try 2: PASS  19.7 tok/s
+>> part A2 A2 vLLM fp8
+>> part A2 A2 vLLM fp8
+>> step A2 loading
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+!! A2 failed to load after 167s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+!! A2 failed to load after 167s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 40960
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A2 loading
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+!! A2 failed to load after 164s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+!! A2 failed to load after 164s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A2 loading
+>> step A2 loading
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --enforce-eager
+>> load A2: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --enforce-eager
+>> A2 up in 183s
+>> A2 up in 183s
+>> step A2 speed
+>> step A2 speed
+  A2 vLLM fp8 pp512 rep1: ttft 0.37s  decode 18.3 tok/s  (256 tok)
+  A2 vLLM fp8 pp512 rep1: ttft 0.37s  decode 18.3 tok/s  (256 tok)
+  A2 vLLM fp8 pp512 rep2: ttft 0.35s  decode 18.3 tok/s  (256 tok)
+  A2 vLLM fp8 pp512 rep2: ttft 0.35s  decode 18.3 tok/s  (256 tok)
+  A2 vLLM fp8 pp512 rep3: ttft 0.35s  decode 18.2 tok/s  (256 tok)
+  A2 vLLM fp8 pp512 rep3: ttft 0.35s  decode 18.2 tok/s  (256 tok)
+  A2 vLLM fp8 pp4096 rep1: ttft 0.00s  decode 0.0 tok/s  (0 tok)
+  A2 vLLM fp8 pp4096 rep1: ttft 0.00s  decode 0.0 tok/s  (0 tok)
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 175, in <module>
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 175, in <module>
+    {"speed": speed, "conc": conc, "coding": coding, "summary": summary}[a.cmd](a)
+    {"speed": speed, "conc": conc, "coding": coding, "summary": summary}[a.cmd](a)
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 89, in speed
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 89, in speed
+    e0 = energy(a); r = stream(a, "/v1/completions", completion_body(P.get(n, rep), a.gen)); e1 = energy(a)
+    e0 = energy(a); r = stream(a, "/v1/completions", completion_body(P.get(n, rep), a.gen)); e1 = energy(a)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 35, in stream
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 35, in stream
+    with post(a, path, body) as resp:
+    with post(a, path, body) as resp:
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 24, in post
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 24, in post
+    return urllib.request.urlopen(urllib.request.Request(a.base + path, json.dumps(body).encode(), h), timeout=timeout)
+    return urllib.request.urlopen(urllib.request.Request(a.base + path, json.dumps(body).encode(), h), timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 521, in open
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 630, in http_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 559, in error
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+    result = func(*args)
+             ^^^^^^^^^^^
+             ^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 639, in http_error_default
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 500: Internal Server Error
+urllib.error.HTTPError: HTTP Error 500: Internal Server Error
+!! A2 speed failed
+!! A2 speed failed
+>> step A2 conc
+>> step A2 conc
+Traceback (most recent call last):
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 175, in <module>
+Traceback (most recent call last):
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 175, in <module>
+    {"speed": speed, "conc": conc, "coding": coding, "summary": summary}[a.cmd](a)
+    {"speed": speed, "conc": conc, "coding": coding, "summary": summary}[a.cmd](a)
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 99, in conc
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 99, in conc
+    stream(a, "/v1/completions", completion_body(P.get(256, 99), 32))
+    stream(a, "/v1/completions", completion_body(P.get(256, 99), 32))
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 35, in stream
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 35, in stream
+    with post(a, path, body) as resp:
+    with post(a, path, body) as resp:
+         ^^^^^^^^^^^^^^^^^^^
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 24, in post
+  File "/home/snowdesk/.t3/worktrees/b65-benchmarks/t3-6c3059fc/b65-phase7/oai_bench.py", line 24, in post
+    return urllib.request.urlopen(urllib.request.Request(a.base + path, json.dumps(body).encode(), h), timeout=timeout)
+    return urllib.request.urlopen(urllib.request.Request(a.base + path, json.dumps(body).encode(), h), timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 515, in open
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 515, in open
+    response = self._open(req, data)
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 532, in _open
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 532, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 1373, in http_open
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 1373, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 1348, in do_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 1348, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 1450, in getresponse
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 1450, in getresponse
+    response.begin()
+    response.begin()
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 336, in begin
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 297, in _read_status
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/socket.py", line 720, in readinto
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/snowdesk/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer
+ConnectionResetError: [Errno 104] Connection reset by peer
+!! A2 conc failed
+!! A2 conc failed
+>> step A2 coding
+>> step A2 coding
+  A2 vLLM fp8 c01 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c01 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c01 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c01 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c01 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c01 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c02 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c03 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c04 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c05 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c06 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c07 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c08 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c09 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 0: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 1: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 2: FAIL  0.0 tok/s
+  A2 vLLM fp8 c10 try 2: FAIL  0.0 tok/s
+>> part A3 A3 vLLM sym_int4 + MTP
+>> part A3 A3 vLLM sym_int4 + MTP
+>> step A3 loading
+>> step A3 loading
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+!! A3 failed to load after 167s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+!! A3 failed to load after 167s: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+   (APIServer pid=1)     wait_for_engine_startup(
+   (APIServer pid=1)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+   (APIServer pid=1)     raise RuntimeError(
+   (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+>> step A3 loading
+>> step A3 loading
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+>> load A3: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --enforce-eager --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+>> A3 up in 197s
+>> A3 up in 197s
+>> step A3 speed
+>> step A3 speed
+  A3 vLLM sym_int4 + MTP pp512 rep1: ttft 0.47s  decode 40.0 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp512 rep1: ttft 0.47s  decode 40.0 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp512 rep2: ttft 0.43s  decode 41.5 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp512 rep2: ttft 0.43s  decode 41.5 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp512 rep3: ttft 0.43s  decode 55.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp512 rep3: ttft 0.43s  decode 55.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep1: ttft 2.96s  decode 53.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep1: ttft 2.96s  decode 53.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep2: ttft 2.96s  decode 39.5 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep2: ttft 2.96s  decode 39.5 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep3: ttft 2.96s  decode 45.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp4096 rep3: ttft 2.96s  decode 45.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep1: ttft 12.57s  decode 48.2 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep1: ttft 12.57s  decode 48.2 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep2: ttft 12.60s  decode 46.4 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep2: ttft 12.60s  decode 46.4 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep3: ttft 12.64s  decode 40.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp16384 rep3: ttft 12.64s  decode 40.8 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep1: ttft 27.50s  decode 44.3 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep1: ttft 27.50s  decode 44.3 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep2: ttft 27.50s  decode 57.0 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep2: ttft 27.50s  decode 57.0 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep3: ttft 27.51s  decode 54.5 tok/s  (256 tok)
+  A3 vLLM sym_int4 + MTP pp32768 rep3: ttft 27.51s  decode 54.5 tok/s  (256 tok)
+>> step A3 conc
+>> step A3 conc
+  A3 vLLM sym_int4 + MTP C1 rep1: aggregate 39.1 tok/s, per-stream median 41.6
+  A3 vLLM sym_int4 + MTP C1 rep1: aggregate 39.1 tok/s, per-stream median 41.6
+  A3 vLLM sym_int4 + MTP C1 rep2: aggregate 47.9 tok/s, per-stream median 51.8
+  A3 vLLM sym_int4 + MTP C1 rep2: aggregate 47.9 tok/s, per-stream median 51.8
+  A3 vLLM sym_int4 + MTP C1 rep3: aggregate 56.1 tok/s, per-stream median 61.7
+  A3 vLLM sym_int4 + MTP C1 rep3: aggregate 56.1 tok/s, per-stream median 61.7
+  A3 vLLM sym_int4 + MTP C2 rep1: aggregate 38.2 tok/s, per-stream median 38.8
+  A3 vLLM sym_int4 + MTP C2 rep1: aggregate 38.2 tok/s, per-stream median 38.8
+  A3 vLLM sym_int4 + MTP C2 rep2: aggregate 78.7 tok/s, per-stream median 47.1
+  A3 vLLM sym_int4 + MTP C2 rep2: aggregate 78.7 tok/s, per-stream median 47.1
+  A3 vLLM sym_int4 + MTP C2 rep3: aggregate 57.1 tok/s, per-stream median 49.3
+  A3 vLLM sym_int4 + MTP C2 rep3: aggregate 57.1 tok/s, per-stream median 49.3
+  A3 vLLM sym_int4 + MTP C4 rep1: aggregate 128.1 tok/s, per-stream median 41.6
+  A3 vLLM sym_int4 + MTP C4 rep1: aggregate 128.1 tok/s, per-stream median 41.6
+  A3 vLLM sym_int4 + MTP C4 rep2: aggregate 122.0 tok/s, per-stream median 44.0
+  A3 vLLM sym_int4 + MTP C4 rep2: aggregate 122.0 tok/s, per-stream median 44.0
+  A3 vLLM sym_int4 + MTP C4 rep3: aggregate 130.8 tok/s, per-stream median 52.3
+  A3 vLLM sym_int4 + MTP C4 rep3: aggregate 130.8 tok/s, per-stream median 52.3
+  A3 vLLM sym_int4 + MTP C8 rep1: aggregate 194.3 tok/s, per-stream median 32.6
+  A3 vLLM sym_int4 + MTP C8 rep1: aggregate 194.3 tok/s, per-stream median 32.6
+  A3 vLLM sym_int4 + MTP C8 rep2: aggregate 189.1 tok/s, per-stream median 36.4
+  A3 vLLM sym_int4 + MTP C8 rep2: aggregate 189.1 tok/s, per-stream median 36.4
+  A3 vLLM sym_int4 + MTP C8 rep3: aggregate 197.5 tok/s, per-stream median 35.9
+  A3 vLLM sym_int4 + MTP C8 rep3: aggregate 197.5 tok/s, per-stream median 35.9
+>> step A3 coding
+>> step A3 coding
+  A3 vLLM sym_int4 + MTP c01 try 0: PASS  59.8 tok/s
+  A3 vLLM sym_int4 + MTP c01 try 0: PASS  59.8 tok/s
+  A3 vLLM sym_int4 + MTP c01 try 1: PASS  53.1 tok/s
+  A3 vLLM sym_int4 + MTP c01 try 1: PASS  53.1 tok/s
+  A3 vLLM sym_int4 + MTP c01 try 2: PASS  52.8 tok/s
+  A3 vLLM sym_int4 + MTP c01 try 2: PASS  52.8 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 0: PASS  60.8 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 0: PASS  60.8 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 1: PASS  59.2 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 1: PASS  59.2 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 2: PASS  59.4 tok/s
+  A3 vLLM sym_int4 + MTP c02 try 2: PASS  59.4 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 0: PASS  57.2 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 0: PASS  57.2 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 1: PASS  56.7 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 1: PASS  56.7 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 2: PASS  56.1 tok/s
+  A3 vLLM sym_int4 + MTP c03 try 2: PASS  56.1 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 0: PASS  62.2 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 0: PASS  62.2 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 1: PASS  61.2 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 1: PASS  61.2 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 2: PASS  61.1 tok/s
+  A3 vLLM sym_int4 + MTP c04 try 2: PASS  61.1 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 0: PASS  57.9 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 0: PASS  57.9 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 1: PASS  56.5 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 1: PASS  56.5 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 2: PASS  60.3 tok/s
+  A3 vLLM sym_int4 + MTP c05 try 2: PASS  60.3 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 0: PASS  58.1 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 0: PASS  58.1 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 1: PASS  52.7 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 1: PASS  52.7 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 2: PASS  55.1 tok/s
+  A3 vLLM sym_int4 + MTP c06 try 2: PASS  55.1 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 0: PASS  55.0 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 0: PASS  55.0 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 1: PASS  53.8 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 1: PASS  53.8 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 2: PASS  58.0 tok/s
+  A3 vLLM sym_int4 + MTP c07 try 2: PASS  58.0 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 0: PASS  55.9 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 0: PASS  55.9 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 1: PASS  56.2 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 1: PASS  56.2 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 2: PASS  58.9 tok/s
+  A3 vLLM sym_int4 + MTP c08 try 2: PASS  58.9 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 0: PASS  66.0 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 0: PASS  66.0 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 1: PASS  64.2 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 1: PASS  64.2 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 2: PASS  64.2 tok/s
+  A3 vLLM sym_int4 + MTP c09 try 2: PASS  64.2 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 0: PASS  59.9 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 0: PASS  59.9 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 1: PASS  61.3 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 1: PASS  61.3 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 2: PASS  62.0 tok/s
+  A3 vLLM sym_int4 + MTP c10 try 2: PASS  62.0 tok/s
+>> done p7-20261022-141831
+>> done p7-20261022-141831
+run_id=p7-20261022-161422
+date=2026-10-22T16:14:22-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A1g A3g A2b
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A1g A1g vLLM sym_int4 graphs
+>> step A1g loading
+>> load A1g: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960
+>> A1g up in 354s
+>> step A1g speed
+  A1g vLLM sym_int4 graphs pp512 rep1: ttft 0.40s  decode 28.2 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp512 rep2: ttft 0.36s  decode 28.2 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp512 rep3: ttft 0.35s  decode 28.6 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp4096 rep1: ttft 2.82s  decode 29.2 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp4096 rep2: ttft 2.82s  decode 29.6 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp4096 rep3: ttft 2.82s  decode 30.3 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp16384 rep1: ttft 12.16s  decode 29.0 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp16384 rep2: ttft 12.15s  decode 29.7 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp16384 rep3: ttft 12.16s  decode 28.3 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp32768 rep1: ttft 26.49s  decode 25.9 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp32768 rep2: ttft 26.49s  decode 23.9 tok/s  (256 tok)
+  A1g vLLM sym_int4 graphs pp32768 rep3: ttft 26.50s  decode 27.3 tok/s  (256 tok)
+>> step A1g conc
+  A1g vLLM sym_int4 graphs C1 rep1: aggregate 24.8 tok/s, per-stream median 25.5
+  A1g vLLM sym_int4 graphs C1 rep2: aggregate 25.1 tok/s, per-stream median 25.9
+  A1g vLLM sym_int4 graphs C1 rep3: aggregate 25.8 tok/s, per-stream median 26.6
+  A1g vLLM sym_int4 graphs C2 rep1: aggregate 50.7 tok/s, per-stream median 26.7
+  A1g vLLM sym_int4 graphs C2 rep2: aggregate 53.0 tok/s, per-stream median 28.0
+  A1g vLLM sym_int4 graphs C2 rep3: aggregate 53.4 tok/s, per-stream median 28.2
+  A1g vLLM sym_int4 graphs C4 rep1: aggregate 98.4 tok/s, per-stream median 28.4
+  A1g vLLM sym_int4 graphs C4 rep2: aggregate 97.5 tok/s, per-stream median 28.1
+  A1g vLLM sym_int4 graphs C4 rep3: aggregate 99.5 tok/s, per-stream median 28.7
+  A1g vLLM sym_int4 graphs C8 rep1: aggregate 163.4 tok/s, per-stream median 24.9
+  A1g vLLM sym_int4 graphs C8 rep2: aggregate 143.5 tok/s, per-stream median 21.3
+  A1g vLLM sym_int4 graphs C8 rep3: aggregate 151.9 tok/s, per-stream median 22.8
+>> step A1g coding
+  A1g vLLM sym_int4 graphs c01 try 0: PASS  28.9 tok/s
+  A1g vLLM sym_int4 graphs c01 try 1: PASS  27.8 tok/s
+  A1g vLLM sym_int4 graphs c01 try 2: PASS  28.4 tok/s
+  A1g vLLM sym_int4 graphs c02 try 0: PASS  24.5 tok/s
+  A1g vLLM sym_int4 graphs c02 try 1: PASS  22.9 tok/s
+  A1g vLLM sym_int4 graphs c02 try 2: PASS  25.0 tok/s
+  A1g vLLM sym_int4 graphs c03 try 0: PASS  26.0 tok/s
+  A1g vLLM sym_int4 graphs c03 try 1: PASS  25.8 tok/s
+  A1g vLLM sym_int4 graphs c03 try 2: PASS  27.0 tok/s
+  A1g vLLM sym_int4 graphs c04 try 0: PASS  27.0 tok/s
+  A1g vLLM sym_int4 graphs c04 try 1: PASS  22.7 tok/s
+  A1g vLLM sym_int4 graphs c04 try 2: PASS  26.1 tok/s
+  A1g vLLM sym_int4 graphs c05 try 0: PASS  21.6 tok/s
+  A1g vLLM sym_int4 graphs c05 try 1: PASS  23.3 tok/s
+  A1g vLLM sym_int4 graphs c05 try 2: PASS  25.1 tok/s
+  A1g vLLM sym_int4 graphs c06 try 0: PASS  27.7 tok/s
+  A1g vLLM sym_int4 graphs c06 try 1: PASS  24.0 tok/s
+  A1g vLLM sym_int4 graphs c06 try 2: PASS  24.4 tok/s
+  A1g vLLM sym_int4 graphs c07 try 0: PASS  28.4 tok/s
+  A1g vLLM sym_int4 graphs c07 try 1: PASS  23.4 tok/s
+  A1g vLLM sym_int4 graphs c07 try 2: PASS  26.1 tok/s
+  A1g vLLM sym_int4 graphs c08 try 0: PASS  23.6 tok/s
+  A1g vLLM sym_int4 graphs c08 try 1: PASS  24.9 tok/s
+  A1g vLLM sym_int4 graphs c08 try 2: PASS  25.0 tok/s
+  A1g vLLM sym_int4 graphs c09 try 0: PASS  26.5 tok/s
+  A1g vLLM sym_int4 graphs c09 try 1: PASS  27.6 tok/s
+  A1g vLLM sym_int4 graphs c09 try 2: PASS  25.3 tok/s
+  A1g vLLM sym_int4 graphs c10 try 0: PASS  21.5 tok/s
+  A1g vLLM sym_int4 graphs c10 try 1: PASS  21.9 tok/s
+  A1g vLLM sym_int4 graphs c10 try 2: PASS  23.5 tok/s
+>> part A3g A3g vLLM sym_int4 + MTP graphs
+>> step A3g loading
+>> load A3g: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":3}'
+>> A3g up in 464s
+>> step A3g speed
+  A3g vLLM sym_int4 + MTP graphs pp512 rep1: ttft 0.47s  decode 43.9 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp512 rep2: ttft 0.42s  decode 45.3 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp512 rep3: ttft 0.42s  decode 62.2 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp4096 rep1: ttft 2.94s  decode 48.7 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp4096 rep2: ttft 2.94s  decode 43.3 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp4096 rep3: ttft 2.94s  decode 48.6 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp16384 rep1: ttft 12.55s  decode 49.0 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp16384 rep2: ttft 12.56s  decode 44.1 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp16384 rep3: ttft 12.57s  decode 45.0 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp32768 rep1: ttft 27.41s  decode 44.3 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp32768 rep2: ttft 27.38s  decode 60.7 tok/s  (256 tok)
+  A3g vLLM sym_int4 + MTP graphs pp32768 rep3: ttft 27.38s  decode 57.4 tok/s  (256 tok)
+>> step A3g conc
+  A3g vLLM sym_int4 + MTP graphs C1 rep1: aggregate 41.7 tok/s, per-stream median 44.6
+  A3g vLLM sym_int4 + MTP graphs C1 rep2: aggregate 51.5 tok/s, per-stream median 56.1
+  A3g vLLM sym_int4 + MTP graphs C1 rep3: aggregate 62.0 tok/s, per-stream median 68.8
+  A3g vLLM sym_int4 + MTP graphs C2 rep1: aggregate 38.7 tok/s, per-stream median 42.0
+  A3g vLLM sym_int4 + MTP graphs C2 rep2: aggregate 84.1 tok/s, per-stream median 50.4
+  A3g vLLM sym_int4 + MTP graphs C2 rep3: aggregate 64.6 tok/s, per-stream median 56.2
+  A3g vLLM sym_int4 + MTP graphs C4 rep1: aggregate 134.7 tok/s, per-stream median 42.3
+  A3g vLLM sym_int4 + MTP graphs C4 rep2: aggregate 130.0 tok/s, per-stream median 46.0
+  A3g vLLM sym_int4 + MTP graphs C4 rep3: aggregate 138.8 tok/s, per-stream median 54.1
+  A3g vLLM sym_int4 + MTP graphs C8 rep1: aggregate 197.0 tok/s, per-stream median 35.3
+  A3g vLLM sym_int4 + MTP graphs C8 rep2: aggregate 193.3 tok/s, per-stream median 34.9
+  A3g vLLM sym_int4 + MTP graphs C8 rep3: aggregate 202.5 tok/s, per-stream median 37.2
+>> step A3g coding
+  A3g vLLM sym_int4 + MTP graphs c01 try 0: PASS  66.7 tok/s
+  A3g vLLM sym_int4 + MTP graphs c01 try 1: PASS  59.5 tok/s
+  A3g vLLM sym_int4 + MTP graphs c01 try 2: PASS  58.5 tok/s
+  A3g vLLM sym_int4 + MTP graphs c02 try 0: PASS  68.6 tok/s
+  A3g vLLM sym_int4 + MTP graphs c02 try 1: PASS  66.4 tok/s
+  A3g vLLM sym_int4 + MTP graphs c02 try 2: PASS  66.0 tok/s
+  A3g vLLM sym_int4 + MTP graphs c03 try 0: PASS  63.5 tok/s
+  A3g vLLM sym_int4 + MTP graphs c03 try 1: PASS  63.6 tok/s
+  A3g vLLM sym_int4 + MTP graphs c03 try 2: PASS  62.5 tok/s
+  A3g vLLM sym_int4 + MTP graphs c04 try 0: PASS  69.7 tok/s
+  A3g vLLM sym_int4 + MTP graphs c04 try 1: PASS  67.9 tok/s
+  A3g vLLM sym_int4 + MTP graphs c04 try 2: PASS  67.7 tok/s
+  A3g vLLM sym_int4 + MTP graphs c05 try 0: PASS  62.7 tok/s
+  A3g vLLM sym_int4 + MTP graphs c05 try 1: PASS  59.0 tok/s
+  A3g vLLM sym_int4 + MTP graphs c05 try 2: PASS  62.6 tok/s
+  A3g vLLM sym_int4 + MTP graphs c06 try 0: PASS  60.6 tok/s
+  A3g vLLM sym_int4 + MTP graphs c06 try 1: PASS  55.1 tok/s
+  A3g vLLM sym_int4 + MTP graphs c06 try 2: PASS  57.4 tok/s
+  A3g vLLM sym_int4 + MTP graphs c07 try 0: PASS  56.1 tok/s
+  A3g vLLM sym_int4 + MTP graphs c07 try 1: PASS  54.3 tok/s
+  A3g vLLM sym_int4 + MTP graphs c07 try 2: PASS  60.0 tok/s
+  A3g vLLM sym_int4 + MTP graphs c08 try 0: PASS  59.8 tok/s
+  A3g vLLM sym_int4 + MTP graphs c08 try 1: PASS  60.1 tok/s
+  A3g vLLM sym_int4 + MTP graphs c08 try 2: PASS  63.3 tok/s
+  A3g vLLM sym_int4 + MTP graphs c09 try 0: PASS  70.5 tok/s
+  A3g vLLM sym_int4 + MTP graphs c09 try 1: PASS  69.2 tok/s
+  A3g vLLM sym_int4 + MTP graphs c09 try 2: PASS  68.8 tok/s
+  A3g vLLM sym_int4 + MTP graphs c10 try 0: PASS  63.3 tok/s
+  A3g vLLM sym_int4 + MTP graphs c10 try 1: PASS  65.4 tok/s
+  A3g vLLM sym_int4 + MTP graphs c10 try 2: PASS  65.9 tok/s
+>> part A2b A2b vLLM fp8 small batch
+>> step A2b loading
+>> load A2b: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --max-num-batched-tokens 512 --enforce-eager
+!! A2b failed to load after 655s: --quantization fp8 --gpu-memory-utilization 0.95 --max-model-len 8192 --max-num-batched-tokens 512 --enforce-eager
+   (EngineCore pid=380)                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   (EngineCore pid=380)   File "/opt/venv/lib/python3.12/site-packages/vllm/v1/worker/gpu_model_runner.py", line 7313, in _allocate_kv_cache_tensors
+   (EngineCore pid=380)     tensor = torch.zeros(
+   (EngineCore pid=380)              ^^^^^^^^^^^^
+   (EngineCore pid=380) RuntimeError: level_zero backend failed with error: 40 (UR_RESULT_ERROR_OUT_OF_RESOURCES)
+!! A2b: no variant loaded
+>> done p7-20261022-161422
+run_id=p7-20261022-165453
+date=2026-10-22T16:54:53-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A4 A3k2 A3k4
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A4 A4 exl3xpu EXL3 4bpw + MTP
+>> step A4 loading
+>> load A4: --set vllm.enable_prefix_caching=false --set vllm.mamba_cache_mode=null
+>> A4 up in 369s
+>> step A4 speed
+  A4 exl3xpu EXL3 4bpw + MTP pp512 rep1: ttft 0.39s  decode 36.3 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp512 rep2: ttft 0.39s  decode 42.0 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp512 rep3: ttft 0.39s  decode 48.5 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp4096 rep1: ttft 2.65s  decode 45.0 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp4096 rep2: ttft 1.91s  decode 34.5 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp4096 rep3: ttft 1.91s  decode 43.9 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp16384 rep1: ttft 8.20s  decode 44.6 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp16384 rep2: ttft 8.22s  decode 39.6 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp16384 rep3: ttft 8.22s  decode 42.0 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp32768 rep1: ttft 18.46s  decode 44.6 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp32768 rep2: ttft 18.46s  decode 46.5 tok/s  (256 tok)
+  A4 exl3xpu EXL3 4bpw + MTP pp32768 rep3: ttft 18.47s  decode 39.2 tok/s  (256 tok)
+>> step A4 conc
+  A4 exl3xpu EXL3 4bpw + MTP C1 rep1: aggregate 38.0 tok/s, per-stream median 40.2
+  A4 exl3xpu EXL3 4bpw + MTP C1 rep2: aggregate 39.2 tok/s, per-stream median 41.5
+  A4 exl3xpu EXL3 4bpw + MTP C1 rep3: aggregate 50.2 tok/s, per-stream median 54.2
+  A4 exl3xpu EXL3 4bpw + MTP C2 rep1: aggregate 36.4 tok/s, per-stream median 34.4
+  A4 exl3xpu EXL3 4bpw + MTP C2 rep2: aggregate 67.1 tok/s, per-stream median 44.9
+  A4 exl3xpu EXL3 4bpw + MTP C2 rep3: aggregate 60.3 tok/s, per-stream median 42.3
+  A4 exl3xpu EXL3 4bpw + MTP C4 rep1: aggregate 103.2 tok/s, per-stream median 32.5
+  A4 exl3xpu EXL3 4bpw + MTP C4 rep2: aggregate 105.5 tok/s, per-stream median 37.3
+  A4 exl3xpu EXL3 4bpw + MTP C4 rep3: aggregate 112.5 tok/s, per-stream median 36.9
+  A4 exl3xpu EXL3 4bpw + MTP C8 rep1: aggregate 213.3 tok/s, per-stream median 35.1
+  A4 exl3xpu EXL3 4bpw + MTP C8 rep2: aggregate 207.5 tok/s, per-stream median 37.0
+  A4 exl3xpu EXL3 4bpw + MTP C8 rep3: aggregate 205.9 tok/s, per-stream median 36.5
+>> step A4 coding
+  A4 exl3xpu EXL3 4bpw + MTP c01 try 0: PASS  45.9 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c01 try 1: PASS  46.6 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c01 try 2: PASS  44.8 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c02 try 0: PASS  49.9 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c02 try 1: PASS  50.1 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c02 try 2: PASS  48.8 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c03 try 0: PASS  55.2 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c03 try 1: PASS  52.1 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c03 try 2: PASS  51.6 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c04 try 0: PASS  55.1 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c04 try 1: PASS  53.8 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c04 try 2: PASS  53.9 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c05 try 0: PASS  51.4 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c05 try 1: PASS  50.9 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c05 try 2: PASS  50.3 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c06 try 0: PASS  47.3 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c06 try 1: PASS  46.2 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c06 try 2: PASS  52.0 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c07 try 0: PASS  49.2 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c07 try 1: PASS  48.2 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c07 try 2: PASS  53.3 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c08 try 0: PASS  49.1 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c08 try 1: PASS  50.0 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c08 try 2: PASS  46.8 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c09 try 0: PASS  60.1 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c09 try 1: PASS  58.8 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c09 try 2: PASS  58.7 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c10 try 0: PASS  57.6 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c10 try 1: PASS  56.2 tok/s
+  A4 exl3xpu EXL3 4bpw + MTP c10 try 2: PASS  56.2 tok/s
+>> part A3k2 A3k2 vLLM sym_int4 + MTP k=2 graphs
+>> step A3k2 loading
+>> load A3k2: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'
+>> A3k2 up in 328s
+>> step A3k2 coding
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c01 try 0: PASS  58.5 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c01 try 1: PASS  57.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c01 try 2: PASS  56.9 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c02 try 0: PASS  59.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c02 try 1: PASS  58.2 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c02 try 2: PASS  58.4 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c03 try 0: PASS  58.9 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c03 try 1: PASS  55.5 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c03 try 2: PASS  55.4 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c04 try 0: PASS  61.3 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c04 try 1: PASS  57.2 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c04 try 2: PASS  59.0 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c05 try 0: PASS  59.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c05 try 1: PASS  58.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c05 try 2: PASS  57.3 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c06 try 0: PASS  60.3 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c06 try 1: PASS  58.0 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c06 try 2: PASS  57.7 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c07 try 0: PASS  60.3 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c07 try 1: PASS  58.9 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c07 try 2: PASS  58.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c08 try 0: PASS  56.0 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c08 try 1: PASS  55.9 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c08 try 2: PASS  55.5 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c09 try 0: PASS  60.9 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c09 try 1: PASS  59.2 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c09 try 2: PASS  60.3 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c10 try 0: PASS  60.2 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c10 try 1: PASS  59.6 tok/s
+  A3k2 vLLM sym_int4 + MTP k=2 graphs c10 try 2: PASS  56.0 tok/s
+>> part A3k4 A3k4 vLLM sym_int4 + MTP k=4 graphs
+>> step A3k4 loading
+>> load A3k4: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":4}'
+>> A3k4 up in 318s
+>> step A3k4 coding
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c01 try 0: PASS  75.2 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c01 try 1: PASS  67.6 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c01 try 2: PASS  75.2 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c02 try 0: PASS  68.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c02 try 1: PASS  56.4 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c02 try 2: PASS  64.8 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c03 try 0: PASS  72.0 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c03 try 1: PASS  66.6 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c03 try 2: PASS  68.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c04 try 0: PASS  76.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c04 try 1: PASS  77.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c04 try 2: PASS  77.4 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c05 try 0: PASS  70.9 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c05 try 1: PASS  67.4 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c05 try 2: PASS  64.6 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c06 try 0: PASS  67.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c06 try 1: PASS  66.4 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c06 try 2: PASS  66.5 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c07 try 0: PASS  69.1 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c07 try 1: PASS  56.4 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c07 try 2: PASS  68.1 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c08 try 0: PASS  63.1 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c08 try 1: PASS  63.2 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c08 try 2: PASS  70.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c09 try 0: PASS  78.3 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c09 try 1: PASS  76.5 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c09 try 2: PASS  77.1 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c10 try 0: PASS  74.8 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c10 try 1: PASS  69.5 tok/s
+  A3k4 vLLM sym_int4 + MTP k=4 graphs c10 try 2: PASS  73.3 tok/s
+>> done p7-20261022-165453
+run_id=p7-20261022-172120
+date=2026-10-22T17:21:20-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=B1 B2 B3
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part B1 B1 Strata Coder IQ1_M drafts on
+>> step B1 loading
+>> load B1: 
+!! B1 failed to load after 5s: 
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+     File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+       return io.open(self, mode, buffering, encoding, errors, newline)
+              ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   FileNotFoundError: [Errno 2] No such file or directory: 'raw/p7-20261022-172120/strata-B1.json'
+!! B1: no variant loaded
+>> part B2 B2 Strata Coder IQ1_M drafts off
+>> step B2 loading
+>> load B2: spec=0 nomtp
+!! B2 failed to load after 6s: spec=0 nomtp
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+     File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+       return io.open(self, mode, buffering, encoding, errors, newline)
+              ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   FileNotFoundError: [Errno 2] No such file or directory: 'raw/p7-20261022-172120/strata-B2.json'
+!! B2: no variant loaded
+>> part B3 B3 llama.cpp SYCL Coder IQ1_M
+>> step B3 loading
+>> load B3: -ngl 999 --override-tensor per_layer_token_embd=CPU -fa on -ctk q8_0 -ctv q8_0 -c 40960 -np 1
+>> B3 up in 93s
+>> step B3 speed
+  B3 llama.cpp SYCL Coder IQ1_M pp512 rep1: ttft 2.07s  decode 18.7 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp512 rep2: ttft 1.75s  decode 18.5 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp512 rep3: ttft 1.93s  decode 18.9 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp4096 rep1: ttft 10.11s  decode 18.5 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp4096 rep2: ttft 10.04s  decode 18.3 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp4096 rep3: ttft 9.96s  decode 18.4 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp16384 rep1: ttft 38.71s  decode 16.6 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp16384 rep2: ttft 38.35s  decode 16.5 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp16384 rep3: ttft 38.24s  decode 16.6 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp32768 rep1: ttft 81.90s  decode 14.5 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp32768 rep2: ttft 81.26s  decode 14.3 tok/s  (256 tok)
+  B3 llama.cpp SYCL Coder IQ1_M pp32768 rep3: ttft 84.57s  decode 14.5 tok/s  (256 tok)
+>> step B3 coding
+  B3 llama.cpp SYCL Coder IQ1_M c01 try 0: PASS  19.6 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c01 try 1: PASS  19.7 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c01 try 2: PASS  19.7 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c02 try 0: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c02 try 1: PASS  18.8 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c02 try 2: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c03 try 0: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c03 try 1: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c03 try 2: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c04 try 0: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c04 try 1: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c04 try 2: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c05 try 0: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c05 try 1: PASS  19.7 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c05 try 2: PASS  19.7 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c06 try 0: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c06 try 1: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c06 try 2: PASS  19.6 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c07 try 0: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c07 try 1: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c07 try 2: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c08 try 0: FAIL  19.2 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c08 try 1: FAIL  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c08 try 2: FAIL  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c09 try 0: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c09 try 1: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c09 try 2: PASS  19.5 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c10 try 0: PASS  19.3 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c10 try 1: PASS  19.4 tok/s
+  B3 llama.cpp SYCL Coder IQ1_M c10 try 2: PASS  19.4 tok/s
+>> done p7-20261022-172120
+run_id=p7-20261022-173629
+date=2026-10-22T17:36:29-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=B1 B2 A3k5 A3k6
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part B1 B1 Strata Coder IQ1_M drafts on
+>> step B1 loading
+>> load B1: 
+>> B1 up in 50s
+>> step B1 speed
+  B1 Strata Coder IQ1_M drafts on pp512 rep1: ttft 1.26s  decode 48.8 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp512 rep2: ttft 1.24s  decode 50.4 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp512 rep3: ttft 1.24s  decode 49.9 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp4096 rep1: ttft 4.46s  decode 52.2 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp4096 rep2: ttft 4.37s  decode 48.6 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp4096 rep3: ttft 4.32s  decode 46.9 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp16384 rep1: ttft 16.05s  decode 81.8 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp16384 rep2: ttft 16.07s  decode 82.0 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp16384 rep3: ttft 16.06s  decode 69.1 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp32768 rep1: ttft 32.87s  decode 60.1 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp32768 rep2: ttft 32.92s  decode 54.7 tok/s  (256 tok)
+  B1 Strata Coder IQ1_M drafts on pp32768 rep3: ttft 32.97s  decode 55.0 tok/s  (256 tok)
+>> step B1 coding
+  B1 Strata Coder IQ1_M drafts on c01 try 0: PASS  61.7 tok/s
+  B1 Strata Coder IQ1_M drafts on c01 try 1: PASS  61.6 tok/s
+  B1 Strata Coder IQ1_M drafts on c01 try 2: PASS  60.9 tok/s
+  B1 Strata Coder IQ1_M drafts on c02 try 0: PASS  73.3 tok/s
+  B1 Strata Coder IQ1_M drafts on c02 try 1: PASS  73.2 tok/s
+  B1 Strata Coder IQ1_M drafts on c02 try 2: FAIL  73.6 tok/s
+  B1 Strata Coder IQ1_M drafts on c03 try 0: PASS  79.6 tok/s
+  B1 Strata Coder IQ1_M drafts on c03 try 1: PASS  70.8 tok/s
+  B1 Strata Coder IQ1_M drafts on c03 try 2: PASS  78.9 tok/s
+  B1 Strata Coder IQ1_M drafts on c04 try 0: PASS  78.4 tok/s
+  B1 Strata Coder IQ1_M drafts on c04 try 1: PASS  77.5 tok/s
+  B1 Strata Coder IQ1_M drafts on c04 try 2: PASS  78.3 tok/s
+  B1 Strata Coder IQ1_M drafts on c05 try 0: PASS  75.3 tok/s
+  B1 Strata Coder IQ1_M drafts on c05 try 1: PASS  75.1 tok/s
+  B1 Strata Coder IQ1_M drafts on c05 try 2: PASS  75.2 tok/s
+  B1 Strata Coder IQ1_M drafts on c06 try 0: PASS  73.8 tok/s
+  B1 Strata Coder IQ1_M drafts on c06 try 1: PASS  72.9 tok/s
+  B1 Strata Coder IQ1_M drafts on c06 try 2: PASS  73.8 tok/s
+  B1 Strata Coder IQ1_M drafts on c07 try 0: PASS  62.2 tok/s
+  B1 Strata Coder IQ1_M drafts on c07 try 1: PASS  57.0 tok/s
+  B1 Strata Coder IQ1_M drafts on c07 try 2: PASS  64.4 tok/s
+  B1 Strata Coder IQ1_M drafts on c08 try 0: FAIL  74.1 tok/s
+  B1 Strata Coder IQ1_M drafts on c08 try 1: FAIL  67.3 tok/s
+  B1 Strata Coder IQ1_M drafts on c08 try 2: FAIL  65.3 tok/s
+  B1 Strata Coder IQ1_M drafts on c09 try 0: PASS  77.5 tok/s
+  B1 Strata Coder IQ1_M drafts on c09 try 1: PASS  79.8 tok/s
+  B1 Strata Coder IQ1_M drafts on c09 try 2: PASS  77.4 tok/s
+  B1 Strata Coder IQ1_M drafts on c10 try 0: PASS  74.8 tok/s
+  B1 Strata Coder IQ1_M drafts on c10 try 1: PASS  71.6 tok/s
+  B1 Strata Coder IQ1_M drafts on c10 try 2: PASS  71.7 tok/s
+>> part B2 B2 Strata Coder IQ1_M drafts off
+>> step B2 loading
+>> load B2: spec=0 nomtp
+!! B2 failed to load after 5s: spec=0 nomtp
+   the engine log's last lines:
+     [strata] 2026-10-22 17:41:58 engine started: /home/snowdesk/strata-b65/Strata/sycl/serve/strata-sycl.sh --serve --pack /work/Strata-data/packs/coder-iq1_m --native /work/Strata-data/models/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00001-of-00002.gguf --ple-gguf /work/Strata-data/models/Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M-00002-of-00002.gguf --expert-profile /work/Strata/data/expert-profile-coder.bin --expert-cache auto --spec 0 --max-context 40960 --kv int8 --stream-experts --vram-reserve-mib 2048 --prefill 4096
+     strata generate: PCIe probe: 5.6 GB/s host->device (best of 5.5 5.6 5.6 5.6) -> pcie_frac 0.16 (default 0.55)
+     strata generate: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+     strata generate: /work/Strata-data/packs/coder-iq1_m is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) and --prefill CHUNK
+!! B2: no variant loaded
+>> part A3k5 A3k5 vLLM sym_int4 + MTP k=5 graphs
+>> step A3k5 loading
+>> load A3k5: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'
+>> A3k5 up in 327s
+>> step A3k5 coding
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c01 try 0: PASS  60.8 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c01 try 1: PASS  66.8 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c01 try 2: PASS  67.8 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c02 try 0: PASS  72.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c02 try 1: PASS  65.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c02 try 2: PASS  65.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c03 try 0: PASS  72.6 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c03 try 1: PASS  63.7 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c03 try 2: PASS  69.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c04 try 0: PASS  77.0 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c04 try 1: PASS  74.3 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c04 try 2: PASS  74.9 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c05 try 0: PASS  70.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c05 try 1: PASS  62.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c05 try 2: PASS  62.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c06 try 0: PASS  76.6 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c06 try 1: PASS  75.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c06 try 2: PASS  76.0 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c07 try 0: PASS  74.2 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c07 try 1: PASS  81.6 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c07 try 2: PASS  80.4 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c08 try 0: PASS  70.4 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c08 try 1: PASS  65.5 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c08 try 2: FAIL  74.4 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c09 try 0: PASS  93.3 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c09 try 1: PASS  79.7 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c09 try 2: PASS  87.9 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c10 try 0: PASS  81.3 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c10 try 1: PASS  81.5 tok/s
+  A3k5 vLLM sym_int4 + MTP k=5 graphs c10 try 2: PASS  78.5 tok/s
+>> part A3k6 A3k6 vLLM sym_int4 + MTP k=6 graphs
+>> step A3k6 loading
+>> load A3k6: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":6}'
+>> A3k6 up in 332s
+>> step A3k6 coding
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c01 try 0: PASS  73.2 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c01 try 1: PASS  53.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c01 try 2: PASS  57.4 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c02 try 0: PASS  65.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c02 try 1: PASS  71.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c02 try 2: PASS  75.1 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c03 try 0: PASS  76.0 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c03 try 1: PASS  70.4 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c03 try 2: PASS  66.6 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c04 try 0: PASS  87.5 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c04 try 1: PASS  79.7 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c04 try 2: PASS  84.5 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c05 try 0: PASS  71.2 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c05 try 1: PASS  85.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c05 try 2: PASS  69.4 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c06 try 0: PASS  72.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c06 try 1: PASS  67.2 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c06 try 2: PASS  67.2 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c07 try 0: PASS  65.5 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c07 try 1: PASS  77.2 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c07 try 2: PASS  64.6 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c08 try 0: PASS  69.1 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c08 try 1: PASS  68.6 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c08 try 2: PASS  75.0 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c09 try 0: PASS  94.4 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c09 try 1: PASS  86.0 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c09 try 2: PASS  86.3 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c10 try 0: PASS  83.6 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c10 try 1: PASS  70.4 tok/s
+  A3k6 vLLM sym_int4 + MTP k=6 graphs c10 try 2: PASS  78.6 tok/s
+>> done p7-20261022-173629
+run_id=p7-20261022-175606
+date=2026-10-22T17:56:06-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=B2
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part B2 B2 Strata Coder IQ1_M no MTP
+>> step B2 loading
+>> load B2: spec=2 nomtp
+>> B2 up in 97s
+>> step B2 speed
+  B2 Strata Coder IQ1_M no MTP pp512 rep1: ttft 1.32s  decode 38.3 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp512 rep2: ttft 1.30s  decode 37.6 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp512 rep3: ttft 1.27s  decode 37.9 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp4096 rep1: ttft 4.81s  decode 40.6 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp4096 rep2: ttft 4.39s  decode 37.4 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp4096 rep3: ttft 4.33s  decode 39.1 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp16384 rep1: ttft 16.08s  decode 38.3 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp16384 rep2: ttft 16.07s  decode 44.8 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp16384 rep3: ttft 16.05s  decode 40.9 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp32768 rep1: ttft 32.93s  decode 41.9 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp32768 rep2: ttft 32.86s  decode 40.9 tok/s  (256 tok)
+  B2 Strata Coder IQ1_M no MTP pp32768 rep3: ttft 32.89s  decode 39.3 tok/s  (256 tok)
+>> step B2 coding
+  B2 Strata Coder IQ1_M no MTP c01 try 0: PASS  38.6 tok/s
+  B2 Strata Coder IQ1_M no MTP c01 try 1: PASS  38.5 tok/s
+  B2 Strata Coder IQ1_M no MTP c01 try 2: PASS  38.4 tok/s
+  B2 Strata Coder IQ1_M no MTP c02 try 0: PASS  38.4 tok/s
+  B2 Strata Coder IQ1_M no MTP c02 try 1: PASS  38.3 tok/s
+  B2 Strata Coder IQ1_M no MTP c02 try 2: FAIL  39.0 tok/s
+  B2 Strata Coder IQ1_M no MTP c03 try 0: PASS  39.9 tok/s
+  B2 Strata Coder IQ1_M no MTP c03 try 1: PASS  40.0 tok/s
+  B2 Strata Coder IQ1_M no MTP c03 try 2: PASS  40.4 tok/s
+  B2 Strata Coder IQ1_M no MTP c04 try 0: PASS  39.9 tok/s
+  B2 Strata Coder IQ1_M no MTP c04 try 1: PASS  39.6 tok/s
+  B2 Strata Coder IQ1_M no MTP c04 try 2: PASS  39.8 tok/s
+  B2 Strata Coder IQ1_M no MTP c05 try 0: PASS  39.7 tok/s
+  B2 Strata Coder IQ1_M no MTP c05 try 1: PASS  39.8 tok/s
+  B2 Strata Coder IQ1_M no MTP c05 try 2: PASS  39.7 tok/s
+  B2 Strata Coder IQ1_M no MTP c06 try 0: PASS  38.6 tok/s
+  B2 Strata Coder IQ1_M no MTP c06 try 1: PASS  38.4 tok/s
+  B2 Strata Coder IQ1_M no MTP c06 try 2: PASS  38.5 tok/s
+  B2 Strata Coder IQ1_M no MTP c07 try 0: PASS  38.1 tok/s
+  B2 Strata Coder IQ1_M no MTP c07 try 1: PASS  38.4 tok/s
+  B2 Strata Coder IQ1_M no MTP c07 try 2: PASS  38.2 tok/s
+  B2 Strata Coder IQ1_M no MTP c08 try 0: FAIL  38.2 tok/s
+  B2 Strata Coder IQ1_M no MTP c08 try 1: FAIL  38.2 tok/s
+  B2 Strata Coder IQ1_M no MTP c08 try 2: FAIL  37.8 tok/s
+  B2 Strata Coder IQ1_M no MTP c09 try 0: PASS  38.8 tok/s
+  B2 Strata Coder IQ1_M no MTP c09 try 1: PASS  38.7 tok/s
+  B2 Strata Coder IQ1_M no MTP c09 try 2: PASS  38.7 tok/s
+  B2 Strata Coder IQ1_M no MTP c10 try 0: PASS  38.2 tok/s
+  B2 Strata Coder IQ1_M no MTP c10 try 1: PASS  38.3 tok/s
+  B2 Strata Coder IQ1_M no MTP c10 try 2: PASS  38.5 tok/s
+>> done p7-20261022-175606
+run_id=p7-20261022-180341
+date=2026-10-22T18:03:41-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A5
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A5 A5 vLLM sym_int4 + MTP k=5 graphs
+>> step A5 loading
+>> load A5: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'
+>> A5 up in 367s
+>> step A5 speed
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep1: ttft 0.48s  decode 38.3 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep2: ttft 0.44s  decode 45.2 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep3: ttft 0.44s  decode 72.8 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep1: ttft 2.96s  decode 47.0 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep2: ttft 2.96s  decode 43.6 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep3: ttft 2.97s  decode 60.0 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep1: ttft 12.64s  decode 46.4 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep2: ttft 12.64s  decode 52.8 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep3: ttft 12.65s  decode 50.6 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep1: ttft 27.54s  decode 53.7 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep2: ttft 27.53s  decode 43.2 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep3: ttft 27.57s  decode 51.6 tok/s  (256 tok)
+>> step A5 conc
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep1: aggregate 48.2 tok/s, per-stream median 52.1
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep2: aggregate 65.0 tok/s, per-stream median 72.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep3: aggregate 66.4 tok/s, per-stream median 74.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep1: aggregate 36.0 tok/s, per-stream median 37.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep2: aggregate 66.4 tok/s, per-stream median 48.9
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep3: aggregate 56.3 tok/s, per-stream median 52.1
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep1: aggregate 133.2 tok/s, per-stream median 42.0
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep2: aggregate 116.9 tok/s, per-stream median 44.1
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep3: aggregate 115.3 tok/s, per-stream median 45.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep1: aggregate 135.1 tok/s, per-stream median 30.9
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep2: aggregate 136.8 tok/s, per-stream median 31.8
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep3: aggregate 137.9 tok/s, per-stream median 35.5
+>> step A5 coding
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 0: PASS  74.1 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 1: PASS  68.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 2: PASS  70.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 0: PASS  71.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 1: PASS  54.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 2: PASS  55.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 0: PASS  76.3 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 1: PASS  69.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 2: PASS  71.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 0: PASS  80.1 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 1: PASS  77.5 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 2: PASS  76.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 0: PASS  73.3 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 1: PASS  64.7 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 2: PASS  63.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 0: PASS  76.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 1: PASS  74.5 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 2: PASS  74.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 0: PASS  71.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 1: PASS  77.7 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 2: PASS  78.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 0: PASS  68.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 1: PASS  63.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 2: FAIL  71.4 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 0: PASS  89.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 1: PASS  82.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 2: PASS  87.5 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 0: PASS  78.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 1: PASS  79.7 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 2: PASS  76.0 tok/s
+>> done p7-20261022-180341
+run_id=p7-20261023-093219
+date=2026-10-23T09:32:20-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A0m3 A0mk2 A0mk4 A0mk5 A0mk6 B3n
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A0m3 A0m3 llama.cpp SYCL Q4_K_M + MTP k=3
+>> step A0m3 loading
+>> load A0m3: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 3
+>> A0m3 up in 9s
+>> step A0m3 speed
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp512 rep1: ttft 1.27s  decode 30.7 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp512 rep2: ttft 1.27s  decode 35.0 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp512 rep3: ttft 1.28s  decode 34.1 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp4096 rep1: ttft 5.62s  decode 32.5 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp4096 rep2: ttft 5.76s  decode 30.2 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp4096 rep3: ttft 5.76s  decode 43.2 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp16384 rep1: ttft 22.00s  decode 27.8 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp16384 rep2: ttft 22.43s  decode 30.9 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp16384 rep3: ttft 22.81s  decode 33.1 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp32768 rep1: ttft 49.17s  decode 27.4 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp32768 rep2: ttft 49.32s  decode 25.5 tok/s  (256 tok)
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 pp32768 rep3: ttft 49.25s  decode 29.1 tok/s  (256 tok)
+>> step A0m3 conc
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C1 rep1: aggregate 32.1 tok/s, per-stream median 37.3
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C1 rep2: aggregate 31.8 tok/s, per-stream median 37.3
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C1 rep3: aggregate 33.7 tok/s, per-stream median 40.3
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C2 rep1: aggregate 33.3 tok/s, per-stream median 18.9
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C2 rep2: aggregate 30.6 tok/s, per-stream median 18.2
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C2 rep3: aggregate 35.7 tok/s, per-stream median 20.4
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C4 rep1: aggregate 22.6 tok/s, per-stream median 6.1
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C4 rep2: aggregate 24.8 tok/s, per-stream median 7.0
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C4 rep3: aggregate 23.6 tok/s, per-stream median 6.6
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C8 rep1: aggregate 38.5 tok/s, per-stream median 5.5
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C8 rep2: aggregate 37.4 tok/s, per-stream median 5.6
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 C8 rep3: aggregate 33.9 tok/s, per-stream median 4.8
+>> step A0m3 coding
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 0: PASS  40.0 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 1: PASS  40.0 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 2: PASS  39.9 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 0: PASS  41.1 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 1: PASS  40.3 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 2: PASS  41.3 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 0: PASS  43.1 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 1: PASS  43.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 2: PASS  43.1 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 0: PASS  45.7 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 1: PASS  44.9 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 2: PASS  44.8 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 0: PASS  43.4 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 1: PASS  44.1 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 2: PASS  43.0 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 0: PASS  43.3 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 1: PASS  44.0 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 2: PASS  43.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 0: PASS  44.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 1: PASS  44.3 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 2: PASS  38.5 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 0: PASS  39.5 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 1: PASS  40.7 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 2: PASS  40.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 0: PASS  47.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 1: PASS  47.7 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 2: PASS  47.6 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 0: PASS  36.5 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 1: PASS  39.5 tok/s
+  A0m3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 2: PASS  38.2 tok/s
+>> part A0mk2 A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2
+>> step A0mk2 loading
+>> load A0mk2: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 2
+>> A0mk2 up in 9s
+>> step A0mk2 coding
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c01 try 0: PASS  36.2 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c01 try 1: PASS  36.0 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c01 try 2: PASS  36.1 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c02 try 0: PASS  38.0 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c02 try 1: PASS  37.5 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c02 try 2: PASS  39.2 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c03 try 0: PASS  38.8 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c03 try 1: PASS  38.9 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c03 try 2: PASS  38.1 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c04 try 0: PASS  40.6 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c04 try 1: PASS  39.3 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c04 try 2: PASS  38.6 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c05 try 0: PASS  38.8 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c05 try 1: PASS  39.3 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c05 try 2: PASS  38.8 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c06 try 0: PASS  39.2 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c06 try 1: PASS  39.7 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c06 try 2: PASS  39.4 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c07 try 0: PASS  40.2 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c07 try 1: PASS  39.6 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c07 try 2: PASS  37.7 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c08 try 0: PASS  35.7 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c08 try 1: PASS  36.5 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c08 try 2: PASS  37.3 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c09 try 0: PASS  41.0 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c09 try 1: PASS  41.0 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c09 try 2: PASS  40.8 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c10 try 0: PASS  40.4 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c10 try 1: PASS  40.4 tok/s
+  A0mk2 llama.cpp SYCL Q4_K_M + MTP k=2 c10 try 2: PASS  40.0 tok/s
+>> part A0mk4 A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4
+>> step A0mk4 loading
+>> load A0mk4: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 4
+>> A0mk4 up in 10s
+>> step A0mk4 coding
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c01 try 0: PASS  37.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c01 try 1: PASS  37.0 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c01 try 2: PASS  37.0 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c02 try 0: PASS  35.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c02 try 1: PASS  36.2 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c02 try 2: PASS  40.4 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c03 try 0: PASS  38.4 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c03 try 1: PASS  41.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c03 try 2: PASS  38.7 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c04 try 0: PASS  41.8 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c04 try 1: PASS  41.6 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c04 try 2: PASS  39.5 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c05 try 0: PASS  38.9 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c05 try 1: PASS  40.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c05 try 2: PASS  38.8 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c06 try 0: PASS  37.2 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c06 try 1: PASS  40.0 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c06 try 2: PASS  41.5 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c07 try 0: PASS  42.4 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c07 try 1: PASS  41.3 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c07 try 2: PASS  34.0 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c08 try 0: PASS  33.6 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c08 try 1: PASS  35.9 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c08 try 2: PASS  35.5 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c09 try 0: PASS  44.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c09 try 1: PASS  44.1 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c09 try 2: PASS  41.9 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c10 try 0: PASS  41.3 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c10 try 1: PASS  41.3 tok/s
+  A0mk4 llama.cpp SYCL Q4_K_M + MTP k=4 c10 try 2: PASS  42.5 tok/s
+>> part A0mk5 A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5
+>> step A0mk5 loading
+>> load A0mk5: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 5
+>> A0mk5 up in 9s
+>> step A0mk5 coding
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c01 try 0: PASS  29.1 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c01 try 1: PASS  29.1 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c01 try 2: PASS  29.1 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c02 try 0: PASS  33.9 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c02 try 1: PASS  34.0 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c02 try 2: PASS  36.8 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c03 try 0: PASS  39.2 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c03 try 1: PASS  39.1 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c03 try 2: PASS  38.3 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c04 try 0: PASS  43.6 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c04 try 1: PASS  41.6 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c04 try 2: PASS  41.3 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c05 try 0: PASS  37.4 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c05 try 1: PASS  38.9 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c05 try 2: PASS  37.4 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c06 try 0: PASS  37.2 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c06 try 1: PASS  38.6 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c06 try 2: PASS  38.2 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c07 try 0: PASS  43.6 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c07 try 1: PASS  38.6 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c07 try 2: PASS  33.7 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c08 try 0: PASS  32.7 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c08 try 1: PASS  35.1 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c08 try 2: PASS  34.3 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c09 try 0: PASS  45.3 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c09 try 1: PASS  45.7 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c09 try 2: PASS  45.8 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c10 try 0: PASS  42.5 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c10 try 1: PASS  43.9 tok/s
+  A0mk5 llama.cpp SYCL Q4_K_M + MTP k=5 c10 try 2: PASS  42.6 tok/s
+>> part A0mk6 A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6
+>> step A0mk6 loading
+>> load A0mk6: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 6
+>> A0mk6 up in 9s
+>> step A0mk6 coding
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c01 try 0: PASS  29.4 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c01 try 1: PASS  29.4 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c01 try 2: PASS  29.4 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c02 try 0: PASS  30.6 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c02 try 1: PASS  28.3 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c02 try 2: PASS  34.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c03 try 0: PASS  33.3 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c03 try 1: PASS  36.2 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c03 try 2: PASS  35.2 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c04 try 0: PASS  37.2 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c04 try 1: PASS  35.5 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c04 try 2: PASS  34.1 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c05 try 0: PASS  35.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c05 try 1: PASS  35.1 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c05 try 2: PASS  34.7 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c06 try 0: PASS  33.6 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c06 try 1: PASS  36.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c06 try 2: PASS  32.5 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c07 try 0: PASS  37.3 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c07 try 1: PASS  37.6 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c07 try 2: PASS  29.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c08 try 0: PASS  28.8 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c08 try 1: PASS  31.1 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c08 try 2: PASS  29.6 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c09 try 0: PASS  42.2 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c09 try 1: PASS  42.2 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c09 try 2: PASS  39.4 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c10 try 0: PASS  36.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c10 try 1: PASS  36.9 tok/s
+  A0mk6 llama.cpp SYCL Q4_K_M + MTP k=6 c10 try 2: PASS  37.1 tok/s
+>> part B3n B3n llama.cpp SYCL Coder IQ1_M + ngram-mod
+>> step B3n loading
+>> load B3n: -ngl 999 --override-tensor per_layer_token_embd=CPU -fa on -ctk q8_0 -ctv q8_0 -c 40960 -np 1 --spec-type ngram-mod
+>> B3n up in 72s
+>> step B3n speed
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp512 rep1: ttft 1.90s  decode 19.0 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp512 rep2: ttft 1.81s  decode 19.0 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp512 rep3: ttft 1.84s  decode 19.0 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp4096 rep1: ttft 9.99s  decode 17.6 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp4096 rep2: ttft 10.01s  decode 18.5 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp4096 rep3: ttft 9.82s  decode 18.4 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp16384 rep1: ttft 38.66s  decode 16.5 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp16384 rep2: ttft 38.51s  decode 16.3 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp16384 rep3: ttft 39.70s  decode 16.5 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp32768 rep1: ttft 82.36s  decode 42.6 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp32768 rep2: ttft 81.45s  decode 15.7 tok/s  (256 tok)
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod pp32768 rep3: ttft 81.69s  decode 24.7 tok/s  (256 tok)
+>> step B3n coding
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c01 try 0: PASS  20.4 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c01 try 1: PASS  20.6 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c01 try 2: PASS  20.5 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c02 try 0: PASS  20.1 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c02 try 1: PASS  46.2 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c02 try 2: PASS  22.2 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c03 try 0: PASS  20.1 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c03 try 1: PASS  19.8 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c03 try 2: PASS  39.6 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c04 try 0: PASS  20.0 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c04 try 1: PASS  64.6 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c04 try 2: PASS  64.8 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c05 try 0: PASS  20.3 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c05 try 1: PASS  20.5 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c05 try 2: PASS  20.5 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c06 try 0: PASS  19.9 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c06 try 1: PASS  35.5 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c06 try 2: PASS  38.3 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c07 try 0: PASS  19.5 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c07 try 1: PASS  57.9 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c07 try 2: PASS  58.1 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c08 try 0: FAIL  20.0 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c08 try 1: FAIL  27.2 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c08 try 2: FAIL  18.3 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c09 try 0: PASS  20.1 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c09 try 1: PASS  20.1 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c09 try 2: PASS  51.6 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c10 try 0: PASS  20.0 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c10 try 1: PASS  21.7 tok/s
+  B3n llama.cpp SYCL Coder IQ1_M + ngram-mod c10 try 2: PASS  23.5 tok/s
+>> done p7-20261023-093219
+run_id=p7-20261023-101139
+date=2026-10-23T10:11:39-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A0mk3
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A0mk3 A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3
+>> step A0mk3 loading
+>> load A0mk3: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 3
+>> A0mk3 up in 42s
+>> step A0mk3 coding
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 0: PASS  36.8 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 1: PASS  38.6 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c01 try 2: PASS  38.6 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 0: PASS  39.3 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 1: PASS  39.0 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c02 try 2: PASS  40.2 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 0: PASS  41.6 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 1: PASS  42.2 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c03 try 2: PASS  41.9 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 0: PASS  44.3 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 1: PASS  43.7 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c04 try 2: PASS  43.5 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 0: PASS  42.3 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 1: PASS  42.8 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c05 try 2: PASS  41.7 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 0: PASS  41.9 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 1: PASS  42.7 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c06 try 2: PASS  42.3 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 0: PASS  42.9 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 1: PASS  42.8 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c07 try 2: PASS  37.2 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 0: PASS  38.0 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 1: PASS  39.7 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c08 try 2: PASS  39.5 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 0: PASS  44.5 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 1: PASS  44.5 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c09 try 2: PASS  46.4 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 0: PASS  42.4 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 1: PASS  43.4 tok/s
+  A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 2: PASS  43.0 tok/s
+>> done p7-20261023-101139

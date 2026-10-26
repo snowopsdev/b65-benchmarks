@@ -1,0 +1,28 @@
+run_id=p7-dry-20261022-123145
+date=2026-10-22T12:31:45-04:00
+kernel=7.2.8-9-omarchy
+docker=29.9.1
+llama_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card0 /dev/dri/renderD129
+parts_list=A0
+sizes=512,4096 reps=1 gen=64 levels=1,2 tries=1 limit=2
+dry=1 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
+>> part A0 A0 llama.cpp SYCL Q4_K_M
+>> step A0 loading
+>> load A0: -ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu
+>> A0 up in 112s
+>> step A0 speed
+  A0 llama.cpp SYCL Q4_K_M pp512 rep1: ttft 1.35s  decode 23.1 tok/s  (64 tok)
+  A0 llama.cpp SYCL Q4_K_M pp4096 rep1: ttft 5.77s  decode 22.2 tok/s  (64 tok)
+>> step A0 conc
+  A0 llama.cpp SYCL Q4_K_M C1 rep1: aggregate 16.4 tok/s, per-stream median 23.4
+  A0 llama.cpp SYCL Q4_K_M C2 rep1: aggregate 25.5 tok/s, per-stream median 15.1
+>> step A0 coding
+  A0 llama.cpp SYCL Q4_K_M c01 try 0: PASS  24.4 tok/s
+  A0 llama.cpp SYCL Q4_K_M c02 try 0: PASS  22.8 tok/s
+>> done p7-dry-20261022-123145

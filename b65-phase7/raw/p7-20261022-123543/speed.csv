@@ -1,0 +1,13 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A0 llama.cpp SYCL Q4_K_M,single,512,512,1,1,1.136,450.7,256,23.1,12.18,,184.2,0,length,"1, `--ctx-checkpoints 0` and 1, 4096 and 16384 context, 512-"
+A0 llama.cpp SYCL Q4_K_M,single,512,512,1,2,1.17,437.8,256,21.67,12.94,,177.3,0,length,CL build doesn't write that string.   - `--jinja` on the ser
+A0 llama.cpp SYCL Q4_K_M,single,512,512,1,3,1.115,459.4,256,23.08,12.16,,186.3,0,length," `run.sh` | the whole matrix, resumable, writes `raw/p7-*.js"
+A0 llama.cpp SYCL Q4_K_M,single,4096,4096,1,1,5.234,782.6,256,22.17,16.74,,187.4,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A0 llama.cpp SYCL Q4_K_M,single,4096,4096,1,2,6.15,666.0,256,22.1,17.69,,179.8,0,length," rate is the headline**, not the speed. - **summary**: `task"
+A0 llama.cpp SYCL Q4_K_M,single,4096,4096,1,3,5.323,769.5,256,22.21,16.8,,187.6,0,length," with checkpoints off. With checkpoints on, the server repro"
+A0 llama.cpp SYCL Q4_K_M,single,16384,16384,1,1,20.78,788.5,256,18.53,34.54,,186.2,0,length,5: run the local-ai-registry lab gates in the official `serv
+A0 llama.cpp SYCL Q4_K_M,single,16384,16384,1,2,21.48,762.8,256,18.53,35.24,,183.7,0,length,".4 / 25.2–25.3 tok/s at 32K, 64K and 128K. 2. **The context "
+A0 llama.cpp SYCL Q4_K_M,single,16384,16384,1,3,21.326,768.3,256,18.53,35.09,,184.4,0,length," Gemma pp512 is a tie (−0.9%), not +13%, and Qwen pp512 is +"
+A0 llama.cpp SYCL Q4_K_M,single,32768,32768,1,1,45.604,718.5,256,15.14,62.45,,184.1,0,length,"         # full run, ~1.5–2.5 h ```  Per model: - llama-benc"
+A0 llama.cpp SYCL Q4_K_M,single,32768,32768,1,2,46.548,704.0,256,15.1,63.44,,182.1,0,length, check)     SYCL_BIN=~/src/llama.cpp/build-sycl/bin ./canary
+A0 llama.cpp SYCL Q4_K_M,single,32768,32768,1,3,46.649,702.4,256,15.11,63.52,,182.0,0,length,`) are smoke tests and aren't used in the findings.  ## Open

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B65 Bench · Phase 7</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100; --series-5: #8b5fd6;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --good-text: #006300; --critical-text: #b42323;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500; --series-5: #9a73e3;
+    --good-text: #0ca30c; --critical-text: #e66767;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19; --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500; --series-5: #9a73e3;
+  --good-text: #0ca30c; --critical-text: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root { min-height: 100vh; background: var(--page); color: var(--text-primary);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+h1 { font-size: 20px; margin: 0; font-weight: 650; }
+.sub { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); font-weight: 600; font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--muted); }
+.running .dot { background: var(--good); animation: pulse 1.6s infinite; }
+.finished .dot { background: var(--good); } .stopped .dot { background: var(--warning); }
+@keyframes pulse { 50% { opacity: .3; } }
+select { font: inherit; color: inherit; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 3px 8px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-x: auto; }
+.card h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+.card .lede { color: var(--text-secondary); margin: -4px 0 12px; font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile .unit { font-size: 15px; color: var(--text-secondary); font-weight: 500; margin-left: 3px; }
+.tile .note { color: var(--muted); font-size: 12px; }
+.now .what { font-size: 18px; font-weight: 600; }
+.now .when { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+.chip.done { color: var(--text-secondary); background: var(--wash); }
+.chip.now { color: var(--text-primary); border-color: var(--series-1); font-weight: 600; }
+.bar { height: 6px; border-radius: 3px; background: var(--wash); overflow: hidden; margin: 6px 0; }
+.bar > div { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .4s; }
+pre { margin: 8px 0 0; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-secondary);
+  background: var(--wash); border-radius: 8px; padding: 10px; white-space: pre-wrap; word-break: break-word; max-height: 260px; overflow: auto; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+.muted { color: var(--muted); } .good { color: var(--good-text); } .bad { color: var(--critical-text); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: 260px; overflow: visible; }
+.chart text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.chart .val { fill: var(--text-primary); font-size: 11px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.12); white-space: nowrap; display: none; font-variant-numeric: tabular-nums; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 16px; }
+.empty { color: var(--muted); padding: 30px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Phase 7 · Other engines on the B65</h1>
+    <span id="badge" class="badge"><span class="dot"></span><span id="state">…</span></span>
+    <span id="sub" class="sub"></span>
+    <select id="run" aria-label="Run"></select>
+  </header>
+
+  <section class="card now" id="now"></section>
+
+  <div class="tiles">
+    <div class="card tile"><div class="label">B65 board power</div><div class="value" id="t-w">–</div><div class="note">xe hwmon, live</div></div>
+    <div class="card tile"><div class="label">GPU temperature</div><div class="value" id="t-c">–</div><div class="note" id="t-vt"></div></div>
+    <div class="card tile"><div class="label">B65 VRAM held by the engine</div><div class="value" id="t-v">–</div><div class="note" id="t-vp"></div></div>
+    <div class="card tile"><div class="label">Coding gate (tests passed)</div><div class="value" id="t-q">–</div><div class="note" id="t-qn"></div></div>
+  </div>
+
+  <section class="card">
+    <h2>Engines</h2>
+    <table><thead><tr><th>Part</th><th>Status</th><th class="num">Load</th><th class="num">VRAM peak</th><th>Server args</th></tr></thead><tbody id="parts"></tbody></table>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Decode speed, one request</h2>
+      <p class="lede">Tokens per second while generating, by prompt length. Median of reps; higher is better.</p>
+      <div class="legend" id="lg-dec"></div><div class="chart" id="ch-dec"></div>
+    </section>
+    <section class="card">
+      <h2>Total throughput, requests at once</h2>
+      <p class="lede">All streams' tokens per second together, 512-token prompts. This is what a shared server gets.</p>
+      <div class="legend" id="lg-agg"></div><div class="chart" id="ch-agg"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>One request at a time</h2>
+    <table><thead><tr><th>Engine</th><th class="num">Prompt</th><th class="num">Time to first token</th><th class="num">Prefill tok/s</th><th class="num">Decode tok/s</th><th class="num">Board W</th><th class="num">Reps</th></tr></thead><tbody id="speed"></tbody></table>
+  </section>
+  <div class="grid2">
+    <section class="card">
+      <h2>Requests at once</h2>
+      <table style="min-width:0"><thead><tr><th>Engine</th><th class="num">Streams</th><th class="num">Total tok/s</th><th class="num">Per stream</th><th class="num">TTFT</th></tr></thead><tbody id="conc"></tbody></table>
+    </section>
+    <section class="card">
+      <h2>Coding gate (thinking off)</h2>
+      <p class="lede">The 10 Phase 5 tasks × 3 tries, run against unit tests. Decode here is on real answers, the honest number for speculative decoding.</p>
+      <table style="min-width:0"><thead><tr><th>Engine</th><th class="num">Passed</th><th class="num">Decode tok/s</th><th class="num">Answer tokens</th></tr></thead><tbody id="coding"></tbody></table>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Reference: same chip, published</h2>
+    <p class="lede" style="margin:0">Registry, Arc Pro B70 (same BMG-G31 die as the B65, more Xe cores, same 608 GB/s), Qwen3.8-27B: llama.cpp SYCL Q4_K_M 25.0 tok/s for one request, 56.8 total at 8; vLLM with 0xSero's EXL3 kernels and MTP 75.4 for one request, 363 total at 8. Our earlier B65 recipe (Phase 6): about 23 tok/s at a 512-token prompt.</p>
+  </section>
+</div>
+</div>
+<div class="tip" id="tip"></div>
+<script src="nav.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = (v, d = 1) => v == null ? "–" : Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+const dur = s => s == null ? "–" : s < 90 ? `${Math.round(s)} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${(s / 3600).toFixed(1)} h`;
+// color follows the engine (part), never its rank
+const PART_SLOT = { A0: 1, A1: 2, A2: 3, A3: 4, A1g: 2, A2b: 3, A3g: 4, A4: 5, A3k2: 2, A3k4: 3, A3k5: 4, A3k6: 5, A5: 4, B1: 2, B2: 3, B3: 1,
+  A0m2: 2, A0m3: 2, A0m4: 3, A0m5: 4, A0m6: 5, A0mk2: 2, A0mk3: 2, A0mk4: 3, A0mk5: 4, A0mk6: 5, B3n: 4 };
+const colorOf = label => `var(--series-${PART_SLOT[label.split(" ")[0]] || 1})`;
+const STEPS = ["weights", "loading", "speed", "conc", "coding"];
+let RUN = null;
+
+function groupedBars(id, legendId, groups, series, val, unit, groupLabel) {
+  const el = $(id), lg = $(legendId);
+  lg.innerHTML = series.map(s => `<span><span class="sw" style="background:${colorOf(s)}"></span>${esc(s)}</span>`).join("");
+  const has = groups.some(g => series.some(s => val(s, g) != null));
+  if (!has) { el.innerHTML = `<div class="empty">No results yet</div>`; return; }
+  const W = el.clientWidth || 520, H = 260, m = { t: 22, r: 8, b: 30, l: 40 };
+  const max = Math.max(...groups.flatMap(g => series.map(s => val(s, g) || 0)));
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000].find(x => max / x <= 5) || 2000, top = Math.ceil(max / step) * step || step;
+  const y = v => m.t + (H - m.t - m.b) * (1 - v / top), gw = (W - m.l - m.r) / groups.length;
+  const bw = Math.min(28, (gw * 0.72 - 2 * (series.length - 1)) / series.length);
+  let svg = "";
+  for (let v = 0; v <= top; v += step) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  groups.forEach((g, gi) => {
+    const cx = m.l + gw * (gi + .5), x0 = cx - (series.length * bw + 2 * (series.length - 1)) / 2;
+    svg += `<text x="${cx}" y="${H - 10}" text-anchor="middle">${esc(groupLabel(g))}</text>`;
+    series.forEach((s, si) => {
+      const v = val(s, g); if (v == null) return;
+      const x = x0 + si * (bw + 2), yt = y(v), yb = y(0), r = Math.min(4, bw / 2, yb - yt);
+      svg += `<path d="M${x},${yb}V${yt + r}Q${x},${yt} ${x + r},${yt}H${x + bw - r}Q${x + bw},${yt} ${x + bw},${yt + r}V${yb}Z" fill="${colorOf(s)}"/>`;
+      svg += `<text class="val" x="${x + bw / 2}" y="${yt - 5}" text-anchor="middle">${v >= 100 ? Math.round(v) : fmt(v)}</text>`;
+      svg += `<rect x="${x - 1}" y="${m.t}" width="${bw + 2}" height="${yb - m.t}" fill="transparent" data-tip="${esc(s)} · ${esc(groupLabel(g))}: <b>${fmt(v)}</b> ${unit}"/>`;
+    });
+  });
+  svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--axis)"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(lg.textContent)}">${svg}</svg>`;
+  el.querySelectorAll("[data-tip]").forEach(r => {
+    r.addEventListener("mousemove", e => { const t = $("tip"); t.innerHTML = r.dataset.tip; t.style.display = "block"; t.style.left = (e.pageX + 12) + "px"; t.style.top = (e.pageY - 30) + "px"; });
+    r.addEventListener("mouseleave", () => $("tip").style.display = "none");
+  });
+}
+
+function render(d, nav) {
+  const p = d.p7, now = d.now;
+  $("badge").className = "badge " + (p.state || "");
+  $("state").textContent = { running: "running", finished: "done", stopped: "stopped", "not started": "not started" }[p.state] || p.state;
+  $("sub").textContent = p.run_id ? `${p.run_id}${p.dry ? " (dry run)" : ""} · ${dur(p.elapsed_s)}` : "";
+  const sel = $("run"); const opts = (p.runs || []).map(r => `<option ${r === p.run_id ? "selected" : ""}>${r}</option>`).join("");
+  if (sel.dataset.v !== opts) { sel.innerHTML = opts; sel.dataset.v = opts; }
+
+  // now
+  const dl = p.download, plan = p.plan || [], eng = Object.fromEntries((p.engines || []).filter(e => e.status === "ok").map(e => [e.part, e]));
+  let h = "";
+  if (p.state === "running" && p.current) {
+    const c = p.current, lab = (plan.find(x => x.part === c.part) || {}).label || c.part;
+    const what = { weights: "waiting for the model download", loading: "loading the model", speed: "one request at a time", conc: "several requests at once", coding: "coding tasks" }[c.step] || c.step;
+    h += `<div class="what">${esc(lab)} — ${what}</div><div class="when">in this step for ${dur(now - c.since)}</div>`;
+    h += `<div class="steps">` + plan.map(x => {
+      const i = plan.indexOf(x), ci = plan.findIndex(y => y.part === c.part);
+      const st = i < ci ? "done" : i > ci ? "" : "now";
+      return `<span class="chip ${st}">${esc(x.part)}${st === "now" ? " · " + esc(c.step) : ""}</span>`;
+    }).join("") + `</div>`;
+    if (c.step === "weights" && dl) h += `<div class="bar"><div style="width:${Math.min(100, 100 * dl.bytes / dl.total)}%"></div></div><div class="when">${fmt(dl.bytes / 1e9)} of ${fmt(dl.total / 1e9)} GB</div>`;
+    const tail = (p.server_tail || []).length ? p.server_tail : p.log || [];
+    h += `<pre>${esc(tail.join("\n"))}</pre>`;
+  } else if (p.state === "not started") {
+    h += `<div class="what">Not started</div>`;
+  } else {
+    h += `<div class="what">${p.state === "finished" ? "Run complete" : "Run stopped"}</div><pre>${esc((p.log || []).join("\n"))}</pre>`;
+  }
+  if (dl && !dl.complete && !(p.current && p.current.step === "weights")) h += `<div class="when" style="margin-top:8px">vLLM weights downloading: ${fmt(dl.bytes / 1e9)} of ${fmt(dl.total / 1e9)} GB</div><div class="bar"><div style="width:${Math.min(100, 100 * dl.bytes / dl.total)}%"></div></div>`;
+  $("now").innerHTML = h;
+
+  // tiles
+  const live = nav && nav.live;
+  $("t-w").innerHTML = live ? `${fmt(live[1])}<span class="unit">W</span>` : "–";
+  $("t-c").innerHTML = live && live[2] != null ? `${fmt(live[2], 0)}<span class="unit">°C</span>` : "–";
+  $("t-vt").textContent = live && live[3] != null ? `VRAM ${fmt(live[3], 0)} °C` : "";
+  const cp = p.current ? p.current.part : null, vr = (p.vram || {})[cp];
+  $("t-v").innerHTML = vr && p.state === "running" ? `${fmt(vr.now / 1024)}<span class="unit">GB</span>` : "–";
+  $("t-vp").textContent = vr ? `peak ${fmt(vr.peak / 1024)} GB this part` : "";
+  const cd = (p.coding || []).find(x => x.label.startsWith(cp || "~")) || (p.coding || []).slice(-1)[0];
+  $("t-q").innerHTML = cd ? `${cd.passed}<span class="unit">/ ${cd.n}</span>` : "–";
+  $("t-qn").textContent = cd ? `${cd.label} · last ${cd.last}` : "";
+
+  // parts
+  $("parts").innerHTML = plan.map(x => {
+    const tried = (p.engines || []).filter(e => e.part === x.part), ok = tried.find(e => e.status === "ok");
+    let st = ok ? (p.current && p.current.part === x.part ? "running" : "done") : tried.length && !(p.current && p.current.part === x.part) ? "failed to load" : p.current && p.current.part === x.part ? p.current.step : "pending";
+    if (!ok && tried.length && p.current && p.current.part === x.part) st = `retrying (${tried.length} failed)`;
+    const cls = st === "done" ? "good" : st.startsWith("failed") ? "bad" : "";
+    const v = (p.vram || {})[x.part], e = ok || tried.slice(-1)[0];
+    return `<tr><td><span class="sw" style="background:${colorOf(x.label)}"></span>${esc(x.label)}</td><td class="${cls}">${esc(st)}</td>
+      <td class="num">${e ? dur(+e.load_s) : "–"}</td><td class="num">${v ? fmt(v.peak / 1024) + " GB" : "–"}</td><td class="muted" style="font-size:12px">${esc(e ? e.args : "")}</td></tr>`;
+  }).join("") || `<tr><td colspan="5" class="muted">–</td></tr>`;
+
+  // charts + tables
+  const sp = p.speed || [], labels = [...new Set(sp.map(r => r.label))];
+  const sizes = [...new Set(sp.map(r => r.prompt))].sort((a, b) => a - b);
+  const sval = (l, n) => (sp.find(r => r.label === l && r.prompt === n) || {}).decode ?? null;
+  const k = n => n >= 1024 ? `${n / 1024}K` : `${n}`;
+  groupedBars("ch-dec", "lg-dec", sizes, labels, sval, "tok/s", n => `${k(n)} prompt`);
+  const cc = p.conc || [], cl = [...new Set(cc.map(r => r.label))], lv = [...new Set(cc.map(r => r.streams))].sort((a, b) => a - b);
+  groupedBars("ch-agg", "lg-agg", lv, cl, (l, s) => (cc.find(r => r.label === l && r.streams === s) || {}).agg ?? null, "tok/s total", s => `${s} at once`);
+  const sw = l => `<span class="sw" style="background:${colorOf(l)}"></span>`;
+  $("speed").innerHTML = sp.map(r => `<tr><td>${sw(r.label)}${esc(r.label)}</td><td class="num">${k(r.prompt)}</td><td class="num">${fmt(r.ttft, 2)} s</td>
+    <td class="num">${fmt(r.prefill, 0)}</td><td class="num"><b>${fmt(r.decode)}</b></td><td class="num">${fmt(r.watts, 0)}</td><td class="num">${r.reps}${r.short ? ` <span class="bad">(${r.short} short)</span>` : ""}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">No results yet</td></tr>`;
+  $("conc").innerHTML = cc.map(r => `<tr><td>${sw(r.label)}${esc(r.label.split(" ").slice(1).join(" "))}</td><td class="num">${r.streams}</td><td class="num"><b>${fmt(r.agg)}</b></td><td class="num">${fmt(r.per_stream)}</td><td class="num">${fmt(r.ttft, 2)} s</td></tr>`).join("") || `<tr><td colspan="5" class="muted">No results yet</td></tr>`;
+  $("coding").innerHTML = (p.coding || []).map(r => `<tr><td>${sw(r.label)}${esc(r.label.split(" ").slice(1).join(" "))}</td><td class="num"><b>${r.passed}</b> / ${r.n}</td><td class="num">${fmt(r.decode)}</td><td class="num">${fmt(r.tokens, 0)}</td></tr>`).join("") || `<tr><td colspan="4" class="muted">No results yet</td></tr>`;
+}
+
+async function tick() {
+  try {
+    const q = RUN ? `?run=${encodeURIComponent(RUN)}` : "";
+    const [d, nav] = await Promise.all([fetch("api/p7" + q).then(r => r.json()), fetch("api/nav").then(r => r.json()).catch(() => null)]);
+    render(d, nav);
+  } catch (e) { $("state").textContent = "dashboard offline"; }
+}
+$("run").addEventListener("change", e => { RUN = e.target.selectedIndex === 0 ? null : e.target.value; tick(); });
+tick(); setInterval(tick, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,1,0.475,1077.8,256,38.25,7.14,,167.2,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,2,0.437,1172.0,256,45.24,6.07,,168.8,0,length,CL server log doesn't contain that string.   - The server st
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,3,0.438,1169.0,256,72.85,3.94,,170.9,0,length, `run.sh` | the orchestrator: `all` / `speed` / `conc` / `co
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,1,2.961,1383.2,256,46.98,8.39,,179.8,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,2,2.963,1382.2,256,43.63,8.81,,178.3,0,length, rate is the headline**. - **summary**: `oai_bench.py summar
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,3,2.966,1381.2,256,59.98,7.22,,181.3,0,length,c391c09869123ef2/findings/gemma-sycl-diag.md).  ## 4. Keep a
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,1,12.639,1296.3,256,46.4,18.14,,191.3,0,length,` for a clean comparison. - Record the Hugging Face commits 
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,2,12.643,1295.9,256,52.76,17.48,,192.1,0,length," | Muse Glimmer 28B Q4_K_M | 128K | **6/6** | **25.2** | 96,"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,3,12.653,1294.9,256,50.57,17.7,,191.5,0,length,33 W) and for Qwen and Muse decode. **Gemma decode draws 4–1
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,1,27.544,1189.7,256,53.73,32.29,,195.8,0,length,100 tok/J). Vulkan is the fallback if oneAPI isn't installed
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,2,27.531,1190.2,256,43.17,33.44,,194.6,0,length, `c34cb73722222222222222222222222222222222` (Q4_K_M)  ## Run
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,3,27.566,1188.7,256,51.56,32.51,,195.0,0,length,", 5 reps, SYCL fa1, `-b 2048 -ub 2048`, all three models: pp"

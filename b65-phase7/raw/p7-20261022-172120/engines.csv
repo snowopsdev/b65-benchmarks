@@ -1,0 +1,4 @@
+part,label,engine,status,load_s,args
+B1,B1 Strata Coder IQ1_M drafts on,strata,fail,5,""
+B2,B2 Strata Coder IQ1_M drafts off,strata,fail,6,"spec=0 nomtp"
+B3,B3 llama.cpp SYCL Coder IQ1_M,llama,ok,93,"-ngl 999 --override-tensor per_layer_token_embd=CPU -fa on -ctk q8_0 -ctv q8_0 -c 40960 -np 1"

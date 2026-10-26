@@ -1,0 +1,18 @@
+== os
+Ubuntu 24.04.4 LTS
+== sycl-ls
+no sycl-ls
+== level-zero / compute-runtime packages
+intel-ocloc 26.14.37833.4-1~24.04~ppa1
+intel-ocloc-dev 26.14.37833.4-1~24.04~ppa1
+intel-opencl-icd 26.14.37833.4-1~24.04~ppa1
+libze-dev:amd64 1.28.2-1~24.04~ppa1
+libze-intel-gpu-dev 26.14.37833.4-1~24.04~ppa1
+libze-intel-gpu-raytracing 1.2.2-1~24.04~ppa1
+libze-intel-gpu1 26.14.37833.4-1~24.04~ppa1
+libze1:amd64 1.28.2-1~24.04~ppa1
+== torch.xpu
+2.12.0+xpu True 1
+0 Intel(R) Graphics [0xe222] 31.9 GiB
+== vllm
+0.26.1.dev0+g568afb3a1.d20260907

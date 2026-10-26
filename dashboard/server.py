@@ -645,7 +645,7 @@ def nav_status():
                 p4=state(latest(os.path.join(ROOT, "b65-phase4", "raw"), r"^p4-\d{8}-\d{6}$")),
                 us=state(latest(os.path.join(ROOT, "b65-ubserve", "raw"), r"^us-\d{8}-\d{6}$")),
                 p5=state(latest(os.path.join(ROOT, "b65-phase5", "raw"), r"^p5-\d{8}-\d{6}$")),
-                p6=p6_nav(), p15=p15_nav())
+                p6=p6_nav(), p15=p15_nav(), p7=p7_nav())
 
 def p6_nav():
     """Phase 6 sidebar dot: the full run if there is one, else the dry run (shown as running/dry)."""
@@ -1028,6 +1028,108 @@ def p6_full():
     except (KeyError, ValueError, OSError): pass
     return res
 
+# --- Phase 7: other engines (b65-phase7/raw/p7-*): llama.cpp SYCL vs Intel llm-scaler vLLM, one OpenAI-API client ---
+P7_WEIGHTS = (os.path.expanduser("~/models/Qwen3.8-27B"), 55.6e9)   # Qwen/Qwen3.8-27B BF16, for the vLLM parts
+_p7_dl = {"t": 0, "v": None}
+
+def p7_download():
+    """Size of the BF16 weight folder so far (cached 10 s; it walks the folder)."""
+    if time.time() - _p7_dl["t"] < 10: return _p7_dl["v"]
+    d, total = P7_WEIGHTS; got = 0
+    for dp, _, fs in os.walk(d):
+        for f in fs:
+            try: got += os.path.getsize(os.path.join(dp, f))
+            except OSError: pass
+    _p7_dl.update(t=time.time(), v=dict(path=d, bytes=got, total=total, complete=os.path.exists(os.path.join(d, ".complete"))))
+    return _p7_dl["v"]
+
+def p7_runs():
+    base = os.path.join(ROOT, "b65-phase7", "raw")
+    return base, sorted((d for d in os.listdir(base) if re.match(r"^p7-(dry-)?\d{8}-\d{6}$", d)), key=lambda r: r[-15:]) if os.path.isdir(base) else []
+
+def p7_state(out):
+    pid = (read_lines(f"{out}/pid") or [""])[0].strip()
+    try: alive = bool(pid) and "phase7" in open(f"/proc/{pid}/cmdline").read()
+    except OSError: alive = False
+    return "finished" if os.path.exists(f"{out}/done") else "running" if alive else "stopped"
+
+def p7_nav():
+    base, runs = p7_runs()
+    if not runs: return dict(state="not started")
+    st = p7_state(os.path.join(base, runs[-1]))
+    return dict(state="dry" if "-dry-" in runs[-1] and st != "running" else st, run_id=runs[-1])
+
+def p7_full(run=None):
+    kit = os.path.join(ROOT, "b65-phase7"); base, runs = p7_runs()
+    res = dict(state="not started", run_id=None, runs=runs[::-1], download=p7_download())
+    if not runs: return res
+    run = run if run in runs else runs[-1]; out = os.path.join(base, run)
+    res.update(run_id=run, dry="-dry-" in run, state=p7_state(out))
+    env = res["env"] = dict(l.split("=", 1) for l in read_lines(f"{out}/env.txt") if "=" in l)
+    res["plan"] = [dict(zip(("part", "label"), l.split("|", 1))) for l in read_lines(f"{out}/plan.txt") if "|" in l]
+    res["engines"] = list(csv.DictReader(open(f"{out}/engines.csv"))) if os.path.exists(f"{out}/engines.csv") else []
+    cur = (read_lines(f"{out}/current") or [""])[0].split("|") if res["state"] == "running" else []
+    res["current"] = dict(part=cur[0], step=cur[1], since=float(cur[2])) if len(cur) == 3 else None
+    rows = lambda n: list(csv.DictReader(open(os.path.join(out, n)))) if os.path.exists(os.path.join(out, n)) else []
+    f = lambda v: float(v) if v not in ("", None) else None
+    med = lambda xs: round(statistics.median(xs), 2) if xs else None
+    sp, cc, cd = rows("speed.csv"), rows("conc.csv"), rows("coding.csv")
+    res["speed"] = [dict(label=l, prompt=int(n), reps=len(g), ttft=med([f(r["ttft_s"]) for r in g]), prefill=med([f(r["prefill_tok_s"]) for r in g]),
+                         decode=med([f(r["decode_tok_s"]) for r in g]), decode_all=[f(r["decode_tok_s"]) for r in g],
+                         watts=med([f(r["board_w"]) for r in g if r["board_w"]]), short=sum(int(r["short"]) for r in g))
+                    for (l, n) in dict.fromkeys((r["label"], r["prompt_target"]) for r in sp)
+                    for g in [[r for r in sp if r["label"] == l and r["prompt_target"] == n]]]
+    res["conc"] = [dict(label=l, streams=int(c), reps=len({r["rep"] for r in g}), agg=med(list({f(r["agg_tok_s"]) for r in g})),
+                        per_stream=med([f(r["decode_tok_s"]) for r in g]), ttft=med([f(r["ttft_s"]) for r in g]), watts=med([f(r["board_w"]) for r in g if r["board_w"]]))
+                   for (l, c) in dict.fromkeys((r["label"], r["conc"]) for r in cc)
+                   for g in [[r for r in cc if r["label"] == l and r["conc"] == c]]]
+    res["coding"] = [dict(label=l, passed=sum(int(r["pass"]) for r in g), n=len(g), decode=med([f(r["decode_tok_s"]) for r in g if f(r["decode_tok_s"])]),
+                          tokens=med([f(r["completion_tokens"]) for r in g if r["completion_tokens"]]), last=g[-1]["task"] + " try " + g[-1]["try"])
+                     for l in dict.fromkeys(r["label"] for r in cd) for g in [[r for r in cd if r["label"] == l]]]
+    vr = rows("vram.csv"); res["vram"] = {}
+    for r in vr: v = res["vram"].setdefault(r["part"], dict(now=0, peak=0)); m = int(r["b65_vram_mib"] or 0); v["now"] = m; v["peak"] = max(v["peak"], m); v["t"] = float(r["t"])
+    log = read_lines(os.path.join(kit, "p7-dry.log" if res["dry"] else "p7-run.log"))
+    start = max((i for i, l in enumerate(log) if l == f"run_id={run}"), default=0)
+    res["log"] = [l[:220] for l in log[start:] if l.strip() and not l.startswith(("date=", "kernel=", "docker=", "llama_sycl", "sycl_device", "image=", "gguf=", "hf_weights", "b65=", "parts_list", "sizes=", "dry=", "kit_commit"))][-14:]
+    if res["current"]:   # live view of the request in flight: last client line, server log tail for loading
+        sl = os.path.join(out, f"{res['current']['part']}.server.log")
+        res["server_tail"] = [l[:200] for l in read_lines(sl) if l.strip() and "unused tensor" not in l][-4:] if res["current"]["step"] in ("loading", "weights") else []
+    try:
+        from datetime import datetime
+        t0 = datetime.fromisoformat(env["date"]).timestamp()
+        res["elapsed_s"] = round((os.path.getmtime(f"{out}/done") if os.path.exists(f"{out}/done") else time.time()) - t0)
+    except (KeyError, ValueError, OSError): res["elapsed_s"] = None
+    return res
+
+def p7_share():
+    """Phase 7 for the share page: every full (non-dry) run merged, the latest result per engine label. Measured values
+    leave the server only once b65-phase7/FINAL exists (written after the last track); before that, statuses only."""
+    base, runs = p7_runs(); full = [r for r in runs if "-dry-" not in r]
+    final = os.path.exists(os.path.join(ROOT, "b65-phase7", "FINAL"))
+    parts, envs = {}, {}
+    for run in full:
+        f = p7_full(run); envs[run] = f.get("env", {})
+        ok = {e["part"]: e for e in f.get("engines", []) if e["status"] == "ok"}
+        for e in f.get("engines", []):
+            p = parts.setdefault(e["part"], dict(part=e["part"], label=e["label"], engine=e["engine"], tries=[]))
+            p["tries"].append(dict(run=run, status=e["status"], load_s=float(e["load_s"] or 0), args=e["args"]))
+            if e["part"] in ok:
+                lab = ok[e["part"]]["label"]
+                p.update(label=lab, run=run, load_s=float(ok[e["part"]]["load_s"] or 0), args=ok[e["part"]]["args"], status="ok",
+                         speed=[x for x in f["speed"] if x["label"] == lab], conc=[x for x in f["conc"] if x["label"] == lab],
+                         coding=next((x for x in f["coding"] if x["label"] == lab), None),
+                         vram_peak_mib=(f["vram"].get(e["part"]) or {}).get("peak"))
+            elif p.get("status") != "ok": p["status"] = "fail"
+    for p in parts.values():   # loaded, then died under load (A2: fp8 OOM on the first 4K prompt): not a working setup
+        cd = p.get("coding")
+        if p.get("status") == "ok" and cd and cd["n"] and cd["passed"] == 0 and any(not x["decode"] for x in p.get("speed", [])):
+            p["status"] = "crashed"
+    res = dict(complete=final, runs=full, state="finished" if final else (p7_nav().get("state") or "not started"),
+               parts=[dict(part=p["part"], label=p["label"], engine=p["engine"], status=p.get("status"), tries=len(p["tries"])) for p in parts.values()])
+    if final:
+        res.update(parts=list(parts.values()), env=envs)
+    return res
+
 # --- Phase 1.5: registry lab gates (b65-phase15): native pre-check (p15pre-*) and registry runs in the pinned image (p15reg-*) ---
 P15_REG = os.path.expanduser("~/src/ext/local-ai-registry-20261014")
 P15_CARD = "intel-arc-pro-b65-32gb"
@@ -1203,7 +1305,7 @@ def share_status():
         cells.append(c)
     shape = power_shape(out)  # normalized: no watts leave the server
     build = re.search(r"build (\d+)", env.get("llama_bench", "")); mesa = env.get("mesa", "").replace("mesa 1:", "").split("-")[0]
-    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p5=p5_share(), p6=p6_share(), p2=p2_share(), models=[
+    res = dict(run_id=r["run_id"], state=r["state"], complete=complete, p05=p05_share(), p1=p1_share(), p1s=p1_share(p1s_full()), gd=gd_share(), p3=p3_share(), p4=p4_share(), us=us_share(), p5=p5_share(), p6=p6_share(), p7=p7_share(), p2=p2_share(), models=[
         dict(name=m, display=DISPLAY.get(m, m), quant=specs.get(m, ("", None))[0], size_gb=specs.get(m, ("", None))[1],
              spot=spot(out, m)) for m in models], cells=cells, done=sum(c["status"] not in ("pending", "running") for c in cells), total=len(cells),
         reps=int(re.search(r"-r (\d+)", env.get("bench_args", "-r 5")).group(1)), shape=shape,
@@ -1300,6 +1402,12 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(os.path.join(HERE, "p15.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p15":
             return self.send(200, json.dumps(dict(p15=p15_full(), now=time.time())).encode(), "application/json")
+        if path in ("/p7", "/p7.html"):
+            return self.send(200, open(os.path.join(HERE, "p7.html"), "rb").read(), "text/html; charset=utf-8")
+        if path == "/api/p7":
+            from urllib.parse import parse_qs, urlparse
+            run = (parse_qs(urlparse(self.path).query).get("run") or [None])[0]
+            return self.send(200, json.dumps(dict(p7=p7_full(run), now=time.time())).encode(), "application/json")
         if path in ("/p6", "/p6.html"):
             return self.send(200, open(os.path.join(HERE, "p6.html"), "rb").read(), "text/html; charset=utf-8")
         if path == "/api/p6":

@@ -1,0 +1,2 @@
+part,label,engine,status,load_s,args
+B2,B2 Strata Coder IQ1_M no MTP,strata,ok,97,"spec=2 nomtp"

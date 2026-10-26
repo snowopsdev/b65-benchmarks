@@ -1,0 +1,29 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A1 vLLM sym_int4,single,512,512,1,1,0.402,1272.7,256,19.32,13.6,,179.4,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A1 vLLM sym_int4,single,512,512,1,2,0.356,1438.3,256,19.32,13.55,,181.2,0,length,CL server log doesn't contain that string.   - The server st
+A1 vLLM sym_int4,single,512,512,1,3,0.357,1433.3,256,19.32,13.56,,181.9,0,length, `run.sh` | the orchestrator: `all` / `speed` / `conc` / `co
+A1 vLLM sym_int4,single,4096,4096,1,1,2.842,1441.3,256,19.17,16.15,,186.0,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real-world ser
+A1 vLLM sym_int4,single,4096,4096,1,2,2.844,1440.3,256,19.16,16.15,,185.8,0,length, rate is the headline**. - **summary**: `oai_bench.py summar
+A1 vLLM sym_int4,single,4096,4096,1,3,2.85,1437.2,256,19.16,16.16,,186.6,0,length," on every setup, including the default. That's the expected "
+A1 vLLM sym_int4,single,16384,16384,1,1,12.213,1341.5,256,18.59,25.93,,191.0,0,length,5: run the local-ai-registry lab gates in the official serve
+A1 vLLM sym_int4,single,16384,16384,1,2,12.225,1340.2,256,18.6,25.93,,191.2,0,length,".4 / 25.2 tok/s at 32K, 64K and 128K. 2. **Muse's context re"
+A1 vLLM sym_int4,single,16384,16384,1,3,12.23,1339.7,256,18.59,25.95,,191.3,0,length," Gemma pp512 is a tie (−0.9%), Gemma pp4096 is +9.5%, and Qw"
+A1 vLLM sym_int4,single,32768,32768,1,1,26.604,1231.7,256,17.91,40.84,,193.8,0,length,"         # full run, ~1 h ```  ## What it measures - **llama"
+A1 vLLM sym_int4,single,32768,32768,1,2,26.606,1231.6,256,17.92,40.84,,193.8,0,length, check)     SYCL_BIN=~/src/llama.cpp/build-sycl/bin ./canary
+A1 vLLM sym_int4,single,32768,32768,1,3,26.621,1230.9,256,17.91,40.86,,193.8,0,length,"`) are smoke tests, not results.  ## Models | Model | Quant "
+A2 vLLM fp8,single,512,512,1,1,0.374,1368.8,256,18.25,14.35,,180.3,0,length,"1, 4 prompt sizes, 3 runs each, plus a 16k prefill. `raw/p05"
+A2 vLLM fp8,single,512,512,1,2,0.351,1457.9,256,18.25,14.32,,181.7,0,length,CL server doesn't write that string.   - `--jinja` on the se
+A2 vLLM fp8,single,512,512,1,3,0.352,1455.5,256,18.25,14.32,,183.0,0,length," `run.sh` | the whole matrix, resumable, writes `raw/p7-*.js"
+A2 vLLM fp8,single,4096,4096,1,1,0,0,0,0.0,0.18,,119.5,1,,
+A3 vLLM sym_int4 + MTP,single,512,512,1,1,0.47,1090.4,256,39.97,6.85,,153.3,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A3 vLLM sym_int4 + MTP,single,512,512,1,2,0.431,1187.3,256,41.54,6.57,,155.4,0,length,CL server log doesn't contain that string.   - The server st
+A3 vLLM sym_int4 + MTP,single,512,512,1,3,0.431,1189.2,256,55.8,5.0,,156.3,0,length, `run.sh` | the orchestrator: `all` / `speed` / `conc` / `co
+A3 vLLM sym_int4 + MTP,single,4096,4096,1,1,2.961,1383.5,256,53.76,7.7,,171.4,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A3 vLLM sym_int4 + MTP,single,4096,4096,1,2,2.959,1384.4,256,39.53,9.41,,169.3,0,length, rate is the headline**. - **summary**: `oai_bench.py summar
+A3 vLLM sym_int4 + MTP,single,4096,4096,1,3,2.956,1385.6,256,45.76,8.53,,171.0,0,length," on every setup, including the default. That's the expected "
+A3 vLLM sym_int4 + MTP,single,16384,16384,1,1,12.568,1303.6,256,48.23,17.86,,188.3,0,length,5: run the local-ai-registry lab gates in the official serve
+A3 vLLM sym_int4 + MTP,single,16384,16384,1,2,12.597,1300.6,256,46.37,18.1,,188.2,0,length,".4 / 25.2 tok/s at 32K, 64K and 128K. 2. **Muse's context re"
+A3 vLLM sym_int4 + MTP,single,16384,16384,1,3,12.636,1296.7,256,40.76,18.89,,187.1,0,length," Gemma pp512 is a tie (−0.9%), Gemma pp4096 is +9.5%, and Qw"
+A3 vLLM sym_int4 + MTP,single,32768,32768,1,1,27.501,1191.5,256,44.27,33.26,,194.3,0,length,"         # full run, ~1 h ```  ## What it measures - **llama"
+A3 vLLM sym_int4 + MTP,single,32768,32768,1,2,27.503,1191.4,256,56.99,31.98,,195.3,0,length, check)     SYCL_BIN=~/src/llama.cpp/build-sycl/bin ./canary
+A3 vLLM sym_int4 + MTP,single,32768,32768,1,3,27.51,1191.1,256,54.47,32.19,,195.2,0,length,"`) are smoke tests, not results.  ## Models | Model | Quant "
