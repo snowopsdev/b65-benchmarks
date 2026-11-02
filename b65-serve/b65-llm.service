@@ -1,0 +1,14 @@
+[Unit]
+Description=Qwen3.8-27B on the B65 (Intel vLLM sym_int4 + MTP, OpenAI API on 127.0.0.1:8100)
+After=docker.service network-online.target
+
+[Service]
+ExecStart=%h/.local/share/b65-llm/serve.sh
+ExecStop=/usr/bin/docker stop -t 20 b65-llm
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=60
+TimeoutStopSec=40
+
+[Install]
+WantedBy=default.target
