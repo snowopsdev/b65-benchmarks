@@ -7,10 +7,11 @@ OUT=results/prefill-$(date +%Y%m%d-%H%M%S); mkdir -p "$OUT"
 PY=$HOME/.local/share/unsloth-xpu/bin/python; TOK=$HOME/models/tokenizers/Qwen3.8-27B/tokenizer.json
 TF=$HOME/src/TensorFold/zig-out/xpu/bin/tensorfold-native; PORT=8081
 run_mode() { local label=$1; shift
-  env XPU_DEVICE_ID=e222 "$@" "$TF" serve "$HOME/models/Qwen3.8-27B-GPTQ-g128" --drafter "$HOME/models/Qwen3.8-27B-DFlash2" \
+  curl -s -o /dev/null http://127.0.0.1:$PORT/ && { echo "!! port $PORT is already in use"; exit 1; }   # or the readiness check below would pass on that server
+  env -u XPU_PREFILL_INT8 XPU_DEVICE_ID=e222 "$@" "$TF" serve "$HOME/models/Qwen3.8-27B-GPTQ-g128" --drafter "$HOME/models/Qwen3.8-27B-DFlash2" \
     --parallel 1 --context 81920 --host 127.0.0.1 --port $PORT --name qwen > "$OUT/$label.server.log" 2>&1 &
   local pid=$!
-  for _ in $(seq 1 80); do curl -sf http://127.0.0.1:$PORT/v1/models >/dev/null && break; kill -0 $pid 2>/dev/null || { echo "!! $label server died"; tail -3 "$OUT/$label.server.log"; return 1; }; sleep 3; done
+  for _ in $(seq 1 80); do curl -sf http://127.0.0.1:$PORT/v1/models >/dev/null && break; kill -0 $pid 2>/dev/null || { echo "!! $label server died"; tail -3 "$OUT/$label.server.log"; exit 1; }; sleep 3; done
   grep -E 'streams of' "$OUT/$label.server.log"
   local c=(--base http://127.0.0.1:$PORT --model qwen --label "$label" --out "$OUT")
   "$PY" ../b65-phase7/oai_bench.py speed "${c[@]}" --tokenizer "$TOK" --sizes 512,4096,8192,16384,32768,65536 --reps 3 --gen 256
