@@ -1,0 +1,12 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+T80k-kv8,single,512,512,1,1,1.837,278.7,0,0.0,56.76,,,1,,"1, 16384-token prompt, 100-token generation, 3 reps, `--no-m"
+T80k-kv8,single,512,512,1,1,0.404,1266.0,256,68.79,4.11,,,0,length,"1, 16384-token prompt, 100-token generation, 3 reps, `--no-m"
+T80k-kv8,single,512,512,1,2,0.405,1264.8,256,79.92,3.6,,,0,length,CL backend doesn't write that string.   - `DRY=1` runs one m
+T80k-kv8,single,4096,4096,1,1,3.025,1354.0,256,58.74,7.37,,,0,length," (B65 benchmarks, local agent)  ## Part 1: Plan  ### Goal Me"
+T80k-kv8,single,4096,4096,1,2,3.025,1354.0,256,62.93,7.08,,,0,length," (same client, same tests, every engine) - **Speed:** `oai_b"
+T80k-kv8,single,16384,16384,1,1,12.941,1266.0,256,38.93,19.49,,,0,length," depth.** Qwen is fastest there (17.3), then Gemma (14.3), t"
+T80k-kv8,single,16384,16384,1,2,12.942,1266.0,256,33.99,20.45,,,0,length,"1.4–25.4), so the recipes are safe to publish. 2. **The offi"
+T80k-kv8,single,32768,32768,1,1,28.647,1143.8,256,21.46,40.53,,,0,length, the same settings. 7. **VRAM:** Strata streams experts into
+T80k-kv8,single,32768,32768,1,2,28.65,1143.7,256,22.35,40.06,,,0,length, kept in `board_w_raw`. - `env.txt` records the Vulkan devic
+T80k-kv8,single,65536,65536,1,1,68.637,954.8,256,16.17,84.41,,,0,length,48` and compare with `baseline_ub2048.json`; `UB=512` still 
+T80k-kv8,single,65536,65536,1,2,68.64,954.8,256,15.65,84.94,,,0,length,"8The B65 benchmark plan is complete. Phase 1.5, which re-che"

@@ -1,0 +1,48 @@
+  layers loaded: 8/64
+  layers loaded: 16/64
+  layers loaded: 24/64
+  layers loaded: 32/64
+  layers loaded: 40/64
+  layers loaded: 48/64
+  layers loaded: 56/64
+  layers loaded: 64/64
+info: qwen27-xpu: window ms by rows: 1 30.6, 8 34.4, 16 37.3
+info: qwen27-xpu: prompt cache of 2.0 GiB
+info: qwen27-xpu: 1 streams of 81920 tokens, DFlash2 trees for a lone stream
+warning: libtfgrammar.so is required for structured output and required tool calls (HTTP 400 when missing); restore the matching release archive's lib/ directory or run zig build grammar -Dxgrammar=DIR; prepare DIR with git clone --branch v0.2.8 --recurse-submodules https://github.com/mlc-ai/xgrammar
+[tensorfold] profile: stable; registered overrides: none
+[tensorfold] serving qwen at http://127.0.0.1:8081/v1 (sampling: temperature 1.0, top_k 20, top_p 0.95; drafts: DFlash2 (/home/snowdesk/models/Qwen3.8-27B-DFlash2); context: 81920; loaded in 9.7s)
+[tensorfold] thinking on (the chat template's default): replies reason in reasoning_content before the answer in content, and max_tokens counts both. --no-thinking turns it off; a request can send chat_template_kwargs {"enable_thinking": false}
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+info: prompt cache: 315 tokens, resumed at 0, kept 1; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 1, evicted 0, refused 0, failed 0)
+[tensorfold] done chatcmpl-e446dd24f4e1745b0d2d3ed0695398ff prompt=315 cached=0 thinking=True effort=none tokens=63 sha=6945791ee108 finish=stop rounds=12 accepted=50/180 ttft=0.299 decode=0.576 elapsed=0.875 queued=0.000 tok/s=107.6 seed=882443174636309265
+[tensorfold] 127.0.0.1 "POST /v1/chat/completions HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 256 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 2, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-e5c284f37a6370af539d6a17713c5d59 prompt=256 cached=0 thinking=False effort=none tokens=32 sha=55efd6b037c1 finish=length rounds=11 accepted=20/165 ttft=0.225 decode=0.499 elapsed=0.725 queued=0.000 tok/s=62.1
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 16384 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 3, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-59ad559abb3ce0ae4572287341e10c86 prompt=16384 cached=0 thinking=False effort=none tokens=256 sha=a0115f20ac72 finish=length rounds=58 accepted=198/870 ttft=12.958 decode=5.999 elapsed=18.957 queued=0.000 tok/s=42.5
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 16384 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 4, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-699fdb4462de676120e0a2cc6b8b859d prompt=16384 cached=0 thinking=False effort=none tokens=256 sha=eef5a77d42e2 finish=length rounds=73 accepted=186/1095 ttft=12.956 decode=7.554 elapsed=20.510 queued=0.000 tok/s=33.8
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 32768 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 5, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-751d059aa9c30452bd10f14893e80e20 prompt=32768 cached=0 thinking=False effort=none tokens=256 sha=af39a408568d finish=length rounds=69 accepted=186/1035 ttft=28.636 decode=11.155 elapsed=39.791 queued=0.000 tok/s=22.9
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 32768 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 6, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-b32c8419b21b28653cd8181997ce3733 prompt=32768 cached=0 thinking=False effort=none tokens=256 sha=23fe6b6a7d70 finish=length rounds=72 accepted=186/1080 ttft=28.648 decode=11.661 elapsed=40.310 queued=0.000 tok/s=21.9
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 65536 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 7, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-63dca4b06ab1f92f0713e8c166e31283 prompt=65536 cached=0 thinking=False effort=none tokens=256 sha=7c6672873019 finish=length rounds=58 accepted=202/870 ttft=69.024 decode=15.922 elapsed=84.946 queued=0.000 tok/s=16.0
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 65536 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 8, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-bfe783d315087959168f18664b3798fc prompt=65536 cached=0 thinking=False effort=none tokens=256 sha=34081b107f74 finish=length rounds=44 accepted=215/660 ttft=69.069 decode=12.064 elapsed=81.132 queued=0.000 tok/s=21.1
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 256 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 9, evicted 0, refused 0, failed 0)
+[tensorfold] done cmpl-af75bf455db2b79e124767910682b362 prompt=256 cached=0 thinking=False effort=none tokens=32 sha=55efd6b037c1 finish=length rounds=11 accepted=20/165 ttft=0.504 decode=1.791 elapsed=2.295 queued=0.000 tok/s=17.3
+[tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+info: prompt cache: 512 tokens, resumed at 0, kept 0; 1 states, 203 MiB and 0 MiB spare of 2048 MiB (hits 0, misses 10, evicted 0, refused 0, failed 0)
+Level Zero : 0x70000001
+error: XPU: a command list did not drain (Level Zero 0x70000001): its copies may still use host memory, so the process ends

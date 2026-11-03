@@ -1,0 +1,66 @@
+[
+ {
+  "ctx": 512,
+  "rep": 0,
+  "prompt_tokens": 569,
+  "ttft": 0.48,
+  "completion": 512,
+  "decode": 147.3
+ },
+ {
+  "ctx": 512,
+  "rep": 1,
+  "prompt_tokens": 569,
+  "ttft": 0.48,
+  "completion": 512,
+  "decode": 154.0
+ },
+ {
+  "ctx": 8192,
+  "rep": 0,
+  "prompt_tokens": 8249,
+  "ttft": 5.91,
+  "completion": 512,
+  "decode": 95.9
+ },
+ {
+  "ctx": 8192,
+  "rep": 1,
+  "prompt_tokens": 8249,
+  "ttft": 5.91,
+  "completion": 512,
+  "decode": 90.8
+ },
+ {
+  "ctx": 16384,
+  "rep": 0,
+  "prompt_tokens": 16441,
+  "ttft": 13.05,
+  "completion": 512,
+  "decode": 64.7
+ },
+ {
+  "ctx": 16384,
+  "rep": 1,
+  "prompt_tokens": 16441,
+  "ttft": 13.05,
+  "completion": 512,
+  "decode": 66.5
+ },
+ {
+  "ctx": 32768,
+  "rep": 0,
+  "prompt_tokens": 32824,
+  "ttft": 28.71,
+  "completion": 512,
+  "decode": 43.9
+ },
+ {
+  "ctx": 32768,
+  "rep": 1,
+  "prompt_tokens": 32825,
+  "ttft": 15.82,
+  "completion": 512,
+  "decode": 42.7
+ }
+]
