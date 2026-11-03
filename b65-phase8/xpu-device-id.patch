@@ -1,0 +1,18 @@
+diff --git i/zig/src/xpu/ze.zig w/zig/src/xpu/ze.zig
+index c7b918a..7d19d77 100644
+--- i/zig/src/xpu/ze.zig
++++ w/zig/src/xpu/ze.zig
+@@ -257,7 +257,12 @@ pub const Gpu = struct {
+         return true;
+     }
+ 
+-    pub fn open(device_id: u32) Error!Gpu {
++    pub fn open(requested_id: u32) Error!Gpu {
++        // XPU_DEVICE_ID (hex, e.g. e222 for an Arc Pro B65) overrides the B70 id the callers ask for.
++        const device_id: u32 = if (std.c.getenv("XPU_DEVICE_ID")) |v|
++            std.fmt.parseInt(u32, std.mem.trimStart(u8, std.mem.span(v), "0x"), 16) catch requested_id
++        else
++            requested_id;
+         var lib = std.DynLib.open("libze_loader.so.1") catch return error.LoaderUnavailable;
+         errdefer lib.close();
+         const api = try resolve(Api, &lib);

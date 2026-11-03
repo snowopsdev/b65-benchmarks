@@ -1,0 +1,7 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+T80k,single,16384,16384,1,1,12.959,1264.3,256,42.51,18.96,,,0,length," depth.** Qwen is fastest (17.3), Gemma is in the middle (14"
+T80k,single,16384,16384,1,2,12.957,1264.5,256,33.76,20.51,,,0,length,"1.4–25.4), and the image is within 1% of native on speed. 2."
+T80k,single,32768,32768,1,1,28.636,1144.3,256,22.86,39.79,,,0,length, the same settings. 7. **VRAM:** Strata streams experts into
+T80k,single,32768,32768,1,2,28.649,1143.8,256,21.87,40.31,,,0,length, kept in `board_w_raw`. - `env.txt` records the Vulkan devic
+T80k,single,65536,65536,1,1,69.026,949.4,256,16.02,84.95,,,0,length,48` and compare with `baseline_ub2048.json`; `UB=512` still 
+T80k,single,65536,65536,1,2,69.07,948.8,256,21.14,81.13,,,0,length,8The above is the full text of the file.<|im_end|> <|im_star

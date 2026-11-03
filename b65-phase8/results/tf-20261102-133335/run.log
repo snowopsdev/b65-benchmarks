@@ -1,0 +1,75 @@
+  T1 pp512 rep1: ttft 0.40s  decode 67.4 tok/s  (256 tok)
+  T1 pp512 rep2: ttft 0.40s  decode 79.0 tok/s  (256 tok)
+  T1 pp512 rep3: ttft 0.40s  decode 86.5 tok/s  (256 tok)
+  T1 pp4096 rep1: ttft 3.02s  decode 58.6 tok/s  (256 tok)
+  T1 pp4096 rep2: ttft 3.02s  decode 64.5 tok/s  (256 tok)
+  T1 pp4096 rep3: ttft 3.02s  decode 76.5 tok/s  (256 tok)
+  T1 pp8192 rep1: ttft 6.16s  decode 42.9 tok/s  (256 tok)
+  T1 pp8192 rep2: ttft 6.16s  decode 69.1 tok/s  (256 tok)
+  T1 pp8192 rep3: ttft 6.16s  decode 56.4 tok/s  (256 tok)
+  T1 C1 rep1: aggregate 105.8 tok/s, per-stream median 126.6
+  T1 C1 rep2: aggregate 86.7 tok/s, per-stream median 100.1
+  T1 C1 rep3: aggregate 110.0 tok/s, per-stream median 132.5
+  T1 C2 rep1: aggregate 136.1 tok/s, per-stream median 94.0
+  T1 C2 rep2: aggregate 113.2 tok/s, per-stream median 73.2
+  T1 C2 rep3: aggregate 117.1 tok/s, per-stream median 94.8
+  T1 C4 rep1: aggregate 145.6 tok/s, per-stream median 53.5
+  T1 C4 rep2: aggregate 151.6 tok/s, per-stream median 46.9
+  T1 C4 rep3: aggregate 153.2 tok/s, per-stream median 54.0
+  T1 C8 rep1: aggregate 167.4 tok/s, per-stream median 32.6
+  T1 C8 rep2: aggregate 176.6 tok/s, per-stream median 29.5
+  T1 C8 rep3: aggregate 168.9 tok/s, per-stream median 29.6
+  T1 c01 try 0: PASS  140.1 tok/s
+  T1 c01 try 1: PASS  130.7 tok/s
+  T1 c01 try 2: PASS  131.0 tok/s
+  T1 c02 try 0: PASS  174.6 tok/s
+  T1 c02 try 1: PASS  152.7 tok/s
+  T1 c02 try 2: PASS  144.2 tok/s
+  T1 c03 try 0: PASS  156.7 tok/s
+  T1 c03 try 1: PASS  143.1 tok/s
+  T1 c03 try 2: PASS  135.9 tok/s
+  T1 c04 try 0: PASS  167.4 tok/s
+  T1 c04 try 1: PASS  157.6 tok/s
+  T1 c04 try 2: PASS  161.6 tok/s
+  T1 c05 try 0: PASS  170.8 tok/s
+  T1 c05 try 1: PASS  157.5 tok/s
+  T1 c05 try 2: PASS  157.5 tok/s
+  T1 c06 try 0: PASS  171.8 tok/s
+  T1 c06 try 1: PASS  156.8 tok/s
+  T1 c06 try 2: PASS  157.4 tok/s
+  T1 c07 try 0: PASS  167.4 tok/s
+  T1 c07 try 1: PASS  153.5 tok/s
+  T1 c07 try 2: PASS  157.5 tok/s
+  T1 c08 try 0: PASS  153.2 tok/s
+  T1 c08 try 1: PASS  122.6 tok/s
+  T1 c08 try 2: PASS  115.9 tok/s
+  T1 c09 try 0: PASS  176.3 tok/s
+  T1 c09 try 1: PASS  160.1 tok/s
+  T1 c09 try 2: PASS  160.1 tok/s
+  T1 c10 try 0: PASS  180.1 tok/s
+  T1 c10 try 1: PASS  160.4 tok/s
+  T1 c10 try 2: PASS  163.0 tok/s
+# Phase 7 summary (medians)
+
+## Single stream
+
+| label | prompt | TTFT s | prefill tok/s | decode tok/s | board W | short |
+|---|---|---|---|---|---|---|
+| T1 | 512 | 0.4 | 1267.3 | 79.0 | – | 0 |
+| T1 | 4096 | 3.0 | 1356.1 | 64.5 | – | 0 |
+| T1 | 8192 | 6.2 | 1329.2 | 56.4 | – | 0 |
+
+## Concurrency (512-token prompts)
+
+| label | streams | aggregate tok/s | per-stream decode tok/s | TTFT s |
+|---|---|---|---|---|
+| T1 | 1 | 105.8 | 126.6 | 0.4 |
+| T1 | 2 | 117.1 | 82.2 | 0.6 |
+| T1 | 4 | 151.6 | 51.5 | 1.1 |
+| T1 | 8 | 168.9 | 30.7 | 1.8 |
+
+## Coding (thinking off)
+
+| label | pass | decode tok/s on answers |
+|---|---|---|
+| T1 | 30/30 | 157.5 |
