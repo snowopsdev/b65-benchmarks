@@ -1,0 +1,112 @@
+run_id=p9l-20261113-183511
+date=2026-11-13T18:35:11-05:00
+kernel=7.2.15-1-omarchy
+mesa=mesa 1:26.2.5-1
+oneapi=Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+level_zero=level-zero-loader 1.32.0-1 intel-compute-runtime 26.35.39758.10-1 
+old_sycl=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+new_sycl=version: 1.0.0-dev (build 12359, commit b1b770d90)
+old_vulkan=version: 0.6.0-dev (build 11574, commit 8bb3cf0d2)
+new_vulkan=version: 1.0.0-dev (build 12359, commit b1b770d90)
+vk_index=1
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+omarchy=4.5.0-3
+reps=5
+models=qwen3.8-27b muse-glimmer gemma-4-31b-qat
+vulkan=1
+dry=0
+energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=ffe1bb1850a77ad8f70f5b6045ae3da46df3052b
+== qwen3.8-27b (/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf)
+>> sycl old qwen3.8-27b pp512 ub2048
+   640.98 ± 0.15 tok/s 182.8W
+>> sycl new qwen3.8-27b pp512 ub2048
+   774.96 ± 0.41 tok/s 193.7W
+>> sycl old qwen3.8-27b pp4096 ub2048
+   891.97 ± 0.24 tok/s 195.3W
+>> sycl new qwen3.8-27b pp4096 ub2048
+   951.33 ± 1.97 tok/s 198.9W
+>> sycl old qwen3.8-27b pp16384 ub2048
+   824.26 ± 0.29 tok/s 195.9W
+>> sycl new qwen3.8-27b pp16384 ub2048
+   878.62 ± 0.26 tok/s 199.2W
+>> sycl old qwen3.8-27b tg128 ub2048
+   23.68 ± 0.02 tok/s 195.1W
+>> sycl new qwen3.8-27b tg128 ub2048
+   24.49 ± 0.0 tok/s 186.0W
+>> sycl old qwen3.8-27b tg128@d16384 ub2048
+   18.77 ± 0.0 tok/s 179.7W
+>> sycl new qwen3.8-27b tg128@d16384 ub2048
+   19.19 ± 0.01 tok/s 171.2W
+>> vulkan old qwen3.8-27b pp512 ub512
+   445.52 ± 0.24 tok/s 153.4W
+>> vulkan new qwen3.8-27b pp512 ub512
+   491.06 ± 0.23 tok/s 158.7W
+>> vulkan old qwen3.8-27b pp16384 ub512
+   388.17 ± 0.04 tok/s 156.3W
+>> vulkan new qwen3.8-27b pp16384 ub512
+   422.54 ± 0.04 tok/s 161.3W
+>> vulkan old qwen3.8-27b tg128 ub512
+   19.07 ± 0.01 tok/s 170.2W
+>> vulkan new qwen3.8-27b tg128 ub512
+   19.08 ± 0.02 tok/s 170.4W
+== muse-glimmer (/home/snowdesk/.lmstudio/models/lmstudio-community/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf)
+>> sycl old muse-glimmer pp512 ub2048
+   691.03 ± 0.28 tok/s 183.5W
+>> sycl new muse-glimmer pp512 ub2048
+   860.45 ± 1.01 tok/s 196.3W
+>> sycl old muse-glimmer pp4096 ub2048
+   905.63 ± 2.82 tok/s 192.3W
+>> sycl new muse-glimmer pp4096 ub2048
+   982.99 ± 0.63 tok/s 198.3W
+>> sycl old muse-glimmer pp16384 ub2048
+   811.19 ± 11.47 tok/s 190.9W
+>> sycl new muse-glimmer pp16384 ub2048
+   890.07 ± 0.27 tok/s 198.1W
+>> sycl old muse-glimmer tg128 ub2048
+   25.68 ± 0.02 tok/s 199.5W
+>> sycl new muse-glimmer tg128 ub2048
+   26.92 ± 0.02 tok/s 193.1W
+>> sycl old muse-glimmer tg128@d16384 ub2048
+   23.6 ± 0.2 tok/s 193.8W
+>> sycl new muse-glimmer tg128@d16384 ub2048
+   24.57 ± 0.23 tok/s 187.4W
+>> vulkan old muse-glimmer pp512 ub512
+   540.08 ± 0.85 tok/s 160.9W
+>> vulkan new muse-glimmer pp512 ub512
+   583.2 ± 0.62 tok/s 165.5W
+>> vulkan old muse-glimmer pp16384 ub512
+   429.7 ± 0.05 tok/s 161.7W
+>> vulkan new muse-glimmer pp16384 ub512
+   457.57 ± 0.11 tok/s 166.6W
+>> vulkan old muse-glimmer tg128 ub512
+   20.93 ± 0.01 tok/s 175.4W
+>> vulkan new muse-glimmer tg128 ub512
+   20.98 ± 0.0 tok/s 175.7W
+!! gemma-4-31b-qat not found
+# Phase 9 part L: llama.cpp b11574 vs v1.0.0 (p9l-20261113-183511)
+
+| backend | model | test | b11574 tok/s | v1.0.0 tok/s | change | b11574 W | v1.0.0 W |
+|---|---|---|---:|---:|---:|---:|---:|
+| sycl | qwen3.8-27b | pp512 | 640.98 ± 0.15 | 774.96 ± 0.41 | +20.9% | 182.8 | 193.7 |
+| sycl | qwen3.8-27b | pp4096 | 891.97 ± 0.24 | 951.33 ± 1.97 | +6.7% | 195.3 | 198.9 |
+| sycl | qwen3.8-27b | pp16384 | 824.26 ± 0.29 | 878.62 ± 0.26 | +6.6% | 195.9 | 199.2 |
+| sycl | qwen3.8-27b | tg128 | 23.68 ± 0.02 | 24.49 ± 0.00 | +3.4% | 195.1 | 186.0 |
+| sycl | qwen3.8-27b | tg128@d16384 | 18.77 ± 0.00 | 19.19 ± 0.01 | +2.2% | 179.7 | 171.2 |
+| vulkan | qwen3.8-27b | pp512 | 445.52 ± 0.24 | 491.06 ± 0.23 | +10.2% | 153.4 | 158.7 |
+| vulkan | qwen3.8-27b | pp16384 | 388.17 ± 0.04 | 422.54 ± 0.04 | +8.9% | 156.3 | 161.3 |
+| vulkan | qwen3.8-27b | tg128 | 19.07 ± 0.01 | 19.08 ± 0.02 | +0.1% | 170.2 | 170.4 |
+| sycl | muse-glimmer | pp512 | 691.03 ± 0.28 | 860.45 ± 1.01 | +24.5% | 183.5 | 196.3 |
+| sycl | muse-glimmer | pp4096 | 905.63 ± 2.82 | 982.99 ± 0.63 | +8.5% | 192.3 | 198.3 |
+| sycl | muse-glimmer | pp16384 | 811.19 ± 11.47 | 890.07 ± 0.27 | +9.7% | 190.9 | 198.1 |
+| sycl | muse-glimmer | tg128 | 25.68 ± 0.02 | 26.92 ± 0.02 | +4.8% | 199.5 | 193.1 |
+| sycl | muse-glimmer | tg128@d16384 | 23.60 ± 0.20 | 24.57 ± 0.23 | +4.1% | 193.8 | 187.4 |
+| vulkan | muse-glimmer | pp512 | 540.08 ± 0.85 | 583.20 ± 0.62 | +8.0% | 160.9 | 165.5 |
+| vulkan | muse-glimmer | pp16384 | 429.70 ± 0.05 | 457.57 ± 0.11 | +6.5% | 161.7 | 166.6 |
+| vulkan | muse-glimmer | tg128 | 20.93 ± 0.01 | 20.98 ± 0.00 | +0.2% | 175.4 | 175.7 |
+
+- sycl prefill: geometric mean +12.6% over 6 tests
+- sycl decode: geometric mean +3.6% over 4 tests
+- vulkan prefill: geometric mean +8.4% over 4 tests
+- vulkan decode: geometric mean +0.1% over 2 tests
+Done: raw/p9l-20261113-183511

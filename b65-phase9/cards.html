@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 9 cards</title>
+<!-- Phase 9 share cards. cards.html?card=llama|tf&fmt=wide|tall ; export_cards.sh renders them to charts/phase9/*.png at 2x.
+     Numbers: raw/p9s-20261113-194418 (coding), raw/p9l-20261113-183511 (llama-bench), raw/p9t-20261113-191445 (TensorFold),
+     raw/p9v-20261113-201241 (vLLM, same prompts), vLLM A5 rerun ../b65-phase7/raw/p7-20261114-075756 + llama.cpp k=5 control raw/p9s-20261114-081048 (vllm_rerun.sh). Palette validated (dataviz validator, dark). -->
+<style>
+  :root {
+    --bg-a: #0d0f13; --bg-b: #162033;
+    --text-primary: #f2f1ee; --text-secondary: #b9b8b2; --text-muted: #8a8984;
+    --kicker: #4b93ec; --rule: #2a2e36; --grid: #232731;
+    --llama: #3987e5;  --llama-dim: #24508a;
+    --vllm: #d95926;
+    --tf: #199e70;     --tf-dim: #135f45;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg-a); }
+  body { font-family: "Liberation Sans", Helvetica, Arial, sans-serif; color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+  .card { position: relative; overflow: hidden; display: flex; flex-direction: column;
+    background: radial-gradient(120% 90% at 85% 0%, var(--bg-b) 0%, var(--bg-a) 62%); }
+  .wide { width: 1200px; height: 675px; padding: 46px 56px 30px; }
+  .tall { width: 1080px; height: 1350px; padding: 64px 60px 44px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .kicker { color: var(--kicker); font-weight: 700; letter-spacing: .01em; text-transform: uppercase; }
+  .pill { display: flex; align-items: center; gap: 10px; border: 1px solid #343a45; background: #0c0e12; border-radius: 999px;
+    font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+  .pill i { width: 11px; height: 11px; border-radius: 50%; background: #22b14c; display: block; }
+  h1 { font-weight: 700; letter-spacing: -.01em; line-height: 1.08; }
+  .sub { color: var(--text-secondary); line-height: 1.3; }
+  .wide .kicker { font-size: 16px; } .wide .pill { font-size: 15px; padding: 8px 16px; }
+  .wide h1 { font-size: 46px; margin-top: 14px; } .wide .sub { font-size: 20px; margin-top: 10px; }
+  .tall .kicker { font-size: 21px; } .tall .pill { font-size: 18px; padding: 10px 18px; }
+  .tall h1 { font-size: 64px; margin-top: 26px; } .tall .sub { font-size: 25px; margin-top: 18px; }
+  .foot { border-top: 1px solid var(--rule); color: var(--text-muted); line-height: 1.45; margin-top: auto; }
+  .wide .foot { font-size: 13.5px; padding-top: 12px; } .tall .foot { font-size: 18px; padding-top: 20px; }
+  .note { color: var(--text-secondary); }
+  .note b { color: var(--text-primary); }
+  .wide .note { font-size: 15px; margin: 22px 0 14px; } .tall .note { font-size: 21px; margin: 26px 0 28px; line-height: 1.45; }
+
+  /* horizontal bars (llama card) */
+  .hbars { display: grid; align-items: center; }
+  .wide .hbars { grid-template-columns: 330px 1fr 74px; row-gap: 9px; margin-top: 22px; }
+  .tall .hbars { grid-template-columns: 1fr 96px; row-gap: 10px; margin-top: 44px; }
+  .hhead { color: var(--text-secondary); font-weight: 700; }
+  .hhead.r { text-align: right; text-transform: uppercase; color: var(--text-muted); letter-spacing: .02em; }
+  .wide .hhead { font-size: 15px; } .tall .hhead { font-size: 20px; }
+  .lab b { display: block; font-weight: 700; } .lab span { color: var(--text-muted); }
+  .wide .lab b { font-size: 18px; } .wide .lab span { font-size: 13.5px; }
+  .tall .lab { grid-column: 1 / -1; margin-top: 14px; } .tall .lab b { font-size: 25px; display: inline; } .tall .lab span { font-size: 19px; margin-left: 10px; }
+  .track { position: relative; display: flex; align-items: center; }
+  .bar { border-radius: 0 4px 4px 0; }
+  .wide .bar { height: 30px; } .tall .bar { height: 42px; }
+  .bar.ref { background: repeating-linear-gradient(135deg, var(--vllm) 0 7px, #b44a20 7px 12px) !important; }
+  .val { font-weight: 700; margin-left: 12px; white-space: nowrap; }
+  .wide .val { font-size: 22px; } .tall .val { font-size: 30px; }
+  .pass { text-align: right; color: var(--text-secondary); }
+  .wide .pass { font-size: 17px; } .tall .pass { font-size: 23px; }
+
+  /* grouped columns (tf card) */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 26px; color: var(--text-secondary); }
+  .legend span { display: inline-flex; align-items: center; gap: 9px; }
+  .legend i { display: inline-block; border-radius: 3px; }
+  .wide .legend { font-size: 15.5px; margin-top: 18px; } .wide .legend i { width: 15px; height: 15px; }
+  .tall .legend { font-size: 21px; margin-top: 34px; } .tall .legend i { width: 20px; height: 20px; }
+  .cols { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #3a3f4a; }
+  .wide .cols { height: 300px; margin-top: 14px; column-gap: 34px; } .tall .cols { height: 640px; margin-top: 26px; column-gap: 28px; }
+  .grp { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 100%; }
+  .col { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+  .wide .col { width: 62px; } .tall .col { width: 66px; }
+  .col .bar { width: 100%; border-radius: 4px 4px 0 0; }
+  .col .v { font-weight: 700; margin-bottom: 6px; white-space: nowrap; }
+  .wide .col .v { font-size: 17px; } .tall .col .v { font-size: 22px; }
+  .col .na { color: var(--text-muted); text-align: center; line-height: 1.2; }
+  .wide .col .na { font-size: 12px; } .tall .col .na { font-size: 16px; }
+  .gl { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; }
+  .wide .gl { column-gap: 34px; margin-top: 9px; } .tall .gl { column-gap: 28px; margin-top: 14px; }
+  .gl b { display: block; font-weight: 700; } .gl span { color: var(--text-muted); }
+  .wide .gl b { font-size: 18px; } .wide .gl span { font-size: 14px; }
+  .tall .gl b { font-size: 24px; } .tall .gl span { font-size: 18px; }
+  .gl em { font-style: normal; color: var(--text-primary); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const q = new URLSearchParams(location.search);
+const card = q.get("card") || "llama", fmt = q.get("fmt") === "tall" ? "tall" : "wide";
+const el = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+const topBar = (kicker) => `<div class="top"><div class="kicker">${kicker}</div><div class="pill"><i></i>Full run complete</div></div>`;
+
+function llama() {
+  const rows = [
+    { n: "llama.cpp 1.0.0, no drafts", d: "Q4_K_M · the recipe flags", v: 24.7, c: "var(--llama-dim)", p: "30/30" },
+    { n: "llama.cpp b11574 + MTP k=3", d: "the October build · rerun today", v: 42.2, c: "var(--llama-dim)", p: "30/30" },
+    { n: "llama.cpp 1.0.0 + MTP k=3", d: "draft-mtp, 3 tokens", v: 68.9, c: "var(--llama)", p: "30/30" },
+    { n: "llama.cpp 1.0.0 + MTP k=4", d: "draft-mtp, 4 tokens", v: 72.2, c: "var(--llama)", p: "30/30" },
+    { n: "llama.cpp 1.0.0 + MTP k=5", d: "draft-mtp, 5 tokens", v: 78.4, c: "var(--llama)", p: "30/30" },
+    { n: "Intel vLLM + MTP k=5", d: "Phase 7 best · rerun Nov 14", v: 70.9, c: "var(--vllm)", p: "29/30", ref: true },
+  ];
+  const max = 84;
+  const lab = (r) => `<div class="lab"><b>${r.n}</b><span>${r.d}</span></div>`;
+  const bar = (r) => `<div class="track"><div class="bar${r.ref ? " ref" : ""}" style="width:${(r.v / max * (fmt === "wide" ? 88 : 86)).toFixed(2)}%;background:${r.c}"></div><div class="val">${r.v.toFixed(1)}</div></div>`;
+  const body = rows.map(r => fmt === "wide" ? lab(r) + bar(r) + `<div class="pass">${r.p}</div>` : lab(r) + bar(r) + `<div class="pass">${r.p}</div>`).join("");
+  const head = fmt === "wide" ? `<div class="hhead">Qwen3.8 27B (dense) · Q4_K_M</div><div></div><div class="hhead r">Passed</div>`
+                              : `<div class="hhead">Qwen3.8 27B (dense) · Q4_K_M</div><div class="hhead r">Passed</div>`;
+  return `<div class="card ${fmt}">${topBar("Intel Arc Pro B65 · 32 GB · Phase 9: llama.cpp 1.0.0")}
+    <h1>llama.cpp 1.0.0: MTP code speed 42 → 78 tok/s</h1>
+    <div class="sub">tok/s while writing code, one request · the same 30 tries for every bar (10 tasks × 3 tries, thinking off)</div>
+    <div class="hbars">${head}${body}</div>
+    <div class="note">llama-bench vs b11574, same session: <b>SYCL prefill +12.6%</b>, decode +3.6% · Vulkan prefill +8.4%, decode flat</div>
+    <div class="foot">Arc Pro B65 32 GB · llama.cpp 1.0.0 (b12359, b1b770d) vs b11574 (8bb3cf0), SYCL, -fa on -b 2048 -ub 2048 · llama.cpp rows 2026-11-13 (k=5 rerun beside vLLM 11-14: 78.0) · striped bar: intel/llm-scaler-vllm 1.5, sym_int4, 2026-11-14 · Linux 7.2.15</div>
+  </div>`;
+}
+
+function tf() {
+  const groups = [
+    { l: "68", s: "tokens", v: [77.9, 152.3, 152.2] },
+    { l: "8K", s: "switch ×1.37", v: [79.6, 87.8, 120.3] },
+    { l: "32K", s: "switch ×2.22", v: [64.5, 46.3, 102.8] },
+    { l: "131K", s: "switch ×3.70", v: [null, 16.5, 61.1] },
+  ];
+  const cs = ["var(--vllm)", "var(--tf-dim)", "var(--tf)"], max = 165;
+  const cols = groups.map(g => `<div class="grp">${g.v.map((v, i) => v == null
+      ? `<div class="col"><div class="na">past its<br>80K context</div></div>`
+      : `<div class="col"><div class="v">${v.toFixed(fmt === "tall" && v >= 100 ? 0 : 1)}</div><div class="bar" style="height:${(v / max * 100).toFixed(2)}%;background:${cs[i]}"></div></div>`).join("")}</div>`).join("");
+  const gl = groups.map(g => `<div><b>${g.l}</b><span>${g.s.startsWith("switch") ? `switch <em>${g.s.slice(7)}</em>` : "prompt tokens"}</span></div>`).join("");
+  return `<div class="card ${fmt}">${topBar("Intel Arc Pro B65 · 32 GB · SergiioB's TensorFold branch")}
+    <h1>One switch: 46 → 103 tok/s at 32K on a B65</h1>
+    <div class="sub">Qwen3.8 27B · decode tok/s on a code prompt, 512 greedy tokens, one request · same prompts, same card, same day</div>
+    <div class="legend"><span><i style="background:var(--vllm)"></i>Intel vLLM, 4-bit + MTP k=5</span>
+      <span><i style="background:var(--tf-dim)"></i>TensorFold, default</span>
+      <span><i style="background:var(--tf)"></i>TensorFold + XPU_ATTN_PREF=256</span></div>
+    <div class="cols">${cols}</div><div class="gl">${gl}</div>
+    <div class="note">Drafted text == non-drafted text in every cell checked. The switch changes the answer text vs default in 4 of 6 cells (their B70 receipt: same).</div>
+    <div class="foot">SergiioB/TensorFold b70-attn-prefix-20261113 (4f7042f) + B65 device-id patch · GPTQ g128 + DFlash2 drafts, bf16 K/V, --parallel 1, prompt cache off · B65 at a 200 W cap · their B70 (230 W): 46 → 90 at 32K, 15 → 51 at 131K · vLLM: intel/llm-scaler-vllm 1.5 · 2026-11-13</div>
+  </div>`;
+}
+function llamaPlain() {
+  const rows = [
+    { n: "New version, no trick", d: "llama.cpp 1.0.0 as is", v: 24.7, c: "var(--llama-dim)", p: "30/30" },
+    { n: "Old version + trick", d: "October's llama.cpp, 3 tokens ahead", v: 42.2, c: "var(--llama-dim)", p: "30/30" },
+    { n: "New version + trick", d: "3 tokens ahead", v: 68.9, c: "var(--llama)", p: "30/30" },
+    { n: "New version + trick", d: "4 tokens ahead", v: 72.2, c: "var(--llama)", p: "30/30" },
+    { n: "New version + trick", d: "5 tokens ahead (best)", v: 78.4, c: "var(--llama)", p: "30/30" },
+    { n: "Intel's own engine (vLLM)", d: "its best setting, tested the same week", v: 70.9, c: "var(--vllm)", p: "29/30", ref: true },
+  ];
+  const max = 84;
+  const lab = (r) => `<div class="lab"><b>${r.n}</b><span>${r.d}</span></div>`;
+  const bar = (r) => `<div class="track"><div class="bar${r.ref ? " ref" : ""}" style="width:${(r.v / max * (fmt === "wide" ? 88 : 86)).toFixed(2)}%;background:${r.c}"></div><div class="val">${Math.round(r.v)}</div></div>`;
+  const body = rows.map(r => lab(r) + bar(r) + `<div class="pass">${r.p}</div>`).join("");
+  const head = fmt === "wide" ? `<div class="hhead">Same 10 coding tasks, 3 tries each</div><div></div><div class="hhead r">Passed</div>`
+                              : `<div class="hhead">Same 10 coding tasks, 3 tries each</div><div class="hhead r">Passed</div>`;
+  return `<div class="card ${fmt}">${topBar("Intel Arc Pro B65 graphics card · local AI")}
+    <h1>New llama.cpp writes code almost 2× faster</h1>
+    <div class="sub">How fast a 27B AI model writes code on one Intel graphics card, in tokens per second (a token is about ¾ of a word). Higher is better.</div>
+    <div class="hbars">${head}${body}</div>
+    <div class="note"><b>The trick:</b> the model guesses a few tokens ahead, then checks them all at once. It's one setting, and every llama.cpp bar passed every try. Tested back to back, it now beats Intel's own engine, and reads your prompt about 13% faster.</div>
+    <div class="foot">Intel Arc Pro B65 32 GB · Qwen3.8 27B, 4-bit · llama.cpp 1.0.0 vs b11574 (Oct), measured Nov 13, 2026 · Intel engine (striped): vLLM, Nov 14, beside a llama.cpp rerun (78) · trick: MTP, --spec-type draft-mtp</div>
+  </div>`;
+}
+
+function tfPlain() {
+  const groups = [
+    { l: "A short question", s: "a sentence", v: [77.9, 152.3, 152.2] },
+    { l: "A few files", s: "8K tokens · <em>1.4× faster</em>", v: [79.6, 87.8, 120.3] },
+    { l: "Lots of code", s: "32K tokens · <em>2.2× faster</em>", v: [64.5, 46.3, 102.8] },
+    { l: "A whole codebase", s: "131K tokens · <em>3.7× faster</em>", v: [null, 16.5, 61.1] },
+  ];
+  const cs = ["var(--vllm)", "var(--tf-dim)", "var(--tf)"], max = 165;
+  const cols = groups.map(g => `<div class="grp">${g.v.map((v, i) => v == null
+      ? `<div class="col"><div class="na">too long<br>for it</div></div>`
+      : `<div class="col"><div class="v">${Math.round(v)}</div><div class="bar" style="height:${(v / max * 100).toFixed(2)}%;background:${cs[i]}"></div></div>`).join("")}</div>`).join("");
+  const gl = groups.map(g => `<div><b>${g.l}</b><span>${g.s}</span></div>`).join("");
+  return `<div class="card ${fmt}">${topBar("Intel Arc Pro B65 graphics card · local AI")}
+    <h1>One new setting makes long prompts 2–4× faster</h1>
+    <div class="sub">How fast a 27B AI model writes code on one Intel graphics card, in tokens per second (a token is about ¾ of a word). Higher is better.</div>
+    <div class="legend"><span><i style="background:var(--vllm)"></i>Intel's own engine (vLLM)</span>
+      <span><i style="background:var(--tf-dim)"></i>TensorFold, as it ships</span>
+      <span><i style="background:var(--tf)"></i>TensorFold with the new setting</span></div>
+    <div class="cols">${cols}</div><div class="gl">${gl}</div>
+    <div class="note">The longer the input, the bigger the gain. The new setting can change the exact wording of an answer. It's an experimental add-on by SergeB (@SergiiioBS), not part of official TensorFold.</div>
+    <div class="foot">Intel Arc Pro B65 32 GB · Qwen3.8 27B, 4-bit · same prompts, same card, same day (Nov 13, 2026) · setting: XPU_ATTN_PREF=256 on TensorFold branch b70-attn-prefix-20261113</div>
+  </div>`;
+}
+document.getElementById("root").appendChild(el(card === "llama-plain" ? llamaPlain() : card === "tf-plain" ? tfPlain() : card === "tf" ? tf() : llama()));
+</script>
+</body>
+</html>

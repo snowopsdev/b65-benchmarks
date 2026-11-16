@@ -1,0 +1,13 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,1,0.479,1069.1,256,38.31,7.13,,165.8,0,length,"1, 4 batch sizes, 4 prompt lengths, 3 reps, 20 s cooldown. `"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,2,0.439,1167.1,256,45.11,6.09,,167.5,0,length,CL server log doesn't contain that string.   - The server st
+A5 vLLM sym_int4 + MTP k=5 graphs,single,512,512,1,3,0.438,1169.7,256,38.34,7.09,,167.9,0,length,- **vLLM's `--max-model-len`** must be at least the 32K prom
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,1,2.95,1388.4,256,47.19,8.35,,179.6,0,length,  ## Part 1: Plan  ### Goal Measure the B65's real serving n
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,2,2.954,1386.5,256,52.31,7.83,,181.2,0,length," (same client, same prompts, every engine) - **speed**: `oai"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,4096,4096,1,3,2.952,1387.3,256,61.81,7.08,,183.0,0,length,](https://github.comsnowopsdev/b65-benchmarks/blob/db9c9d25d
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,1,12.534,1307.1,256,48.4,17.8,,191.5,0,length, W.  ## Findings  1. **Gemma's prefill is the problem.** 38 
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,2,12.594,1300.9,256,43.69,18.43,,191.1,0,length,".9 s | 1,000 tokens, 40 s | | | image b11515 | **6/6** | **2"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,16384,16384,1,3,12.593,1301.0,256,52.9,17.41,,192.3,0,length," length, with a few different words. - **No out-of-memory re"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,1,27.437,1194.3,256,43.2,33.34,,194.9,0,length,", checked on the B65:** its registry recipe quotes 60–80 tok"
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,2,27.441,1194.1,256,50.4,32.5,,195.6,0,length, decode on SYCL (−5% vs Vulkan):** unexplained. - **vLLM on 
+A5 vLLM sym_int4 + MTP k=5 graphs,single,32768,32768,1,3,27.51,1191.1,256,51.73,32.44,,195.6,0,length,65_VK_INDEX=<idx> ./gemma_swa.sh` (about 20 min). It reruns 

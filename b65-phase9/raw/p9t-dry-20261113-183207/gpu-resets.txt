@@ -1,0 +1,1 @@
+no GPU resets logged

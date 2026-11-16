@@ -1,0 +1,2 @@
+part,label,build,status,load_s,args
+NA0mk5,NA0mk5 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=5,v1.0.0,ok,39,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 5"

@@ -3,7 +3,7 @@
 # Engine: Intel llm-scaler vLLM 1.5 with Phase 7's single-user winner (A5: sym_int4, MTP k=5, graphs on; 74.2 tok/s on code),
 # plus tool calls, the reasoning parser and prefix caching (off in the benchmark; agents resend their whole context every turn).
 # Runs in the foreground; b65-llm.service starts it. Listens on 127.0.0.1:$PORT; `tailscale serve` puts it on the tailnet.
-# The exl3xpu alternative (256K context, 51 tok/s) is serve-exl3.sh.
+# The exl3xpu alternative (256K context, 51 tok/s) is serve-exl3.sh; since Phase 9 the default is serve-llamacpp.sh.
 set -euo pipefail
 PORT="${PORT:-8100}"; NAME=b65-llm; B65_PCI=0000:06:00.0
 MTP_K="${MTP_K:-5}"; CTX="${CTX:-81920}"   # the KV cache holds ~86K tokens; k=3 for several users at once (197 vs 137 tok/s at 8 requests)

@@ -1,13 +1,14 @@
 [Unit]
-Description=Qwen3.8-27B on the B65 (Intel vLLM sym_int4 + MTP, OpenAI API on 127.0.0.1:8100)
-After=docker.service network-online.target
+Description=Qwen3.8-27B on the B65 (llama.cpp 1.0.0 SYCL, Q4_K_M + MTP k=5, OpenAI API on 127.0.0.1:8100)
+After=network-online.target
 
 [Service]
-ExecStart=%h/.local/share/b65-llm/serve.sh
-ExecStop=/usr/bin/docker stop -t 20 b65-llm
+# llama.cpp since Phase 9 (2026-11-13). Back to Intel vLLM: ExecStart=%h/.local/share/b65-llm/serve-vllm.sh and
+# ExecStop=/usr/bin/docker stop -t 20 b65-llm, After=docker.service; then daemon-reload and restart.
+ExecStart=%h/.local/share/b65-llm/serve-llamacpp.sh
 Restart=on-failure
 RestartSec=30
-TimeoutStartSec=60
+TimeoutStartSec=120
 TimeoutStopSec=40
 
 [Install]
