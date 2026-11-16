@@ -1,0 +1,7 @@
+backend,build,model,test,ub,tok_s,sd,board_w,invocation_w
+sycl,old,qwen3.8-27b,pp512,2048,639.86,0.0,176.5,52.6
+sycl,new,qwen3.8-27b,pp512,2048,773.97,0.0,189.8,50.0
+sycl,old,qwen3.8-27b,tg128,2048,23.68,0.0,188.0,116.2
+sycl,new,qwen3.8-27b,tg128,2048,10.9,0.0,104.0,88.8
+vulkan,old,qwen3.8-27b,tg128,512,19.06,0.0,165.7,107.0
+vulkan,new,qwen3.8-27b,tg128,512,19.09,0.0,166.3,102.8

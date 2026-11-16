@@ -1,0 +1,1 @@
+./bench.sh: line 77: /home/snowdesk/src/llama.cpp/build-sycl/bin/llama-completion: No such file or directory

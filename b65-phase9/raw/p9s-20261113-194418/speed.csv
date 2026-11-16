@@ -1,0 +1,25 @@
+label,test,prompt_target,prompt_tokens,conc,rep,ttft_s,prefill_tok_s,gen_tokens,decode_tok_s,total_s,agg_tok_s,board_w,short,finish,head
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,512,512,1,1,0.789,648.6,256,24.06,11.39,,183.2,0,length,"1, `--ctx-checkpoints 0` and 1, 4096 and 16384 context, 512-"
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,512,512,1,2,0.797,642.8,256,23.99,11.43,,183.9,0,length,CL build doesn't write that string.   - `--jinja` on the ser
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,512,512,1,3,0.8,640.1,256,23.99,11.43,,184.3,0,length,- **vLLM's `--max-model-len`** is the hard ceiling. A 32K pr
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,4096,4096,1,1,4.509,908.5,256,22.89,15.65,,186.8,0,length," (Forge kit, local changes)  Plan and rules: `HANDOFF.md`. R"
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,4096,4096,1,2,4.546,901.0,256,22.89,15.69,,186.6,0,length," (same client, same prompts) - **speed**: 256 prompts × 128 "
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,4096,4096,1,3,4.555,899.1,256,22.84,15.72,,186.3,0,length,](https://github.com/slowopsdev/b65-benchmarks/blob/db9c9d25
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,16384,16384,1,1,19.049,860.1,256,19.08,32.41,,186.3,0,length, W (10 s sample).  ## Findings  1. **All three models fit 16
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,16384,16384,1,2,19.336,847.3,256,19.08,32.7,,185.3,0,length,".9 s | 1,214 tokens, 50 s | | | image b11515 | **6/6** | **2"
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,16384,16384,1,3,19.362,846.2,256,19.08,32.73,,185.2,0,length, length. - **The SYCL build is the same commit.** `8bb3cf0d2
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,32768,32768,1,1,41.994,780.3,256,15.57,58.37,,185.9,0,length, holds on the B65.**    - **Their number:** 73.7 tok/s on th
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,32768,32768,1,2,41.846,783.1,256,15.55,58.24,,186.1,0,length, decode on SYCL:** 5% slower than on Vulkan. - **vLLM on XPU
+NA0 llama.cpp v1.0.0 SYCL Q4_K_M,single,32768,32768,1,3,42.31,774.5,256,15.55,58.71,,185.2,0,length,"65_VK_INDEX=<idx> DRY=1 ./gemma_swa.sh`, then the full `./ge"
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,512,512,1,1,0.837,612.0,256,51.06,5.83,,166.6,0,length,"1, `--ctx-checkpoints 0` and 1, 4096-token prompt, 16-token "
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,512,512,1,2,0.846,605.1,256,57.82,5.26,,167.0,0,length,CL build doesn't write that string.   - `--jinja` on the ser
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,512,512,1,3,0.83,616.6,256,52.74,5.67,,167.7,0,length,- **vLLM's `--max-model-len`** is the hard ceiling. A 32K pr
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,4096,4096,1,1,4.692,873.0,256,67.29,8.48,,181.3,0,length," (Forge kit, local changes)  Plan and rules: `HANDOFF.md`. R"
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,4096,4096,1,2,4.729,866.1,256,49.46,9.88,,179.2,0,length," (same client, same prompts) - **speed**: 256 prompts × 128 "
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,4096,4096,1,3,4.818,850.1,256,61.96,8.93,,179.6,0,length,](https://github.com/slowopsdev/b65-benchmarks/blob/db9c9d25
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,16384,16384,1,1,20.047,817.3,256,43.65,25.89,,187.3,0,length, W (10 s sample).  ## Findings  1. **All three models fit 16
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,16384,16384,1,2,20.436,801.7,256,51.0,25.44,,186.4,0,length,".9 s | 1,214 tokens, 50 s | | | image b11515 | **6/6** | **2"
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,16384,16384,1,3,20.354,805.0,256,48.01,25.67,,186.5,0,length, length. - **The SYCL build is the same commit.** `8bb3cf0d2
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,32768,32768,1,1,44.661,733.7,256,38.63,51.26,,188.2,0,length, holds on the B65.**    - **Their number:** 73.7 tok/s on th
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,32768,32768,1,2,44.273,740.1,256,39.38,50.75,,189.2,0,length, decode on SYCL:** 5% slower than on Vulkan. - **vLLM on XPU
+NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,single,32768,32768,1,3,44.96,728.8,256,39.93,51.35,,187.7,0,length,"65_VK_INDEX=<idx> DRY=1 ./gemma_swa.sh`, then the full `B65_"

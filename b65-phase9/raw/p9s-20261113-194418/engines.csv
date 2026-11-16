@@ -1,0 +1,7 @@
+part,label,build,status,load_s,args
+OA0mk3,OA0mk3 llama.cpp b11574 SYCL Q4_K_M + MTP k=3,b11574,ok,37,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 3"
+NA0,NA0 llama.cpp v1.0.0 SYCL Q4_K_M,v1.0.0,ok,9,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu"
+NA0m3,NA0m3 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=3,v1.0.0,ok,9,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 3"
+NA0mk2,NA0mk2 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=2,v1.0.0,ok,11,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 2"
+NA0mk4,NA0mk4 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=4,v1.0.0,ok,9,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 4"
+NA0mk5,NA0mk5 llama.cpp v1.0.0 SYCL Q4_K_M + MTP k=5,v1.0.0,ok,9,"-ngl 99 -fa on -b 2048 -ub 2048 -c 65536 -np 8 -kvu --spec-type draft-mtp --spec-draft-n-max 5"

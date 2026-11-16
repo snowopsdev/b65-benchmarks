@@ -1674,3 +1674,79 @@ kit_commit=c5bc04ca02d534c93efe01331a30a71c6dba8977
   A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 1: PASS  43.4 tok/s
   A0mk3 llama.cpp SYCL Q4_K_M + MTP k=3 c10 try 2: PASS  43.0 tok/s
 >> done p7-20261023-101139
+run_id=p7-20261114-075756
+date=2026-11-14T07:57:56-05:00
+kernel=7.2.15-1-omarchy
+docker=29.9.2
+llama_sycl=version: 1.0.0-dev (build 12359, commit b1b770d90)
+sycl_device=  SYCL0: Intel(R) Arc(TM) Pro B65 Graphics (32656 MiB, 32399 MiB free)
+image=intel/llm-scaler-vllm@sha256:52218ad85513ab6686d4c090c83c2bd8c5b02423c63aa4dabd41837fe641fe3b
+gguf=/home/snowdesk/.lmstudio/models/lmstudio-community/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_K_M.gguf
+hf_weights=Qwen/Qwen3.8-27B@1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+b65=0000:06:00.0 /dev/dri/card1 /dev/dri/renderD129
+parts_list=A5
+sizes=512,4096,16384,32768 reps=3 gen=256 levels=1,2,4,8 tries=3 limit=0
+dry=0 energy_file=/sys/class/hwmon/hwmon1/energy1_input
+kit_commit=ffe1bb1850a77ad8f70f5b6045ae3da46df3052b
+>> part A5 A5 vLLM sym_int4 + MTP k=5 graphs
+>> step A5 loading
+>> load A5: --quantization sym_int4 --gpu-memory-utilization 0.9 --max-model-len 40960 --speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":5}'
+>> A5 up in 339s
+>> step A5 speed
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep1: ttft 0.48s  decode 38.3 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep2: ttft 0.44s  decode 45.1 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp512 rep3: ttft 0.44s  decode 38.3 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep1: ttft 2.95s  decode 47.2 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep2: ttft 2.95s  decode 52.3 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp4096 rep3: ttft 2.95s  decode 61.8 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep1: ttft 12.53s  decode 48.4 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep2: ttft 12.59s  decode 43.7 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp16384 rep3: ttft 12.59s  decode 52.9 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep1: ttft 27.44s  decode 43.2 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep2: ttft 27.44s  decode 50.4 tok/s  (256 tok)
+  A5 vLLM sym_int4 + MTP k=5 graphs pp32768 rep3: ttft 27.51s  decode 51.7 tok/s  (256 tok)
+>> step A5 conc
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep1: aggregate 42.0 tok/s, per-stream median 45.0
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep2: aggregate 44.3 tok/s, per-stream median 47.7
+  A5 vLLM sym_int4 + MTP k=5 graphs C1 rep3: aggregate 48.4 tok/s, per-stream median 52.6
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep1: aggregate 41.1 tok/s, per-stream median 40.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep2: aggregate 67.7 tok/s, per-stream median 45.5
+  A5 vLLM sym_int4 + MTP k=5 graphs C2 rep3: aggregate 71.2 tok/s, per-stream median 43.8
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep1: aggregate 124.7 tok/s, per-stream median 38.7
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep2: aggregate 128.6 tok/s, per-stream median 40.6
+  A5 vLLM sym_int4 + MTP k=5 graphs C4 rep3: aggregate 126.1 tok/s, per-stream median 44.2
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep1: aggregate 123.5 tok/s, per-stream median 29.8
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep2: aggregate 116.7 tok/s, per-stream median 31.0
+  A5 vLLM sym_int4 + MTP k=5 graphs C8 rep3: aggregate 109.7 tok/s, per-stream median 27.4
+>> step A5 coding
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 0: PASS  42.3 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 1: PASS  40.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c01 try 2: PASS  40.1 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 0: PASS  41.4 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 1: PASS  38.5 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c02 try 2: PASS  40.4 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 0: PASS  41.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 1: PASS  37.7 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c03 try 2: PASS  43.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 0: PASS  74.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 1: PASS  72.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c04 try 2: PASS  70.6 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 0: PASS  62.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 1: PASS  60.3 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c05 try 2: PASS  65.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 0: PASS  78.0 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 1: PASS  75.4 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c06 try 2: PASS  74.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 0: PASS  73.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 1: PASS  78.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c07 try 2: PASS  81.4 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 0: PASS  70.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 1: PASS  59.9 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c08 try 2: FAIL  71.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 0: PASS  92.2 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 1: PASS  84.1 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c09 try 2: PASS  89.1 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 0: PASS  79.5 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 1: PASS  79.8 tok/s
+  A5 vLLM sym_int4 + MTP k=5 graphs c10 try 2: PASS  77.0 tok/s
+>> done p7-20261114-075756
